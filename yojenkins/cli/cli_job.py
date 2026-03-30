@@ -22,6 +22,7 @@ def info(profile: str, token: str, job: str, **kwargs) -> None:
     Args:
         TODO
     """
+    job = cu.resolve_stdin(job) if job else job
     yj_obj = cu.config_yo_jenkins(profile, token)
     if cu.is_full_url(job):
         data = yj_obj.job.info(job_url=job)

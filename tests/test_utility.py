@@ -1098,6 +1098,14 @@ class TestIsCompleteBuildUrlEdgeCases:
         url = 'http://localhost:8080/notjob/foo/42'
         assert is_complete_build_url(url) is False
 
+    def test_nested_folder_build_url(self):
+        url = 'http://jenkins.com/job/folder1/job/folder2/job/myJob/15'
+        assert is_complete_build_url(url) is True
+
+    def test_deeply_nested_folder_build_url(self):
+        url = 'http://jenkins.com/job/a/job/b/job/c/job/myJob/99'
+        assert is_complete_build_url(url) is True
+
 
 # ---------------------------------------------------------------------------
 # TestBuildUrlCompleteEdgeCases

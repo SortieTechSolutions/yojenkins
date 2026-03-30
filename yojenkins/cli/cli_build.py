@@ -46,12 +46,15 @@ def info(profile: str, token: str, job: str, number: int, url: str, latest: bool
         url:     The build url to get info on
         latest:  Option to get the latest build
     """
+    job = cu.resolve_stdin(job) if job else job
     if url is None and job and is_complete_build_url(job):
         url, job = job, None
     elif job and not number and not latest:
+        hint = ' (Did you mean a full URL with http:// prefix?)' if '/' in job and not job.startswith('http') else ''
         click.echo(
             click.style(
-                'INPUT ERROR: For job, either specify --number or --latest. See --help', fg='bright_red', bold=True
+                f'INPUT ERROR: For job name, specify --number or --latest.{hint} See --help',
+                fg='bright_red', bold=True
             )
         )
         sys.exit(1)
@@ -79,12 +82,15 @@ def status(profile: str, token: str, job: str, number: int, url: str, latest: bo
         url: The build url to get info on
         latest: Option to get the latest build
     """
+    job = cu.resolve_stdin(job) if job else job
     if url is None and job and is_complete_build_url(job):
         url, job = job, None
     elif job and not number and not latest:
+        hint = ' (Did you mean a full URL with http:// prefix?)' if '/' in job and not job.startswith('http') else ''
         click.echo(
             click.style(
-                'INPUT ERROR: For job, either specify --number or --latest. See --help', fg='bright_red', bold=True
+                f'INPUT ERROR: For job name, specify --number or --latest.{hint} See --help',
+                fg='bright_red', bold=True
             )
         )
         sys.exit(1)
@@ -130,9 +136,11 @@ def abort(profile: str, token: str, job: str, number: int, url: str, latest: boo
     if url is None and job and is_complete_build_url(job):
         url, job = job, None
     elif job and not number and not latest:
+        hint = ' (Did you mean a full URL with http:// prefix?)' if '/' in job and not job.startswith('http') else ''
         click.echo(
             click.style(
-                'INPUT ERROR: For job, either specify --number or --latest. See --help', fg='bright_red', bold=True
+                f'INPUT ERROR: For job name, specify --number or --latest.{hint} See --help',
+                fg='bright_red', bold=True
             )
         )
         sys.exit(1)
@@ -161,9 +169,11 @@ def delete(profile: str, token: str, job: str, number: int, url: str, latest: bo
     if url is None and job and is_complete_build_url(job):
         url, job = job, None
     elif job and not number and not latest:
+        hint = ' (Did you mean a full URL with http:// prefix?)' if '/' in job and not job.startswith('http') else ''
         click.echo(
             click.style(
-                'INPUT ERROR: For job, either specify --number or --latest. See --help', fg='bright_red', bold=True
+                f'INPUT ERROR: For job name, specify --number or --latest.{hint} See --help',
+                fg='bright_red', bold=True
             )
         )
         sys.exit(1)
@@ -193,9 +203,11 @@ def stages(profile: str, token: str, opt_list: bool, job: str, number: int, url:
     if url is None and job and is_complete_build_url(job):
         url, job = job, None
     elif job and not number and not latest:
+        hint = ' (Did you mean a full URL with http:// prefix?)' if '/' in job and not job.startswith('http') else ''
         click.echo(
             click.style(
-                'INPUT ERROR: For job, either specify --number or --latest. See --help', fg='bright_red', bold=True
+                f'INPUT ERROR: For job name, specify --number or --latest.{hint} See --help',
+                fg='bright_red', bold=True
             )
         )
         sys.exit(1)
@@ -235,12 +247,15 @@ def logs(
         download_dir: Option to download the log to a directory
         follow: Option to follow the log
     """
+    job = cu.resolve_stdin(job) if job else job
     if url is None and job and is_complete_build_url(job):
         url, job = job, None
     elif job and not number and not latest:
+        hint = ' (Did you mean a full URL with http:// prefix?)' if '/' in job and not job.startswith('http') else ''
         click.echo(
             click.style(
-                'INPUT ERROR: For job, either specify --number or --latest. See --help', fg='bright_red', bold=True
+                f'INPUT ERROR: For job name, specify --number or --latest.{hint} See --help',
+                fg='bright_red', bold=True
             )
         )
         sys.exit(1)
@@ -286,9 +301,11 @@ def browser(profile: str, token: str, job: str, number: int, url: str, latest: b
     if url is None and job and is_complete_build_url(job):
         url, job = job, None
     elif job and not number and not latest:
+        hint = ' (Did you mean a full URL with http:// prefix?)' if '/' in job and not job.startswith('http') else ''
         click.echo(
             click.style(
-                'INPUT ERROR: For job, either specify --number or --latest. See --help', fg='bright_red', bold=True
+                f'INPUT ERROR: For job name, specify --number or --latest.{hint} See --help',
+                fg='bright_red', bold=True
             )
         )
         sys.exit(1)
@@ -317,9 +334,11 @@ def monitor(profile: str, token: str, job: str, number: int, url: str, latest: b
     if url is None and job and is_complete_build_url(job):
         url, job = job, None
     elif job and not number and not latest:
+        hint = ' (Did you mean a full URL with http:// prefix?)' if '/' in job and not job.startswith('http') else ''
         click.echo(
             click.style(
-                'INPUT ERROR: For job, either specify --number or --latest. See --help', fg='bright_red', bold=True
+                f'INPUT ERROR: For job name, specify --number or --latest.{hint} See --help',
+                fg='bright_red', bold=True
             )
         )
         sys.exit(1)
@@ -350,9 +369,11 @@ def parameters(
     if url is None and job and is_complete_build_url(job):
         url, job = job, None
     elif job and not number and not latest:
+        hint = ' (Did you mean a full URL with http:// prefix?)' if '/' in job and not job.startswith('http') else ''
         click.echo(
             click.style(
-                'INPUT ERROR: For job, either specify --number or --latest. See --help', fg='bright_red', bold=True
+                f'INPUT ERROR: For job name, specify --number or --latest.{hint} See --help',
+                fg='bright_red', bold=True
             )
         )
         sys.exit(1)
@@ -384,9 +405,11 @@ def rebuild(profile: str, token: str, job: str, number: int, url: str, latest: b
     if url is None and job and is_complete_build_url(job):
         url, job = job, None
     elif job and not number and not latest:
+        hint = ' (Did you mean a full URL with http:// prefix?)' if '/' in job and not job.startswith('http') else ''
         click.echo(
             click.style(
-                'INPUT ERROR: For job, either specify --number or --latest. See --help', fg='bright_red', bold=True
+                f'INPUT ERROR: For job name, specify --number or --latest.{hint} See --help',
+                fg='bright_red', bold=True
             )
         )
         sys.exit(1)

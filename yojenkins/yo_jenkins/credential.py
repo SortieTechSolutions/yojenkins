@@ -51,8 +51,11 @@ class Credential:
             store = 'system'
             logger.debug(f'Using effective credential folder name: "" = "{folder}"')
         else:
-            if 'job/' not in folder:
-                folder = f'job/{folder}'
+            # Normalize multi-level folder paths: "a/b/c" -> "job/a/job/b/job/c"
+            # Strip any existing "job" markers, then re-add per segment
+            parts = [p for p in folder.split('/') if p]
+            clean_parts = [p for p in parts if p != 'job']
+            folder = '/'.join(f'job/{p}' for p in clean_parts)
             store = 'folder'
         return folder, store
 

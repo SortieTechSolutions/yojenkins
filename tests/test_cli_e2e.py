@@ -253,6 +253,25 @@ class TestErrorHandling:
 # ---------------------------------------------------------------------------
 
 @pytest.mark.e2e
+class TestStdinSupport:
+    def test_job_info_reads_from_stdin(self, cli_runner, mock_config):
+        """echo 'backend-api' | yojenkins job info - should work."""
+        result = cli_runner.invoke(main, ['job', 'info', '-'], input='backend-api\n')
+        assert result.exit_code == 0
+        data = json.loads(result.output)
+        # DemoJob.info() returns fixed demo data regardless of input name
+        assert 'name' in data
+
+    def test_stdin_dash_without_pipe_is_literal(self, cli_runner, mock_config):
+        """When no stdin pipe, '-' is treated as a literal job name."""
+        # CliRunner with no input= simulates an interactive tty
+        result = cli_runner.invoke(main, ['job', 'info', '-'])
+        # Will try to look up a job named '-' — the demo will fail gracefully
+        # Just verify it doesn't hang or crash
+        assert result.exit_code in (0, 1)
+
+
+@pytest.mark.e2e
 class TestAuthPipeline:
     def test_auth_show_displays_profiles(self, cli_runner):
         """auth show invokes Auth.show_local_credentials and outputs the result.

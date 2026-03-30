@@ -313,7 +313,16 @@ class JobMonitor(Monitor):
                 if self.job_build > 1:  # Abort Message confirmed (pressed twice)
                     if job_url:
                         self.server_interaction = True
-                        self.job.build_trigger(job_url=job_url)
+                        # Extract default parameters for parameterized jobs
+                        params = {}
+                        with self._job_info_thread_lock:
+                            if self.job_info_data:
+                                for action in self.job_info_data.get('actions', []):
+                                    if 'parameterDefinitions' in action:
+                                        for p in action['parameterDefinitions']:
+                                            default = p.get('defaultParameterValue', {}).get('value')
+                                            params[p['name']] = default if default is not None else ''
+                        self.job.build_trigger(job_url=job_url, paramters=params)
                     else:
                         pass
                     self.job_build = 0
