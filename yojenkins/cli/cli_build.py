@@ -7,7 +7,7 @@ import click
 
 from yojenkins.cli import cli_utility as cu
 from yojenkins.cli.cli_utility import log_to_history
-from yojenkins.utility.utility import is_complete_build_url, wait_for_build_and_follow_logs
+from yojenkins.utility.utility import browser_open, is_complete_build_url, wait_for_build_and_follow_logs
 from yojenkins.yo_jenkins.status import Status
 
 # Getting the logger reference
@@ -309,6 +309,11 @@ def browser(profile: str, token: str, job: str, number: int, url: str, latest: b
             )
         )
         sys.exit(1)
+
+    # If we have a complete build URL and no job name to resolve, skip auth
+    if url and cu.is_full_url(url) and not job and not number and not latest:
+        browser_open(url)
+        return
 
     yj_obj = cu.config_yo_jenkins(profile, token)
 

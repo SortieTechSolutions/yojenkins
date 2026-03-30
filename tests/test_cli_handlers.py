@@ -6,6 +6,7 @@ business logic method was invoked.
 """
 
 import json
+from pathlib import Path
 from unittest.mock import MagicMock, mock_open, patch
 
 import pytest
@@ -158,6 +159,14 @@ class TestCliFolderHandlers:
 
         cli_folder.browser(folder='root', **PROFILE_TOKEN)
         mock_yj.folder.browser_open.assert_called_once_with(folder_name='root')
+
+    @patch('yojenkins.cli.cli_folder.browser_open')
+    @patch('yojenkins.cli.cli_folder.cu.config_yo_jenkins')
+    @patch('yojenkins.cli.cli_folder.cu.is_full_url', return_value=True)
+    def test_folder_browser_url_skips_auth(self, mock_is_url, mock_config, mock_browser):
+        cli_folder.browser(folder='http://jenkins/job/my-folder', **PROFILE_TOKEN)
+        mock_browser.assert_called_once_with('http://jenkins/job/my-folder')
+        mock_config.assert_not_called()
 
     @patch('click.secho')
     @patch('yojenkins.cli.cli_folder.cu.config_yo_jenkins')
@@ -1312,6 +1321,17 @@ class TestCliBuildHandlersExtended:
             )
         assert exc_info.value.code == 1
 
+    @patch('yojenkins.cli.cli_build.browser_open')
+    @patch('yojenkins.cli.cli_build.cu.config_yo_jenkins')
+    @patch('yojenkins.cli.cli_build.cu.is_full_url', return_value=True)
+    @patch('yojenkins.cli.cli_build.is_complete_build_url', return_value=False)
+    def test_build_browser_url_skips_auth(self, mock_is_build_url, mock_is_url, mock_config, mock_browser):
+        cli_build.browser(
+            job=None, number=None, url='http://jenkins/job/my-job/42', latest=False, **PROFILE_TOKEN
+        )
+        mock_browser.assert_called_once_with('http://jenkins/job/my-job/42')
+        mock_config.assert_not_called()
+
     @patch('yojenkins.cli.cli_build.is_complete_build_url', return_value=False)
     def test_build_browser_missing_number_and_latest_exits(self, mock_is_build_url):
         with pytest.raises(SystemExit) as exc_info:
@@ -1581,6 +1601,14 @@ class TestCliJobHandlersExtended:
 
         cli_job.browser(job='my-job', **PROFILE_TOKEN)
         mock_yj.job.browser_open.assert_called_once_with(job_name='my-job')
+
+    @patch('yojenkins.cli.cli_job.browser_open')
+    @patch('yojenkins.cli.cli_job.cu.config_yo_jenkins')
+    @patch('yojenkins.cli.cli_job.cu.is_full_url', return_value=True)
+    def test_job_browser_url_skips_auth(self, mock_is_url, mock_config, mock_browser):
+        cli_job.browser(job='http://jenkins/job/my-job', **PROFILE_TOKEN)
+        mock_browser.assert_called_once_with('http://jenkins/job/my-job')
+        mock_config.assert_not_called()
 
     @patch('yojenkins.cli.cli_job.cu.config_yo_jenkins')
     @patch('yojenkins.cli.cli_job.cu.is_full_url', return_value=False)
