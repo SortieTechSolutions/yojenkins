@@ -1113,6 +1113,34 @@ class TestCliToolsHandlers:
             cli_tools.history(profile=None, clear=False)
         assert exc_info.value.code == 1
 
+    @patch('click.secho')
+    @patch('builtins.open', new_callable=mock_open)
+    def test_history_disable(self, mocked_open, mock_secho):
+        with patch('pathlib.Path.home', return_value=Path('/tmp/fakehome')):
+            with patch('pathlib.Path.is_file', return_value=False):
+                with patch('pathlib.Path.mkdir'):
+                    with pytest.raises(SystemExit) as exc_info:
+                        cli_tools.history(profile=None, clear=False, disable=True, enable=False)
+        assert exc_info.value.code == 0
+        mock_secho.assert_called_with('History tracking disabled', fg='bright_green', bold=True)
+        mocked_open().writelines.assert_called_once()
+        written = mocked_open().writelines.call_args[0][0]
+        assert any('history_enabled=false' in line for line in written)
+
+    @patch('click.secho')
+    @patch('builtins.open', new_callable=mock_open)
+    def test_history_enable(self, mocked_open, mock_secho):
+        with patch('pathlib.Path.home', return_value=Path('/tmp/fakehome')):
+            with patch('pathlib.Path.is_file', return_value=False):
+                with patch('pathlib.Path.mkdir'):
+                    with pytest.raises(SystemExit) as exc_info:
+                        cli_tools.history(profile=None, clear=False, disable=False, enable=True)
+        assert exc_info.value.code == 0
+        mock_secho.assert_called_with('History tracking enabled', fg='bright_green', bold=True)
+        mocked_open().writelines.assert_called_once()
+        written = mocked_open().writelines.call_args[0][0]
+        assert any('history_enabled=true' in line for line in written)
+
 
 # ============================================================================
 # Additional cli_build tests for uncovered branches

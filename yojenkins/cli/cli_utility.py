@@ -2,6 +2,7 @@
 
 import json
 import logging
+import os
 import platform
 import sys
 from datetime import datetime
@@ -195,40 +196,55 @@ def log_to_history(decorated_function) -> Callable:
         arg_index = -1
 
     def wrapper(*args, **kwargs) -> None:
-        # Get the profile name for the command
-        if 'profile' in kwargs:
-            profile_name = kwargs['profile']
-        elif arg_index >= 0:
-            profile_name = args[arg_index]
-        else:
-            # If no profile is used by the decorated function, use the default profile name
-            profile_name = DEFAULT_PROFILE_NAME
+        # Check if history tracking is disabled
+        history_disabled = os.environ.get('YOJENKINS_DISABLE_HISTORY', '').lower() in ('1', 'true', 'yes')
+        if not history_disabled:
+            config_path = Path.home() / CONFIG_DIR_NAME / 'config'
+            if config_path.is_file():
+                try:
+                    with open(config_path, 'r') as f:
+                        for line in f:
+                            if line.strip() == 'history_enabled=false':
+                                history_disabled = True
+                                break
+                except Exception:
+                    pass
 
-        if profile_name is None:
-            # If function has profile argument, but none was passed, use the default profile name
-            profile_name = DEFAULT_PROFILE_NAME
+        if not history_disabled:
+            # Get the profile name for the command
+            if 'profile' in kwargs:
+                profile_name = kwargs['profile']
+            elif arg_index >= 0:
+                profile_name = args[arg_index]
+            else:
+                # If no profile is used by the decorated function, use the default profile name
+                profile_name = DEFAULT_PROFILE_NAME
 
-        # Check if history file exists, if not create it
-        history_file_path = Path.home() / CONFIG_DIR_NAME / HISTORY_FILE_NAME
-        if not history_file_path.is_file():
-            create_new_history_file(history_file_path)
+            if profile_name is None:
+                # If function has profile argument, but none was passed, use the default profile name
+                profile_name = DEFAULT_PROFILE_NAME
 
-        logger.debug(f'Logging command to command history file: "{history_file_path}" ...')
-        command_info = {
-            'profile': profile_name,
-            'tool_path': CLI_CMD_PATH,
-            'arguments': CLI_CMD_ARGS,
-            'timestamp': datetime.now().timestamp(),
-            'datetime': datetime.now().strftime('%A, %B %d, %Y %I:%M:%S'),
-            'tool_version': __version__,
-        }
+            # Check if history file exists, if not create it
+            history_file_path = Path.home() / CONFIG_DIR_NAME / HISTORY_FILE_NAME
+            if not history_file_path.is_file():
+                create_new_history_file(history_file_path)
 
-        # Add line to history file
-        try:
-            with open(history_file_path, 'a', encoding='utf-8') as outfile:
-                outfile.write(json.dumps(command_info) + '\n')
-        except Exception as error:
-            logger.debug(f'Failed to write command history file: {error}')
+            logger.debug(f'Logging command to command history file: "{history_file_path}" ...')
+            command_info = {
+                'profile': profile_name,
+                'tool_path': CLI_CMD_PATH,
+                'arguments': CLI_CMD_ARGS,
+                'timestamp': datetime.now().timestamp(),
+                'datetime': datetime.now().strftime('%A, %B %d, %Y %I:%M:%S'),
+                'tool_version': __version__,
+            }
+
+            # Add line to history file
+            try:
+                with open(history_file_path, 'a', encoding='utf-8') as outfile:
+                    outfile.write(json.dumps(command_info) + '\n')
+            except Exception as error:
+                logger.debug(f'Failed to write command history file: {error}')
 
         try:
             return decorated_function(*args, **kwargs)
