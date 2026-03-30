@@ -1,5 +1,7 @@
 """FastAPI dependency injection for per-user YoJenkins instances."""
 
+import os
+import secrets
 import time
 from typing import Optional
 
@@ -9,7 +11,7 @@ from jose import JWTError, jwt
 
 from yojenkins.yo_jenkins.yojenkins import YoJenkins
 
-SECRET_KEY = "yojenkins-webapp-secret-change-in-production"
+SECRET_KEY = os.environ.get("YOJENKINS_SECRET_KEY", "") or secrets.token_hex(32)
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_SECONDS = 3600
 SESSION_TTL_SECONDS = 1800

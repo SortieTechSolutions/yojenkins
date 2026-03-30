@@ -10,8 +10,8 @@ router = APIRouter()
 
 @router.get("/search")
 async def search_folders(
-    pattern: str = Query(".*", description="REGEX pattern to search for"),
-    depth: int = Query(4, description="Search depth"),
+    pattern: str = Query(".*", max_length=500, description="REGEX pattern to search for"),
+    depth: int = Query(4, ge=1, le=10, description="Search depth"),
     yj=Depends(get_yo_jenkins),
 ):
     """Search for folders matching a REGEX pattern."""
