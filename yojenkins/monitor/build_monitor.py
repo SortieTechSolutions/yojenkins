@@ -422,7 +422,7 @@ class BuildMonitor(Monitor):
             # Show the build logs
             if self.build_logs:
                 self.help = False
-                self.all_threads_enabled = False
+                self.all_threads_off()
                 curses.echo(True)
                 curses.nl(True)
                 curses.endwin()
@@ -439,7 +439,7 @@ class BuildMonitor(Monitor):
                 mu.draw_message_box(scr, message_lines)
                 # Quit Message confirmed (pressed twice)
                 if self.quit > 1:
-                    self.all_threads_enabled = False
+                    self.all_threads_off()
                     return True
             else:
                 halfdelay_normal = True
@@ -450,7 +450,7 @@ class BuildMonitor(Monitor):
 
             # Straight exist program
             if self.exit:
-                self.all_threads_enabled = False
+                self.all_threads_off()
                 sys.exit(0)
 
             ########################################################################################
@@ -505,8 +505,11 @@ class BuildMonitor(Monitor):
         while self.all_threads_enabled:
             if not self.paused:
                 self.server_interaction = True
-                with self._build_info_thread_lock:
-                    self.build_info_data = self.build.info(build_url=build_url)
+                try:
+                    with self._build_info_thread_lock:
+                        self.build_info_data = self.build.info(build_url=build_url)
+                except RuntimeError:
+                    break
 
             # Wait some time before checking again
             start_time = time()
@@ -530,14 +533,16 @@ class BuildMonitor(Monitor):
         """
         logger.debug(f'Starting thread for build info for "{build_url}" ...')
         try:
-            threading.Thread(
+            t = threading.Thread(
                 target=self.__thread_build_info,
                 args=(
                     build_url,
                     monitor_interval,
                 ),
-                daemon=False,
-            ).start()
+                daemon=True,
+            )
+            t.start()
+            self._threads.append(t)
         except Exception as error:
             logger.error(
                 f'Failed to start build info monitoring thread for {build_url}. Exception: {error}. Type: {type(error)}'
@@ -578,8 +583,11 @@ class BuildMonitor(Monitor):
         while self.all_threads_enabled:
             if not self.paused:
                 self.server_interaction = True
-                with self._build_stages_thread_lock:
-                    self.build_stages_data = self.build.stage_list(build_url=build_url)[0]
+                try:
+                    with self._build_stages_thread_lock:
+                        self.build_stages_data = self.build.stage_list(build_url=build_url)[0]
+                except RuntimeError:
+                    break
 
             # Wait some time before checking again
             start_time = time()
@@ -603,14 +611,16 @@ class BuildMonitor(Monitor):
         """
         logger.debug(f'Starting thread for build stages for "{build_url}" ...')
         try:
-            threading.Thread(
+            t = threading.Thread(
                 target=self.__thread_build_stages,
                 args=(
                     build_url,
                     monitor_interval,
                 ),
-                daemon=False,
-            ).start()
+                daemon=True,
+            )
+            t.start()
+            self._threads.append(t)
         except Exception as error:
             logger.error(
                 f'Failed to start build info monitoring thread for {build_url}. Exception: {error}. Type: {type(error)}'

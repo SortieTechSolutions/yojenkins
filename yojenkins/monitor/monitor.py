@@ -62,6 +62,7 @@ class Monitor:
 
         self.all_threads_enabled = True
         self.paused = False
+        self._threads: list = []
 
         self.server_interaction = False
 
@@ -275,8 +276,12 @@ class Monitor:
             if not self.paused:
                 # Get the build information
                 self.server_interaction = True
-                self.server_status_data['reachable'] = self.rest.is_reachable()
-                self.server_status_data['auth'] = self.auth.verify()
+                try:
+                    self.server_status_data['reachable'] = self.rest.is_reachable()
+                    self.server_status_data['auth'] = self.auth.verify()
+                except RuntimeError:
+                    # Session executor shut down during quit — exit gracefully
+                    break
 
             # Wait some time before checking again
             start_time = time()
@@ -298,7 +303,9 @@ class Monitor:
         """
         logger.debug('Starting thread for server status ...')
         try:
-            threading.Thread(target=self.__thread_server_status, args=(monitor_interval,), daemon=False).start()
+            t = threading.Thread(target=self.__thread_server_status, args=(monitor_interval,), daemon=True)
+            t.start()
+            self._threads.append(t)
         except Exception as error:
             logger.error(f'Failed to start server status monitoring thread. Exception: {error}. Type: {type(error)}')
             return False
@@ -309,19 +316,22 @@ class Monitor:
     #                         ALL THREAD CONTROL
     ###########################################################################
 
-    def all_threads_off(self) -> bool:
+    def all_threads_off(self, timeout: float = 2.0) -> bool:
         """Stop all independent threads running in the background
 
         Args:
-            None
+            timeout: Maximum seconds to wait for each thread to finish
 
         Returns:
             True
         """
-        # logger.debug(f'Stopping all monitor threads ...')
-
         # Set the monitoring thread flag down
         self.all_threads_enabled = False
+
+        # Wait for threads to exit gracefully
+        for t in self._threads:
+            t.join(timeout=timeout)
+        self._threads.clear()
 
         return True
 
