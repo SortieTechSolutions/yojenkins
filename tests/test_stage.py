@@ -54,6 +54,7 @@ def _make_stage_info():
 
 # --- Stage.__init__ ---
 
+
 class TestStageInit:
     def test_init_sets_attributes(self, mock_rest, mock_build, mock_step_obj):
         s = Stage(rest=mock_rest, build=mock_build, step=mock_step_obj)
@@ -64,6 +65,7 @@ class TestStageInit:
 
 
 # --- Stage.info ---
+
 
 class TestStageInfo:
     def test_info_returns_enriched_stage_data(self, stage):
@@ -113,6 +115,7 @@ class TestStageInfo:
 
 # --- Stage.status_text ---
 
+
 class TestStageStatusText:
     def test_status_text_returns_status(self, stage):
         stage.build.stage_list.return_value = (
@@ -142,6 +145,7 @@ class TestStageStatusText:
 
 # --- Stage.step_list ---
 
+
 class TestStageStepList:
     def test_step_list_returns_steps_and_names(self, stage):
         stage.build.stage_list.return_value = (
@@ -152,9 +156,7 @@ class TestStageStepList:
         stage.rest.request.return_value = (stage_info, {}, True)
         stage.rest.get_server_url = MagicMock(return_value='http://localhost:8080')
 
-        step_list, step_names = stage.step_list(
-            stage_name='Build', build_url='http://localhost:8080/job/test/1/'
-        )
+        step_list, step_names = stage.step_list(stage_name='Build', build_url='http://localhost:8080/job/test/1/')
         assert len(step_list) == 1
         assert 'Shell Script' in step_names
 
@@ -184,13 +186,12 @@ class TestStageStepList:
         stage.rest.request.return_value = (stage_info, {}, True)
         stage.rest.get_server_url = MagicMock(return_value='http://localhost:8080')
 
-        step_list, _ = stage.step_list(
-            stage_name='Build', build_url='http://localhost:8080/job/test/1/'
-        )
+        step_list, _ = stage.step_list(stage_name='Build', build_url='http://localhost:8080/job/test/1/')
         assert step_list[0]['parameterDescription'] == 'No command parameters listed'
 
 
 # --- Stage.logs ---
+
 
 class TestStageLogs:
     @patch('yojenkins.yo_jenkins.stage.print2')
@@ -219,10 +220,7 @@ class TestStageLogs:
         stage.rest.get_server_url = MagicMock(return_value='http://localhost:8080')
         stage.step.info.return_value = {'text': '<b>hello</b>', 'length': 5}
 
-        result = stage.logs(
-            stage_name='Build', build_url='http://localhost:8080/job/test/1/',
-            download_dir='/tmp'
-        )
+        result = stage.logs(stage_name='Build', build_url='http://localhost:8080/job/test/1/', download_dir='/tmp')
         assert result is True
 
     def test_step_list_key_error(self, stage):

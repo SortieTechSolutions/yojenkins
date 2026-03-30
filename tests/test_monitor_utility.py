@@ -238,7 +238,7 @@ class TestDrawHorizontalSeperator:
         mock_scr.addstr.assert_called_once()
         args = mock_scr.addstr.call_args
         assert args[0][0] == 10  # row
-        assert args[0][1] == 1   # col
+        assert args[0][1] == 1  # col
         assert len(args[0][2]) == 80  # full width line
 
     def test_does_not_draw_at_boundary_row(self):

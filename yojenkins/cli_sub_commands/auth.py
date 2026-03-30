@@ -1,6 +1,5 @@
 """Auth click sub-command"""
 
-
 import click
 from click_help_colors import HelpColorsCommand
 
@@ -102,5 +101,3 @@ def user(debug, **kwargs):
     """Show current user information"""
     set_debug_log_level(debug)
     cli_auth.user(**translate_kwargs(kwargs))
-
-

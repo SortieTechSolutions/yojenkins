@@ -27,7 +27,6 @@ def build_test_job(yojenkins_instance):
 
 
 class TestBuildIntegration:
-
     def test_build_info(self, yojenkins_instance, build_test_job):
         """Build.info() returns dict with build details."""
         info = yojenkins_instance.build.info(

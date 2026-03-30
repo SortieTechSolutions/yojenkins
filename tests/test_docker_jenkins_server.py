@@ -16,6 +16,7 @@ def mock_shutil_copy():
 def docker_server(mock_shutil_copy):
     """Create a DockerJenkinsServer with shutil.copy2 mocked to avoid filesystem access."""
     from yojenkins.docker_container.docker_jenkins_server import DockerJenkinsServer
+
     return DockerJenkinsServer()
 
 
@@ -23,6 +24,7 @@ def docker_server(mock_shutil_copy):
 def docker_server_custom(mock_shutil_copy):
     """Create a DockerJenkinsServer with custom params."""
     from yojenkins.docker_container.docker_jenkins_server import DockerJenkinsServer
+
     return DockerJenkinsServer(
         port=9090,
         host='myhost',
@@ -87,6 +89,7 @@ class TestDockerJenkinsServerInit:
 
     def test_shutil_copy_called_on_init(self, mock_shutil_copy):
         from yojenkins.docker_container.docker_jenkins_server import DockerJenkinsServer
+
         DockerJenkinsServer()
         mock_shutil_copy.assert_called_once()
 
@@ -94,6 +97,7 @@ class TestDockerJenkinsServerInit:
         with patch('yojenkins.docker_container.docker_jenkins_server.shutil.copy2', side_effect=OSError('copy fail')):
             with pytest.raises(SystemExit):
                 from yojenkins.docker_container.docker_jenkins_server import DockerJenkinsServer
+
                 DockerJenkinsServer()
 
 
@@ -263,16 +267,20 @@ class TestClean:
     def test_clean_volume_removal_failure_returns_false(self, docker_server):
         mock_client = MagicMock()
         docker_server.docker_client = mock_client
-        with patch.object(docker_server, '_container_kill', return_value=True), \
-             patch.object(docker_server, '_volumes_remove', return_value=False):
+        with (
+            patch.object(docker_server, '_container_kill', return_value=True),
+            patch.object(docker_server, '_volumes_remove', return_value=False),
+        ):
             result = docker_server.clean(remove_volume=True, remove_image=False)
         assert result is False
 
     def test_clean_image_removal_failure_returns_false(self, docker_server):
         mock_client = MagicMock()
         docker_server.docker_client = mock_client
-        with patch.object(docker_server, '_container_kill', return_value=True), \
-             patch.object(docker_server, '_image_remove', return_value=False):
+        with (
+            patch.object(docker_server, '_container_kill', return_value=True),
+            patch.object(docker_server, '_image_remove', return_value=False),
+        ):
             result = docker_server.clean(remove_volume=False, remove_image=True)
         assert result is False
 
@@ -291,10 +299,12 @@ class TestSetup:
         mock_client = MagicMock()
         mock_client.info.return_value = {'ServerVersion': '20.10.0'}
         docker_server.docker_client = mock_client
-        with patch.object(docker_server, '_container_kill', return_value=True), \
-             patch.object(docker_server, '_image_build', return_value='yojenkins-jenkins:latest'), \
-             patch.object(docker_server, '_volumes_create', return_value=[{'named': 'vol'}]), \
-             patch.object(docker_server, '_container_run', return_value=('yojenkins-jenkins', 'http://localhost:8080')):
+        with (
+            patch.object(docker_server, '_container_kill', return_value=True),
+            patch.object(docker_server, '_image_build', return_value='yojenkins-jenkins:latest'),
+            patch.object(docker_server, '_volumes_create', return_value=[{'named': 'vol'}]),
+            patch.object(docker_server, '_container_run', return_value=('yojenkins-jenkins', 'http://localhost:8080')),
+        ):
             deployed, success = docker_server.setup()
         assert success is True
         assert deployed['image'] == 'yojenkins-jenkins:latest'
@@ -304,18 +314,22 @@ class TestSetup:
     def test_setup_image_build_failure(self, docker_server):
         mock_client = MagicMock()
         docker_server.docker_client = mock_client
-        with patch.object(docker_server, '_container_kill', return_value=True), \
-             patch.object(docker_server, '_image_build', return_value=''):
+        with (
+            patch.object(docker_server, '_container_kill', return_value=True),
+            patch.object(docker_server, '_image_build', return_value=''),
+        ):
             deployed, success = docker_server.setup()
         assert success is False
 
     def test_setup_container_run_failure(self, docker_server):
         mock_client = MagicMock()
         docker_server.docker_client = mock_client
-        with patch.object(docker_server, '_container_kill', return_value=True), \
-             patch.object(docker_server, '_image_build', return_value='img:latest'), \
-             patch.object(docker_server, '_volumes_create', return_value=[{'named': 'vol'}]), \
-             patch.object(docker_server, '_container_run', return_value=('', '')):
+        with (
+            patch.object(docker_server, '_container_kill', return_value=True),
+            patch.object(docker_server, '_image_build', return_value='img:latest'),
+            patch.object(docker_server, '_volumes_create', return_value=[{'named': 'vol'}]),
+            patch.object(docker_server, '_container_run', return_value=('', '')),
+        ):
             deployed, success = docker_server.setup()
         assert success is False
 

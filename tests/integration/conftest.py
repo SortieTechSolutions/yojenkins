@@ -60,6 +60,7 @@ def _is_docker_available():
     """Check if Docker daemon is reachable."""
     try:
         import docker
+
         client = docker.from_env()
         client.ping()
         return True
@@ -124,11 +125,13 @@ def docker_jenkins_server():
     docker_context = get_resource_path(str(Path('resources') / 'server_docker_settings'))
     test_config_name = 'integration_test_casc.yaml'
     test_config_path = Path(docker_context) / test_config_name
-    test_config_path.write_text(INTEGRATION_JCASC.format(
-        admin_user=INTEGRATION_ADMIN_USER,
-        admin_password=INTEGRATION_ADMIN_PASSWORD,
-        port=INTEGRATION_PORT,
-    ))
+    test_config_path.write_text(
+        INTEGRATION_JCASC.format(
+            admin_user=INTEGRATION_ADMIN_USER,
+            admin_password=INTEGRATION_ADMIN_PASSWORD,
+            port=INTEGRATION_PORT,
+        )
+    )
 
     server = DockerJenkinsServer(
         config_file=test_config_name,
@@ -155,11 +158,13 @@ def docker_jenkins_server():
 
     server_url = f'http://localhost:{INTEGRATION_PORT}'
 
-    if not _wait_for_jenkins(server_url, INTEGRATION_ADMIN_USER, INTEGRATION_ADMIN_PASSWORD,
-                             container_name=CONTAINER_NAME):
+    if not _wait_for_jenkins(
+        server_url, INTEGRATION_ADMIN_USER, INTEGRATION_ADMIN_PASSWORD, container_name=CONTAINER_NAME
+    ):
         # Dump container logs for debugging before cleanup
         try:
             import docker as docker_lib
+
             client = docker_lib.from_env()
             container = client.containers.get(CONTAINER_NAME)
             logger.error('Jenkins container logs:\n%s', container.logs(tail=100).decode('utf-8', errors='replace'))

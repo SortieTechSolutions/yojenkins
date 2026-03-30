@@ -15,17 +15,17 @@ from yojenkins.yo_jenkins.yojenkins import YoJenkins
 router = APIRouter()
 
 
-@router.post("/login", response_model=LoginResponse)
+@router.post('/login', response_model=LoginResponse)
 async def login(request: LoginRequest):
     """Authenticate with a Jenkins server and receive a JWT."""
     auth = Auth(Rest())
 
     profile_info = {
-        "jenkins_server_url": request.jenkins_url,
-        "username": request.username,
-        "api_token": request.api_token,
-        "active": True,
-        "profile": "web_session",  # Distinguishes web sessions from CLI profiles on disk
+        'jenkins_server_url': request.jenkins_url,
+        'username': request.username,
+        'api_token': request.api_token,
+        'active': True,
+        'profile': 'web_session',  # Distinguishes web sessions from CLI profiles on disk
     }
 
     try:
@@ -45,18 +45,18 @@ async def login(request: LoginRequest):
     return LoginResponse(access_token=token)
 
 
-@router.get("/verify", response_model=MessageResponse)
+@router.get('/verify', response_model=MessageResponse)
 async def verify(yj=Depends(get_yo_jenkins)):
     """Verify the current session is still valid."""
     try:
         result = await run_in_threadpool(yj.auth.verify)
         if result:
-            return MessageResponse(message="Authenticated")
+            return MessageResponse(message='Authenticated')
     except YoJenkinsException as exc:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(exc))
 
 
-@router.get("/user")
+@router.get('/user')
 async def user_info(yj=Depends(get_yo_jenkins)):
     """Get current user information."""
     try:

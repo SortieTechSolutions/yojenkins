@@ -39,6 +39,7 @@ def job_instance(mock_rest, mock_folder, mock_jenkins_sdk, mock_auth, mock_build
     """Create a Job instance with all mocked dependencies."""
     with patch('yojenkins.yo_jenkins.job.JobMonitor'):
         from yojenkins.yo_jenkins.job import Job
+
         return Job(mock_rest, mock_folder, mock_jenkins_sdk, mock_auth, mock_build)
 
 
@@ -46,10 +47,12 @@ def job_instance(mock_rest, mock_folder, mock_jenkins_sdk, mock_auth, mock_build
 # Constructor
 # ---------------------------------------------------------------------------
 
+
 class TestJobConstructor:
     def test_constructor_assigns_dependencies(self, mock_rest, mock_folder, mock_jenkins_sdk, mock_auth, mock_build):
         with patch('yojenkins.yo_jenkins.job.JobMonitor'):
             from yojenkins.yo_jenkins.job import Job
+
             job = Job(mock_rest, mock_folder, mock_jenkins_sdk, mock_auth, mock_build)
         assert job.rest is mock_rest
         assert job.folder is mock_folder
@@ -65,6 +68,7 @@ class TestJobConstructor:
 # ---------------------------------------------------------------------------
 # info()
 # ---------------------------------------------------------------------------
+
 
 class TestJobInfo:
     def test_info_by_url(self, job_instance):
@@ -133,6 +137,7 @@ class TestJobInfo:
 # _recursive_search()
 # ---------------------------------------------------------------------------
 
+
 class TestRecursiveSearch:
     def test_finds_matching_jobs(self, job_instance):
         items = [
@@ -150,7 +155,12 @@ class TestRecursiveSearch:
                 'name': 'folder1',
                 'url': 'http://x/job/folder1/',
                 'jobs': [
-                    {'_class': JOB_CLASS, 'fullname': 'folder1/nested-job', 'name': 'nested-job', 'url': 'http://x/job/folder1/job/nested-job/'},
+                    {
+                        '_class': JOB_CLASS,
+                        'fullname': 'folder1/nested-job',
+                        'name': 'nested-job',
+                        'url': 'http://x/job/folder1/job/nested-job/',
+                    },
                 ],
             }
         ]
@@ -183,9 +193,14 @@ class TestRecursiveSearch:
         items = [
             {'_class': JOB_CLASS, 'fullname': 'a', 'name': 'a', 'url': 'http://x/a/'},
             {'_class': JOB_CLASS, 'fullname': 'b', 'name': 'b', 'url': 'http://x/b/'},
-            {'_class': FOLDER_CLASS, 'name': 'f', 'url': 'http://x/f/', 'jobs': [
-                {'_class': JOB_CLASS, 'fullname': 'f/c', 'name': 'c', 'url': 'http://x/f/c/'},
-            ]},
+            {
+                '_class': FOLDER_CLASS,
+                'name': 'f',
+                'url': 'http://x/f/',
+                'jobs': [
+                    {'_class': JOB_CLASS, 'fullname': 'f/c', 'name': 'c', 'url': 'http://x/f/c/'},
+                ],
+            },
         ]
         job_instance._recursive_search('zzz', items, 0)
         assert job_instance.search_items_count == 4  # a, b, folder f, c
@@ -202,6 +217,7 @@ class TestRecursiveSearch:
 # search()
 # ---------------------------------------------------------------------------
 
+
 class TestJobSearch:
     def test_search_all_jenkins(self, job_instance):
         all_jobs = [
@@ -216,7 +232,12 @@ class TestJobSearch:
 
     def test_search_with_folder_restriction(self, job_instance):
         folder_items = [
-            {'_class': JOB_CLASS, 'fullname': 'folder/job-a', 'name': 'job-a', 'url': 'http://x/job/folder/job/job-a/'},
+            {
+                '_class': JOB_CLASS,
+                'fullname': 'folder/job-a',
+                'name': 'job-a',
+                'url': 'http://x/job/folder/job/job-a/',
+            },
         ]
         job_instance.folder.item_list.return_value = (folder_items, [])
 
@@ -239,6 +260,7 @@ class TestJobSearch:
 
     def test_search_jenkins_exception_exits(self, job_instance):
         import jenkins
+
         job_instance.jenkins_sdk.get_all_jobs.side_effect = jenkins.JenkinsException('Server error\n<html>')
         with pytest.raises(YoJenkinsException):
             job_instance.search('anything')
@@ -247,6 +269,7 @@ class TestJobSearch:
 # ---------------------------------------------------------------------------
 # build_trigger()
 # ---------------------------------------------------------------------------
+
 
 class TestBuildTrigger:
     def _setup_trigger(self, job_instance):
@@ -311,6 +334,7 @@ class TestBuildTrigger:
 # config()
 # ---------------------------------------------------------------------------
 
+
 class TestJobConfig:
     def test_get_config_xml(self, job_instance):
         xml_content = '<project><description>test</description></project>'
@@ -343,6 +367,7 @@ class TestJobConfig:
 # ---------------------------------------------------------------------------
 # create()
 # ---------------------------------------------------------------------------
+
 
 class TestJobCreate:
     @patch('yojenkins.yo_jenkins.job.utility.item_exists_in_folder', return_value=False)
@@ -380,6 +405,7 @@ class TestJobCreate:
 # delete()
 # ---------------------------------------------------------------------------
 
+
 class TestJobDelete:
     def test_delete_success(self, job_instance):
         job_instance.rest.request.return_value = ({}, {}, True)
@@ -401,6 +427,7 @@ class TestJobDelete:
 # ---------------------------------------------------------------------------
 # enable() / disable()
 # ---------------------------------------------------------------------------
+
 
 class TestJobEnableDisable:
     def test_enable_success(self, job_instance):
@@ -440,6 +467,7 @@ class TestJobEnableDisable:
 # browser_open()
 # ---------------------------------------------------------------------------
 
+
 class TestBrowserOpen:
     @patch('yojenkins.yo_jenkins.job.utility.browser_open', return_value=True)
     def test_browser_open_success(self, mock_browser, job_instance):
@@ -460,6 +488,7 @@ class TestBrowserOpen:
 # ---------------------------------------------------------------------------
 # build_next_number() / build_last_number()
 # ---------------------------------------------------------------------------
+
 
 class TestBuildNumbers:
     def test_build_next_number(self, job_instance):
@@ -508,6 +537,7 @@ class TestBuildNumbers:
 # rename()
 # ---------------------------------------------------------------------------
 
+
 class TestJobRename:
     def test_rename_success(self, job_instance):
         job_instance.rest.request.return_value = ({}, {}, True)
@@ -534,6 +564,7 @@ class TestJobRename:
 # wipe_workspace()
 # ---------------------------------------------------------------------------
 
+
 class TestWipeWorkspace:
     def test_wipe_workspace_success(self, job_instance):
         job_instance.rest.request.return_value = ({}, {}, True)
@@ -556,6 +587,7 @@ class TestWipeWorkspace:
 # build_list()
 # ---------------------------------------------------------------------------
 
+
 class TestBuildList:
     def test_build_list_returns_builds(self, job_instance):
         job_info = {
@@ -576,6 +608,7 @@ class TestBuildList:
 # build_set_next_number()
 # ---------------------------------------------------------------------------
 
+
 class TestBuildSetNextNumber:
     def test_set_next_number_success(self, job_instance):
         result = job_instance.build_set_next_number(100, job_url='http://localhost:8080/job/my-job/')
@@ -588,6 +621,7 @@ class TestBuildSetNextNumber:
 
     def test_set_next_number_jenkins_exception_exits(self, job_instance):
         import jenkins
+
         job_instance.jenkins_sdk.set_next_build_number.side_effect = jenkins.JenkinsException('Error\n<html>')
         with pytest.raises(YoJenkinsException):
             job_instance.build_set_next_number(100, job_url='http://localhost:8080/job/my-job/')
@@ -596,6 +630,7 @@ class TestBuildSetNextNumber:
 # ---------------------------------------------------------------------------
 # queue_info()
 # ---------------------------------------------------------------------------
+
 
 class TestQueueInfo:
     def test_queue_info_by_number(self, job_instance):
@@ -625,6 +660,7 @@ class TestQueueInfo:
 # ---------------------------------------------------------------------------
 # in_queue_check()
 # ---------------------------------------------------------------------------
+
 
 class TestInQueueCheck:
     def test_in_queue_check_no_args_exits(self, job_instance):
@@ -662,6 +698,7 @@ class TestInQueueCheck:
 # queue_abort()
 # ---------------------------------------------------------------------------
 
+
 class TestQueueAbort:
     def test_queue_abort_no_number_exits(self, job_instance):
         with pytest.raises(YoJenkinsException):
@@ -676,6 +713,7 @@ class TestQueueAbort:
 # ---------------------------------------------------------------------------
 # parameters()
 # ---------------------------------------------------------------------------
+
 
 class TestJobParameters:
     def test_parameters_found(self, job_instance):
@@ -747,6 +785,7 @@ class TestJobParameters:
 # diff()
 # ---------------------------------------------------------------------------
 
+
 class TestJobDiff:
     def test_diff_by_name(self, job_instance):
         job_info = {
@@ -778,6 +817,7 @@ class TestJobDiff:
 # config() edge cases
 # ---------------------------------------------------------------------------
 
+
 class TestJobConfigEdgeCases:
     @patch('yojenkins.yo_jenkins.job.utility.write_xml_to_file', return_value=True)
     def test_config_writes_to_file(self, mock_write, job_instance):
@@ -798,6 +838,7 @@ class TestJobConfigEdgeCases:
 # disable() / enable() / rename() / delete() / wipe_workspace()
 # ---------------------------------------------------------------------------
 
+
 class TestJobDisable:
     def test_disable_by_url(self, job_instance):
         job_instance.rest.request.return_value = ({}, {}, True)
@@ -806,8 +847,7 @@ class TestJobDisable:
 
     def test_disable_by_name(self, job_instance):
         job_instance.rest.request.return_value = ({}, {}, True)
-        with patch('yojenkins.yo_jenkins.job.utility.name_to_url',
-                   return_value='http://localhost:8080/job/my-job'):
+        with patch('yojenkins.yo_jenkins.job.utility.name_to_url', return_value='http://localhost:8080/job/my-job'):
             result = job_instance.disable(job_name='my-job')
         assert result is True
 
@@ -825,8 +865,7 @@ class TestJobEnable:
 
     def test_enable_by_name(self, job_instance):
         job_instance.rest.request.return_value = ({}, {}, True)
-        with patch('yojenkins.yo_jenkins.job.utility.name_to_url',
-                   return_value='http://localhost:8080/job/my-job'):
+        with patch('yojenkins.yo_jenkins.job.utility.name_to_url', return_value='http://localhost:8080/job/my-job'):
             result = job_instance.enable(job_name='my-job')
         assert result is True
 
@@ -859,8 +898,7 @@ class TestJobDelete:
 
     def test_delete_by_name(self, job_instance):
         job_instance.rest.request.return_value = ({}, {}, True)
-        with patch('yojenkins.yo_jenkins.job.utility.name_to_url',
-                   return_value='http://localhost:8080/job/my-job'):
+        with patch('yojenkins.yo_jenkins.job.utility.name_to_url', return_value='http://localhost:8080/job/my-job'):
             result = job_instance.delete(job_name='my-job')
         assert result is True
 
@@ -873,8 +911,7 @@ class TestJobWipeWorkspace:
 
     def test_wipe_by_name(self, job_instance):
         job_instance.rest.request.return_value = ({}, {}, True)
-        with patch('yojenkins.yo_jenkins.job.utility.name_to_url',
-                   return_value='http://localhost:8080/job/my-job'):
+        with patch('yojenkins.yo_jenkins.job.utility.name_to_url', return_value='http://localhost:8080/job/my-job'):
             result = job_instance.wipe_workspace(job_name='my-job')
         assert result is True
 
@@ -882,6 +919,7 @@ class TestJobWipeWorkspace:
 # ---------------------------------------------------------------------------
 # monitor()
 # ---------------------------------------------------------------------------
+
 
 class TestJobMonitor:
     def test_monitor_by_url(self, job_instance):
@@ -907,6 +945,7 @@ class TestJobMonitor:
 # ---------------------------------------------------------------------------
 # create()
 # ---------------------------------------------------------------------------
+
 
 class TestJobCreate:
     def test_create_success(self, job_instance, tmp_path):
@@ -1001,6 +1040,7 @@ class TestJobCreate:
 # build_list_number() edge case
 # ---------------------------------------------------------------------------
 
+
 class TestJobBuildListNumberEdge:
     def test_last_build_none_returns_zero(self, job_instance):
         """build_last_number returns 0 when lastBuild is falsy."""
@@ -1009,9 +1049,7 @@ class TestJobBuildListNumberEdge:
             'fullName': 'my-job',
             'lastBuild': None,
         }
-        result = job_instance.build_last_number(
-            job_url='http://localhost:8080/job/my-job/', job_info=job_info
-        )
+        result = job_instance.build_last_number(job_url='http://localhost:8080/job/my-job/', job_info=job_info)
         assert result == 0
 
     def test_build_number_exist_true(self, job_instance):
@@ -1039,6 +1077,7 @@ class TestJobBuildListNumberEdge:
 # queue_abort()
 # ---------------------------------------------------------------------------
 
+
 class TestJobQueueCancel:
     def test_queue_abort_success(self, job_instance):
         job_instance.rest.request.return_value = ('cancelled', {}, True)
@@ -1051,9 +1090,9 @@ class TestJobQueueCancel:
 
     def test_queue_abort_failure_exits(self, job_instance):
         job_instance.rest.request.return_value = ('', {}, True)
-        job_instance.in_queue_check = MagicMock(return_value=[
-            {'id': 1, 'task': {'url': 'http://localhost:8080/job/x/'}}
-        ])
+        job_instance.in_queue_check = MagicMock(
+            return_value=[{'id': 1, 'task': {'url': 'http://localhost:8080/job/x/'}}]
+        )
         with pytest.raises(YoJenkinsException):
             job_instance.queue_abort(build_queue_number=999)
 
@@ -1061,6 +1100,7 @@ class TestJobQueueCancel:
 # ---------------------------------------------------------------------------
 # browser_open()
 # ---------------------------------------------------------------------------
+
 
 class TestJobBrowserOpen:
     def test_browser_open_by_url(self, job_instance):

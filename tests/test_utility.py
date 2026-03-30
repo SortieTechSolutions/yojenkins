@@ -69,8 +69,13 @@ class TestTranslateKwargs:
         original = {'pretty': 1, 'yaml': 2, 'xml': 3, 'toml': 4, 'list': 5, 'json': 6, 'id': 7}
         result = translate_kwargs(original)
         assert result == {
-            'opt_pretty': 1, 'opt_yaml': 2, 'opt_xml': 3, 'opt_toml': 4,
-            'opt_list': 5, 'opt_json': 6, 'opt_id': 7,
+            'opt_pretty': 1,
+            'opt_yaml': 2,
+            'opt_xml': 3,
+            'opt_toml': 4,
+            'opt_list': 5,
+            'opt_json': 6,
+            'opt_id': 7,
         }
 
 
@@ -78,20 +83,26 @@ class TestTranslateKwargs:
 # TestIsFullUrl
 # ---------------------------------------------------------------------------
 class TestIsFullUrl:
-    @pytest.mark.parametrize('url', [
-        'http://localhost:8080/',
-        'https://jenkins.example.com/job/test/',
-        'http://10.0.0.1:8080/job/foo',
-    ])
+    @pytest.mark.parametrize(
+        'url',
+        [
+            'http://localhost:8080/',
+            'https://jenkins.example.com/job/test/',
+            'http://10.0.0.1:8080/job/foo',
+        ],
+    )
     def test_valid_urls(self, url):
         assert is_full_url(url) is True
 
-    @pytest.mark.parametrize('url', [
-        'localhost:8080',
-        '/job/test/',
-        'just-a-string',
-        '',
-    ])
+    @pytest.mark.parametrize(
+        'url',
+        [
+            'localhost:8080',
+            '/job/test/',
+            'just-a-string',
+            '',
+        ],
+    )
     def test_invalid_urls(self, url):
         assert is_full_url(url) is False
 
@@ -229,7 +240,7 @@ class TestHtmlClean:
         assert html_clean('&lt;div&gt;') == '<div>'
         assert html_clean('&amp;') == '&'
         assert html_clean('&quot;test&quot;') == '"test"'
-        assert html_clean("&apos;test&apos;") == "'test'"
+        assert html_clean('&apos;test&apos;') == "'test'"
 
     def test_plain_text_unchanged(self):
         assert html_clean('plain text') == 'plain text'
@@ -340,38 +351,50 @@ class TestItemUrlToServerUrl:
 # TestToSeconds
 # ---------------------------------------------------------------------------
 class TestToSeconds:
-    @pytest.mark.parametrize('unit,expected', [
-        ('s', 10),
-        ('sec', 10),
-        ('second', 10),
-        ('seconds', 10),
-    ])
+    @pytest.mark.parametrize(
+        'unit,expected',
+        [
+            ('s', 10),
+            ('sec', 10),
+            ('second', 10),
+            ('seconds', 10),
+        ],
+    )
     def test_seconds(self, unit, expected):
         assert to_seconds(10, unit) == expected
 
-    @pytest.mark.parametrize('unit,expected', [
-        ('m', 600),
-        ('min', 600),
-        ('minute', 600),
-        ('minutes', 600),
-    ])
+    @pytest.mark.parametrize(
+        'unit,expected',
+        [
+            ('m', 600),
+            ('min', 600),
+            ('minute', 600),
+            ('minutes', 600),
+        ],
+    )
     def test_minutes(self, unit, expected):
         assert to_seconds(10, unit) == expected
 
-    @pytest.mark.parametrize('unit,expected', [
-        ('h', 36000),
-        ('hr', 36000),
-        ('hour', 36000),
-        ('hours', 36000),
-    ])
+    @pytest.mark.parametrize(
+        'unit,expected',
+        [
+            ('h', 36000),
+            ('hr', 36000),
+            ('hour', 36000),
+            ('hours', 36000),
+        ],
+    )
     def test_hours(self, unit, expected):
         assert to_seconds(10, unit) == expected
 
-    @pytest.mark.parametrize('unit,expected', [
-        ('d', 2160000),
-        ('day', 2160000),
-        ('days', 2160000),
-    ])
+    @pytest.mark.parametrize(
+        'unit,expected',
+        [
+            ('d', 2160000),
+            ('day', 2160000),
+            ('days', 2160000),
+        ],
+    )
     def test_days(self, unit, expected):
         assert to_seconds(10, unit) == expected
 
@@ -713,6 +736,7 @@ class TestAmIBundled:
 class TestItemSubitemList:
     def test_returns_matching_subitems(self):
         from yojenkins.utility.utility import item_subitem_list
+
         item_info = {
             'builds': [
                 {'_class': 'hudson.model.FreeStyleBuild', 'url': 'http://x/1/'},
@@ -730,6 +754,7 @@ class TestItemSubitemList:
 
     def test_missing_item_type_returns_empty(self):
         from yojenkins.utility.utility import item_subitem_list
+
         items, names = item_subitem_list(
             item_info={},
             get_key_info='url',
@@ -741,9 +766,8 @@ class TestItemSubitemList:
 
     def test_no_matching_class(self):
         from yojenkins.utility.utility import item_subitem_list
-        item_info = {
-            'jobs': [{'_class': 'com.Folder', 'name': 'f1'}]
-        }
+
+        item_info = {'jobs': [{'_class': 'com.Folder', 'name': 'f1'}]}
         items, names = item_subitem_list(
             item_info=item_info,
             get_key_info='name',
@@ -760,11 +784,13 @@ class TestItemSubitemList:
 class TestQueueFind:
     def test_no_args_returns_empty(self):
         from yojenkins.utility.utility import queue_find
+
         result = queue_find({'items': []})
         assert result == []
 
     def test_match_by_job_name(self):
         from yojenkins.utility.utility import queue_find
+
         queue_info = {
             'items': [
                 {
@@ -781,6 +807,7 @@ class TestQueueFind:
 
     def test_no_match(self):
         from yojenkins.utility.utility import queue_find
+
         queue_info = {
             'items': [
                 {
@@ -797,6 +824,7 @@ class TestQueueFind:
 
     def test_non_job_item_skipped(self):
         from yojenkins.utility.utility import queue_find
+
         queue_info = {
             'items': [
                 {
@@ -813,6 +841,7 @@ class TestQueueFind:
 
     def test_match_by_job_url(self):
         from yojenkins.utility.utility import queue_find
+
         queue_info = {
             'items': [
                 {
@@ -834,6 +863,7 @@ class TestQueueFind:
 class TestDiffShow:
     def test_basic_diff(self, capsys):
         from yojenkins.utility.utility import diff_show
+
         diff_show('line1\nline2', 'line1\nline3', '---A', '+++B', (), 0, True, False, False)
         out = capsys.readouterr().out
         assert '---A' in out
@@ -842,30 +872,37 @@ class TestDiffShow:
 
     def test_diff_only(self, capsys):
         from yojenkins.utility.utility import diff_show
+
         diff_show('a\nb\nc', 'a\nX\nc', '---', '+++', (), 0, True, True, False)
         out = capsys.readouterr().out
         assert 'Similarity' in out
 
     def test_char_ignore(self, capsys):
         from yojenkins.utility.utility import diff_show
+
         diff_show('XXXhello\nXXXworld', 'XXXhello\nXXXearth', '---', '+++', (), 3, True, False, False)
         out = capsys.readouterr().out
         assert 'Similarity' in out
 
     def test_line_pattern(self, capsys):
         from yojenkins.utility.utility import diff_show
-        diff_show('ERROR: something\nINFO: ok', 'ERROR: other\nINFO: ok', '---', '+++', ('ERROR',), 0, True, False, False)
+
+        diff_show(
+            'ERROR: something\nINFO: ok', 'ERROR: other\nINFO: ok', '---', '+++', ('ERROR',), 0, True, False, False
+        )
         out = capsys.readouterr().out
         assert 'Similarity' in out
 
     def test_diff_guide(self, capsys):
         from yojenkins.utility.utility import diff_show
+
         diff_show('abc\ndef', 'abc\nxyz', '---', '+++', (), 0, True, False, True)
         out = capsys.readouterr().out
         assert 'Similarity' in out
 
     def test_color_output(self, capsys):
         from yojenkins.utility.utility import diff_show
+
         diff_show('a\nb', 'a\nc', '---', '+++', (), 0, False, False, False)
         out = capsys.readouterr().out
         assert 'Similarity' in out
@@ -877,12 +914,14 @@ class TestDiffShow:
 class TestItemExistsInFolder:
     def test_item_exists(self, mock_rest):
         from yojenkins.utility.utility import item_exists_in_folder
+
         mock_rest.request.return_value = ({}, {}, True)
         result = item_exists_in_folder('my-job', 'http://x/job/folder/', 'job', mock_rest)
         assert result is True
 
     def test_item_does_not_exist(self, mock_rest):
         from yojenkins.utility.utility import item_exists_in_folder
+
         mock_rest.request.return_value = ({}, {}, False)
         result = item_exists_in_folder('my-job', 'http://x/job/folder/', 'job', mock_rest)
         assert result is False
@@ -941,6 +980,7 @@ class TestRunGroovyScript:
 
     def test_file_not_found(self, tmp_path):
         from yojenkins.utility.utility import run_groovy_script
+
         rest = MagicMock()
         result, success, error_msg = run_groovy_script('/nonexistent/script.groovy', True, rest)
         assert result == {}
@@ -949,6 +989,7 @@ class TestRunGroovyScript:
 
     def test_successful_json_return(self, tmp_path):
         from yojenkins.utility.utility import run_groovy_script
+
         script = tmp_path / 'test.groovy'
         script.write_text('println "hello"')
         rest = MagicMock()
@@ -960,6 +1001,7 @@ class TestRunGroovyScript:
 
     def test_successful_text_return(self, tmp_path):
         from yojenkins.utility.utility import run_groovy_script
+
         script = tmp_path / 'test.groovy'
         script.write_text('println "hello"')
         rest = MagicMock()
@@ -970,6 +1012,7 @@ class TestRunGroovyScript:
 
     def test_rest_request_failure(self, tmp_path):
         from yojenkins.utility.utility import run_groovy_script
+
         script = tmp_path / 'test.groovy'
         script.write_text('println "hello"')
         rest = MagicMock()
@@ -980,6 +1023,7 @@ class TestRunGroovyScript:
 
     def test_groovy_script_error_flag(self, tmp_path):
         from yojenkins.utility.utility import run_groovy_script
+
         script = tmp_path / 'test.groovy'
         script.write_text('println "hello"')
         rest = MagicMock()
@@ -991,6 +1035,7 @@ class TestRunGroovyScript:
 
     def test_java_exception_in_response(self, tmp_path):
         from yojenkins.utility.utility import run_groovy_script
+
         script = tmp_path / 'test.groovy'
         script.write_text('println "hello"')
         rest = MagicMock()
@@ -1001,6 +1046,7 @@ class TestRunGroovyScript:
 
     def test_json_parse_failure(self, tmp_path):
         from yojenkins.utility.utility import run_groovy_script
+
         script = tmp_path / 'test.groovy'
         script.write_text('println "hello"')
         rest = MagicMock()
@@ -1011,6 +1057,7 @@ class TestRunGroovyScript:
 
     def test_with_kwargs_template(self, tmp_path):
         from yojenkins.utility.utility import run_groovy_script
+
         script = tmp_path / 'test.groovy'
         script.write_text('println "${name}"')
         rest = MagicMock()
@@ -1021,6 +1068,7 @@ class TestRunGroovyScript:
 
     def test_with_kwargs_template_failure(self, tmp_path):
         from yojenkins.utility.utility import run_groovy_script
+
         script = tmp_path / 'test.groovy'
         script.write_text('')  # empty script
         rest = MagicMock()
@@ -1038,6 +1086,7 @@ class TestCreateNewHistoryFile:
 
     def test_creates_file(self, tmp_path):
         from yojenkins.utility.utility import create_new_history_file
+
         filepath = str(tmp_path / '.yojenkins' / 'history')
         os.makedirs(os.path.dirname(filepath), exist_ok=True)
         create_new_history_file(filepath)
@@ -1045,6 +1094,7 @@ class TestCreateNewHistoryFile:
 
     def test_creates_config_dir_if_missing(self, tmp_path):
         from yojenkins.utility.utility import create_new_history_file
+
         with patch('yojenkins.utility.utility.Path') as mock_path:
             mock_path.home.return_value = tmp_path
             filepath = str(tmp_path / '.yojenkins' / 'history')
@@ -1053,6 +1103,7 @@ class TestCreateNewHistoryFile:
 
     def test_permission_error_exits(self, tmp_path):
         from yojenkins.utility.utility import create_new_history_file
+
         with patch('builtins.open', side_effect=PermissionError('denied')):
             with patch('yojenkins.utility.utility.Path') as mock_path:
                 mock_path.home.return_value = tmp_path
@@ -1133,6 +1184,7 @@ class TestGetProjectDirBranches:
 
     def test_no_resource_dir_found_returns_empty(self):
         from yojenkins.utility.utility import get_project_dir
+
         with patch('yojenkins.utility.utility.am_i_bundled', return_value=False):
             with patch('pathlib.Path.exists', return_value=False):
                 result = get_project_dir('nonexistent_dir_xyz')
@@ -1147,11 +1199,13 @@ class TestLoadContentsFromRemoteFileUrl:
 
     def test_unsupported_extension_returns_empty(self):
         from yojenkins.utility.utility import load_contents_from_remote_file_url
+
         result = load_contents_from_remote_file_url('yaml', 'http://example.com/file.txt')
         assert result == {}
 
     def test_request_head_failure_returns_empty(self):
         from yojenkins.utility.utility import load_contents_from_remote_file_url
+
         with patch('yojenkins.utility.utility.requests') as mock_req:
             mock_req.head.side_effect = Exception('connection error')
             result = load_contents_from_remote_file_url('yaml', 'http://example.com/file.yaml')
@@ -1159,6 +1213,7 @@ class TestLoadContentsFromRemoteFileUrl:
 
     def test_file_too_large_returns_empty(self):
         from yojenkins.utility.utility import load_contents_from_remote_file_url
+
         with patch('yojenkins.utility.utility.requests') as mock_req:
             mock_resp = MagicMock()
             mock_resp.headers = {'Content-length': '2000000', 'content-type': 'text/plain'}
@@ -1168,6 +1223,7 @@ class TestLoadContentsFromRemoteFileUrl:
 
     def test_no_content_type_returns_empty(self):
         from yojenkins.utility.utility import load_contents_from_remote_file_url
+
         with patch('yojenkins.utility.utility.requests') as mock_req:
             mock_resp = MagicMock()
             headers = MagicMock()
@@ -1180,6 +1236,7 @@ class TestLoadContentsFromRemoteFileUrl:
 
     def test_unsupported_content_type_returns_empty(self):
         from yojenkins.utility.utility import load_contents_from_remote_file_url
+
         with patch('yojenkins.utility.utility.requests') as mock_req:
             mock_resp = MagicMock()
             headers = MagicMock()
@@ -1202,6 +1259,7 @@ class TestLoadContentsFromRemoteFileUrl:
 
     def test_successful_download(self):
         from yojenkins.utility.utility import load_contents_from_remote_file_url
+
         with patch('yojenkins.utility.utility.requests') as mock_req:
             mock_head_resp = MagicMock()
             mock_head_resp.headers = self._make_headers_mock()
@@ -1218,6 +1276,7 @@ class TestLoadContentsFromRemoteFileUrl:
 
     def test_download_non_ok_status_returns_empty(self):
         from yojenkins.utility.utility import load_contents_from_remote_file_url
+
         with patch('yojenkins.utility.utility.requests') as mock_req:
             mock_head_resp = MagicMock()
             mock_head_resp.headers = self._make_headers_mock()
@@ -1233,6 +1292,7 @@ class TestLoadContentsFromRemoteFileUrl:
 
     def test_yaml_parse_failure_returns_empty(self):
         from yojenkins.utility.utility import load_contents_from_remote_file_url
+
         with patch('yojenkins.utility.utility.requests') as mock_req:
             mock_head_resp = MagicMock()
             mock_head_resp.headers = self._make_headers_mock()
@@ -1257,12 +1317,14 @@ class TestOpenWebBrowser:
 
     def test_browser_open_success(self):
         from yojenkins.utility.utility import browser_open
+
         with patch('yojenkins.utility.utility.webbrowser.open'):
             result = browser_open('http://example.com/')
         assert result is True
 
     def test_browser_open_failure(self):
         from yojenkins.utility.utility import browser_open
+
         with patch('yojenkins.utility.utility.webbrowser.open', side_effect=Exception('no browser')):
             result = browser_open('http://example.com/')
         assert result is False
@@ -1276,6 +1338,7 @@ class TestGetResourcePath:
 
     def test_resource_not_found_returns_empty(self):
         from yojenkins.utility.utility import get_resource_path
+
         with patch('yojenkins.utility.utility.get_project_dir', return_value='/fake/dir'):
             with patch('pathlib.Path.exists', return_value=False):
                 result = get_resource_path('nonexistent/file.txt')
@@ -1290,6 +1353,7 @@ class TestWaitForBuildAndFollowLogs:
 
     def test_waits_then_follows_logs(self):
         from yojenkins.utility.utility import wait_for_build_and_follow_logs
+
         mock_yj = MagicMock()
         mock_yj.job.queue_info.return_value = {
             'executable': {'number': 5},
@@ -1307,6 +1371,7 @@ class TestWaitForBuildAndFollowLogs:
 
     def test_stuck_build_exits(self):
         from yojenkins.utility.utility import wait_for_build_and_follow_logs
+
         mock_yj = MagicMock()
         mock_yj.job.queue_info.return_value = {'stuck': True}
         with patch('yojenkins.utility.utility.logger') as mock_logger:
@@ -1324,6 +1389,7 @@ class TestWaitForBuildAndMonitor:
 
     def test_waits_then_starts_monitor(self):
         from yojenkins.utility.utility import wait_for_build_and_monitor
+
         mock_yj = MagicMock()
         mock_yj.job.queue_info.return_value = {
             'executable': {'number': 7},
@@ -1340,6 +1406,7 @@ class TestWaitForBuildAndMonitor:
 
     def test_stuck_build_exits(self):
         from yojenkins.utility.utility import wait_for_build_and_monitor
+
         mock_yj = MagicMock()
         mock_yj.job.queue_info.return_value = {'stuck': True}
         with patch('yojenkins.utility.utility.logger') as mock_logger:

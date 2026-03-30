@@ -7,4 +7,4 @@ except ModuleNotFoundError:
 
 import tomli_w
 
-__all__ = ['tomllib', 'tomli_w']
+__all__ = ['tomli_w', 'tomllib']

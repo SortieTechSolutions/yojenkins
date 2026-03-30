@@ -255,7 +255,9 @@ class Job:
         if 'lastBuild' not in job_info:
             raise RequestError('Failed to get last build number from job. "lastBuild" key missing in job information')
         if 'number' not in job_info['lastBuild']:
-            raise RequestError('Failed to get last build number from job. "lastBuild.number" key missing in job information')
+            raise RequestError(
+                'Failed to get last build number from job. "lastBuild.number" key missing in job information'
+            )
 
         return job_info['lastBuild']['number']
 

@@ -300,18 +300,21 @@ class TestMonitorDestructor:
 class TestStatusToColorParametrized:
     """Additional parametrized tests for status_to_color"""
 
-    @pytest.mark.parametrize('status,expected_color', [
-        ('RUNNING', 'normal'),
-        ('IN_PROGRESS', 'normal'),
-        ('SUCCEEDED', 'green'),
-        ('FAILED', 'red'),
-        ('FAIL', 'red'),
-        ('QUEUED', 'normal'),
-        ('UNSTABLE', 'orange'),
-        ('PAUSED_PENDING_INPUT', 'cyan'),
-        ('NOT_EXECUTED', 'grey-dark'),
-        ('NOT_RUN', 'grey-dark'),
-    ])
+    @pytest.mark.parametrize(
+        'status,expected_color',
+        [
+            ('RUNNING', 'normal'),
+            ('IN_PROGRESS', 'normal'),
+            ('SUCCEEDED', 'green'),
+            ('FAILED', 'red'),
+            ('FAIL', 'red'),
+            ('QUEUED', 'normal'),
+            ('UNSTABLE', 'orange'),
+            ('PAUSED_PENDING_INPUT', 'cyan'),
+            ('NOT_EXECUTED', 'grey-dark'),
+            ('NOT_RUN', 'grey-dark'),
+        ],
+    )
     def test_status_color_mapping(self, status, expected_color):
         monitor = Monitor()
         assert monitor.status_to_color(status) == expected_color
@@ -320,13 +323,16 @@ class TestStatusToColorParametrized:
 class TestStatusToSoundParametrized:
     """Additional parametrized tests for status_to_sound"""
 
-    @pytest.mark.parametrize('status,expected_contains', [
-        ('SUCCESS', 'positive'),
-        ('FAILURE', 'negative'),
-        ('ABORTED', 'negative'),
-        ('UNSTABLE', 'negative'),
-        ('PAUSED_PENDING_INPUT', 'positive'),
-    ])
+    @pytest.mark.parametrize(
+        'status,expected_contains',
+        [
+            ('SUCCESS', 'positive'),
+            ('FAILURE', 'negative'),
+            ('ABORTED', 'negative'),
+            ('UNSTABLE', 'negative'),
+            ('PAUSED_PENDING_INPUT', 'positive'),
+        ],
+    )
     def test_status_sound_mapping(self, status, expected_contains):
         monitor = Monitor()
         result = monitor.status_to_sound(status)

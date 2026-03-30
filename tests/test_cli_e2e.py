@@ -21,53 +21,71 @@ from yojenkins.yo_jenkins.exceptions import YoJenkinsException
 # Test data (replaces demo mode static data)
 # ---------------------------------------------------------------------------
 
-TEST_BASE_URL = "http://test-jenkins:8080"
+TEST_BASE_URL = 'http://test-jenkins:8080'
 
 TEST_SERVER_INFO = {
-    "mode": "NORMAL",
-    "numExecutors": 2,
-    "url": TEST_BASE_URL,
-    "useSecurity": True,
+    'mode': 'NORMAL',
+    'numExecutors': 2,
+    'url': TEST_BASE_URL,
+    'useSecurity': True,
 }
 
-TEST_PEOPLE = {"users": [{"user": {"fullName": "Alice"}}, {"user": {"fullName": "Bob"}}]}
-TEST_PEOPLE_LIST = [{"fullName": "Alice"}, {"fullName": "Bob"}]
+TEST_PEOPLE = {'users': [{'user': {'fullName': 'Alice'}}, {'user': {'fullName': 'Bob'}}]}
+TEST_PEOPLE_LIST = [{'fullName': 'Alice'}, {'fullName': 'Bob'}]
 
 TEST_JOBS = [
-    {"name": "backend-api", "fullName": "Backend/backend-api", "url": f"{TEST_BASE_URL}/job/Backend/job/backend-api/", "color": "blue", "folder": "Backend"},
-    {"name": "frontend-app", "fullName": "Frontend/frontend-app", "url": f"{TEST_BASE_URL}/job/Frontend/job/frontend-app/", "color": "blue", "folder": "Frontend"},
-    {"name": "deploy-service", "fullName": "DevOps/deploy-service", "url": f"{TEST_BASE_URL}/job/DevOps/job/deploy-service/", "color": "red", "folder": "DevOps"},
+    {
+        'name': 'backend-api',
+        'fullName': 'Backend/backend-api',
+        'url': f'{TEST_BASE_URL}/job/Backend/job/backend-api/',
+        'color': 'blue',
+        'folder': 'Backend',
+    },
+    {
+        'name': 'frontend-app',
+        'fullName': 'Frontend/frontend-app',
+        'url': f'{TEST_BASE_URL}/job/Frontend/job/frontend-app/',
+        'color': 'blue',
+        'folder': 'Frontend',
+    },
+    {
+        'name': 'deploy-service',
+        'fullName': 'DevOps/deploy-service',
+        'url': f'{TEST_BASE_URL}/job/DevOps/job/deploy-service/',
+        'color': 'red',
+        'folder': 'DevOps',
+    },
 ]
 
 TEST_FOLDERS = [
-    {"name": "DevOps", "fullName": "DevOps", "url": f"{TEST_BASE_URL}/job/DevOps/"},
-    {"name": "Backend", "fullName": "Backend", "url": f"{TEST_BASE_URL}/job/Backend/"},
-    {"name": "Frontend", "fullName": "Frontend", "url": f"{TEST_BASE_URL}/job/Frontend/"},
+    {'name': 'DevOps', 'fullName': 'DevOps', 'url': f'{TEST_BASE_URL}/job/DevOps/'},
+    {'name': 'Backend', 'fullName': 'Backend', 'url': f'{TEST_BASE_URL}/job/Backend/'},
+    {'name': 'Frontend', 'fullName': 'Frontend', 'url': f'{TEST_BASE_URL}/job/Frontend/'},
 ]
 
 TEST_BUILDS = [
-    {"number": 84, "result": "SUCCESS", "url": f"{TEST_BASE_URL}/job/DevOps/job/deploy-service/84/"},
-    {"number": 83, "result": "FAILURE", "url": f"{TEST_BASE_URL}/job/DevOps/job/deploy-service/83/"},
+    {'number': 84, 'result': 'SUCCESS', 'url': f'{TEST_BASE_URL}/job/DevOps/job/deploy-service/84/'},
+    {'number': 83, 'result': 'FAILURE', 'url': f'{TEST_BASE_URL}/job/DevOps/job/deploy-service/83/'},
 ]
 
 TEST_STAGES = [
-    {"name": "Checkout", "status": "SUCCESS"},
-    {"name": "Build", "status": "SUCCESS"},
-    {"name": "Test", "status": "SUCCESS"},
+    {'name': 'Checkout', 'status': 'SUCCESS'},
+    {'name': 'Build', 'status': 'SUCCESS'},
+    {'name': 'Test', 'status': 'SUCCESS'},
 ]
 
-BUILD_URL = f"{TEST_BASE_URL}/job/DevOps/job/deploy-service/84/"
+BUILD_URL = f'{TEST_BASE_URL}/job/DevOps/job/deploy-service/84/'
 
 
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture(autouse=True)
 def _patch_history_file_io():
     """Prevent log_to_history from writing to ~/.yojenkins/history.jsonl."""
-    with patch('pathlib.Path.is_file', return_value=True), \
-         patch('builtins.open', MagicMock()):
+    with patch('pathlib.Path.is_file', return_value=True), patch('builtins.open', MagicMock()):
         yield
 
 
@@ -79,28 +97,38 @@ def mock_yj():
     # Server
     yj.server.info.return_value = TEST_SERVER_INFO
     yj.server.people.return_value = (TEST_PEOPLE, TEST_PEOPLE_LIST)
-    yj.server.queue_info.return_value = {"items": []}
+    yj.server.queue_info.return_value = {'items': []}
 
     # Jobs
-    yj.job.info.return_value = {"name": "backend-api", "fullName": "Backend/backend-api", "url": f"{TEST_BASE_URL}/job/Backend/job/backend-api/", "builds": TEST_BUILDS}
-    yj.job.search.return_value = (TEST_JOBS, [j["url"] for j in TEST_JOBS])
-    yj.job.build_list.return_value = (TEST_BUILDS, [b["url"] for b in TEST_BUILDS])
+    yj.job.info.return_value = {
+        'name': 'backend-api',
+        'fullName': 'Backend/backend-api',
+        'url': f'{TEST_BASE_URL}/job/Backend/job/backend-api/',
+        'builds': TEST_BUILDS,
+    }
+    yj.job.search.return_value = (TEST_JOBS, [j['url'] for j in TEST_JOBS])
+    yj.job.build_list.return_value = (TEST_BUILDS, [b['url'] for b in TEST_BUILDS])
 
     # Folders
-    yj.folder.info.return_value = {"name": "DevOps", "fullName": "DevOps", "url": f"{TEST_BASE_URL}/job/DevOps/", "jobs": TEST_JOBS[:1]}
-    yj.folder.search.return_value = (TEST_FOLDERS, [f["url"] for f in TEST_FOLDERS])
-    yj.folder.jobs_list.return_value = (TEST_JOBS[:1], [TEST_JOBS[0]["url"]])
+    yj.folder.info.return_value = {
+        'name': 'DevOps',
+        'fullName': 'DevOps',
+        'url': f'{TEST_BASE_URL}/job/DevOps/',
+        'jobs': TEST_JOBS[:1],
+    }
+    yj.folder.search.return_value = (TEST_FOLDERS, [f['url'] for f in TEST_FOLDERS])
+    yj.folder.jobs_list.return_value = (TEST_JOBS[:1], [TEST_JOBS[0]['url']])
 
     # Builds
     yj.build.info.return_value = TEST_BUILDS[0]
-    yj.build.stage_list.return_value = (TEST_STAGES, [s["name"] for s in TEST_STAGES])
+    yj.build.stage_list.return_value = (TEST_STAGES, [s['name'] for s in TEST_STAGES])
 
     # Auth
     yj.auth.verify.return_value = True
-    yj.auth.user.return_value = {"id": "test-user", "fullName": "Test User"}
+    yj.auth.user.return_value = {'id': 'test-user', 'fullName': 'Test User'}
 
     # REST (for console logs etc.)
-    yj.rest.request.return_value = ("Started: build #84\nFinished: SUCCESS", {}, True)
+    yj.rest.request.return_value = ('Started: build #84\nFinished: SUCCESS', {}, True)
 
     # Attributes not exercised by most tests but needed to avoid AttributeError
     yj.node = MagicMock()
@@ -126,21 +154,25 @@ def mock_config(mock_yj):
 # Category 1: Help flags
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.e2e
-@pytest.mark.parametrize("args,expected", [
-    ([], ['auth', 'server', 'job', 'build', 'folder']),
-    (['auth'], ['configure', 'token', 'show', 'verify', 'user']),
-    (['server'], ['info', 'people', 'queue', 'plugins']),
-    (['job'], ['info', 'search', 'build', 'list']),
-    (['build'], ['info', 'status', 'stages', 'logs']),
-    (['folder'], ['info', 'search', 'jobs']),
-    (['node'], ['info', 'list']),
-    (['account'], ['info', 'list', 'create']),
-    (['credential'], ['info', 'list', 'create']),
-    (['stage'], ['info', 'status']),
-    (['step'], ['info']),
-    (['tools'], ['history']),
-])
+@pytest.mark.parametrize(
+    'args,expected',
+    [
+        ([], ['auth', 'server', 'job', 'build', 'folder']),
+        (['auth'], ['configure', 'token', 'show', 'verify', 'user']),
+        (['server'], ['info', 'people', 'queue', 'plugins']),
+        (['job'], ['info', 'search', 'build', 'list']),
+        (['build'], ['info', 'status', 'stages', 'logs']),
+        (['folder'], ['info', 'search', 'jobs']),
+        (['node'], ['info', 'list']),
+        (['account'], ['info', 'list', 'create']),
+        (['credential'], ['info', 'list', 'create']),
+        (['stage'], ['info', 'status']),
+        (['step'], ['info']),
+        (['tools'], ['history']),
+    ],
+)
 def test_help(cli_runner, args, expected):
     result = cli_runner.invoke(main, [*args, '--help'])
     assert result.exit_code == 0
@@ -151,6 +183,7 @@ def test_help(cli_runner, args, expected):
 # ---------------------------------------------------------------------------
 # Category 2: Server commands
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.e2e
 class TestServerE2E:
@@ -175,6 +208,7 @@ class TestServerE2E:
 # ---------------------------------------------------------------------------
 # Category 3: Job commands
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.e2e
 class TestJobE2E:
@@ -211,6 +245,7 @@ class TestJobE2E:
 # Category 4: Folder commands
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.e2e
 class TestFolderE2E:
     def test_folder_info(self, cli_runner, mock_config):
@@ -237,6 +272,7 @@ class TestFolderE2E:
 # Category 5: Build commands
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.e2e
 class TestBuildE2E:
     def test_build_info(self, cli_runner, mock_config):
@@ -255,6 +291,7 @@ class TestBuildE2E:
 # ---------------------------------------------------------------------------
 # Category 6: Output format matrix
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.e2e
 class TestOutputFormats:
@@ -289,6 +326,7 @@ class TestOutputFormats:
 # Category 7: Error handling
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.e2e
 class TestErrorHandling:
     def test_missing_required_arg(self, cli_runner, mock_config):
@@ -315,6 +353,7 @@ class TestErrorHandling:
 # Category 8: Stdin support
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.e2e
 class TestStdinSupport:
     def test_job_info_reads_from_stdin(self, cli_runner, mock_config):
@@ -335,6 +374,7 @@ class TestStdinSupport:
 # ---------------------------------------------------------------------------
 # Category 9: Auth pipeline (REST-level mock)
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.e2e
 class TestAuthPipeline:

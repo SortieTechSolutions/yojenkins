@@ -1,6 +1,5 @@
 """Credential click sub-command"""
 
-
 import click
 
 from yojenkins.__main__ import credential

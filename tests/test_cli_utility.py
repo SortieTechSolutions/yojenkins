@@ -153,7 +153,6 @@ class TestLogToHistory:
         my_func(profile='default')
         mock_create.assert_called_once()
 
-
     @patch('builtins.open', mock_open())
     @patch('pathlib.Path.is_file', return_value=True)
     def test_env_var_disables_history(self, mock_isfile):
@@ -166,13 +165,14 @@ class TestLogToHistory:
             pass
 
         import os
+
         os.environ['YOJENKINS_DISABLE_HISTORY'] = 'true'
         try:
             with patch('builtins.open', mock_open()) as mocked_file:
                 my_func(profile='default')
                 # open should not have been called for writing history
                 for call in mocked_file.call_args_list:
-                    assert 'a' not in str(call), "History file should not be opened for appending"
+                    assert 'a' not in str(call), 'History file should not be opened for appending'
         finally:
             del os.environ['YOJENKINS_DISABLE_HISTORY']
 

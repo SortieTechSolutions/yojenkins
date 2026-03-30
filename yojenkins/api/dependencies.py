@@ -14,10 +14,10 @@ from yojenkins.yo_jenkins.yojenkins import YoJenkins
 # If YOJENKINS_SECRET_KEY is not set, a random key is generated at startup.
 # A random key means all JWTs are invalidated on process restart.
 # Set the env var for stable sessions across restarts.
-SECRET_KEY = os.environ.get("YOJENKINS_SECRET_KEY", "") or secrets.token_hex(32)
+SECRET_KEY = os.environ.get('YOJENKINS_SECRET_KEY', '') or secrets.token_hex(32)
 # HS256 (HMAC-SHA256): symmetric signing — the same server issues and
 # validates tokens, so asymmetric RS256 would add complexity for no benefit.
-ALGORITHM = "HS256"
+ALGORITHM = 'HS256'
 # 1 hour: long enough for a working session, short enough to limit
 # exposure from a leaked token.
 ACCESS_TOKEN_EXPIRE_SECONDS = 3600
@@ -37,8 +37,8 @@ _sessions: dict[str, tuple[YoJenkins, float]] = {}
 def create_access_token(user_id: str) -> str:
     """Create a JWT access token for the given user session."""
     payload = {
-        "sub": user_id,
-        "exp": time.time() + ACCESS_TOKEN_EXPIRE_SECONDS,
+        'sub': user_id,
+        'exp': time.time() + ACCESS_TOKEN_EXPIRE_SECONDS,
     }
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
@@ -52,7 +52,7 @@ def _decode_token(token: str) -> Optional[str]:
     """Decode JWT and return the user_id (subject), or None if invalid."""
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        return payload.get("sub")
+        return payload.get('sub')
     except JWTError:
         return None
 
@@ -73,7 +73,7 @@ async def get_yo_jenkins(
     if not user_id or user_id not in _sessions:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Session expired or invalid token. Please login again.",
+            detail='Session expired or invalid token. Please login again.',
         )
     yj, _ = _sessions[user_id]
     _sessions[user_id] = (yj, time.time())

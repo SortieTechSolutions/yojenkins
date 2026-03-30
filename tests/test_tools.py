@@ -12,7 +12,6 @@ from yojenkins.tools.shared_library import SharedLibrary
 
 
 class TestPackageInstall:
-
     @patch('subprocess.check_call')
     def test_install_default(self, mock_check_call):
         result = Package.install()
@@ -54,7 +53,6 @@ class TestPackageInstall:
 
 
 class TestPackageUninstall:
-
     @patch('subprocess.check_call')
     def test_uninstall_default(self, mock_check_call):
         result = Package.uninstall()
@@ -84,7 +82,6 @@ class TestPackageUninstall:
 
 
 class TestSharedLibraryInit:
-
     def test_groovy_script_directory_set(self):
         sl = SharedLibrary()
         assert 'groovy_scripts' in str(sl.groovy_script_directory)
@@ -92,7 +89,6 @@ class TestSharedLibraryInit:
 
 
 class TestSharedLibrarySetup:
-
     def test_setup_no_repo_info_returns_false(self):
         sl = SharedLibrary()
         mock_rest = MagicMock()

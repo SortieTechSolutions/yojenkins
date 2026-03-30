@@ -36,221 +36,219 @@ def mock_yj():
     """MagicMock YoJenkins with plausible return values for all route handlers."""
     yj = MagicMock()
     yj.auth.verify.return_value = True
-    yj.auth.user.return_value = {"id": "test-user", "fullName": "Test User"}
-    yj.server.info.return_value = {"mode": "NORMAL", "numExecutors": 2, "url": "http://test:8080"}
+    yj.auth.user.return_value = {'id': 'test-user', 'fullName': 'Test User'}
+    yj.server.info.return_value = {'mode': 'NORMAL', 'numExecutors': 2, 'url': 'http://test:8080'}
     yj.server.people.return_value = (
-        {"users": [{"user": {"fullName": "Alice"}}]},
-        [{"fullName": "Alice"}],
+        {'users': [{'user': {'fullName': 'Alice'}}]},
+        [{'fullName': 'Alice'}],
     )
-    yj.server.queue_info.return_value = {"items": []}
+    yj.server.queue_info.return_value = {'items': []}
     yj.job.search.return_value = (
-        [{"name": "backend-api", "fullName": "backend-api", "url": "http://test/job/backend-api/"}],
-        ["http://test/job/backend-api/"],
+        [{'name': 'backend-api', 'fullName': 'backend-api', 'url': 'http://test/job/backend-api/'}],
+        ['http://test/job/backend-api/'],
     )
-    yj.job.info.return_value = {"name": "backend-api", "url": "http://test/job/backend-api/"}
+    yj.job.info.return_value = {'name': 'backend-api', 'url': 'http://test/job/backend-api/'}
     yj.job.build_list.return_value = (
-        [{"number": 1, "result": "SUCCESS", "url": "http://test/job/backend-api/1/"}],
-        ["http://test/job/backend-api/1/"],
+        [{'number': 1, 'result': 'SUCCESS', 'url': 'http://test/job/backend-api/1/'}],
+        ['http://test/job/backend-api/1/'],
     )
     yj.folder.search.return_value = (
-        [{"name": "DevOps", "url": "http://test/job/DevOps/"}],
-        ["http://test/job/DevOps/"],
+        [{'name': 'DevOps', 'url': 'http://test/job/DevOps/'}],
+        ['http://test/job/DevOps/'],
     )
-    yj.folder.info.return_value = {"name": "DevOps", "url": "http://test/job/DevOps/"}
+    yj.folder.info.return_value = {'name': 'DevOps', 'url': 'http://test/job/DevOps/'}
     yj.folder.jobs_list.return_value = (
-        [{"name": "deploy", "url": "http://test/job/DevOps/job/deploy/"}],
-        ["http://test/job/DevOps/job/deploy/"],
+        [{'name': 'deploy', 'url': 'http://test/job/DevOps/job/deploy/'}],
+        ['http://test/job/DevOps/job/deploy/'],
     )
-    yj.build.info.return_value = {"number": 42, "result": "SUCCESS", "url": "http://test/job/backend-api/42/"}
+    yj.build.info.return_value = {'number': 42, 'result': 'SUCCESS', 'url': 'http://test/job/backend-api/42/'}
     yj.build.stage_list.return_value = (
-        [{"name": "Build", "status": "SUCCESS"}],
-        ["Build"],
+        [{'name': 'Build', 'status': 'SUCCESS'}],
+        ['Build'],
     )
-    yj.rest.request.return_value = ("Started: build #42\nFinished: SUCCESS", {}, True)
+    yj.rest.request.return_value = ('Started: build #42\nFinished: SUCCESS', {}, True)
     return yj
 
 
 @pytest.fixture
 def auth_token(mock_yj):
     """Inject mock YoJenkins into session store and return a valid JWT."""
-    user_id = "test-user-id"
+    user_id = 'test-user-id'
     store_session(user_id, mock_yj)
     return create_access_token(user_id)
 
 
 # --- Authentication tests ---
 
+
 class TestAuth:
     def test_unauthenticated_access(self, client):
-        resp = client.get("/api/server/info")
+        resp = client.get('/api/server/info')
         assert resp.status_code in (401, 403)
 
     def test_invalid_token(self, client):
-        resp = client.get("/api/server/info", headers={
-            "Authorization": "Bearer invalid.jwt.token"
-        })
+        resp = client.get('/api/server/info', headers={'Authorization': 'Bearer invalid.jwt.token'})
         assert resp.status_code == 401
 
     def test_verify_session(self, client, auth_token):
-        resp = client.get("/api/auth/verify", headers={
-            "Authorization": f"Bearer {auth_token}"
-        })
+        resp = client.get('/api/auth/verify', headers={'Authorization': f'Bearer {auth_token}'})
         assert resp.status_code == 200
 
     def test_user_info(self, client, auth_token):
-        resp = client.get("/api/auth/user", headers={
-            "Authorization": f"Bearer {auth_token}"
-        })
+        resp = client.get('/api/auth/user', headers={'Authorization': f'Bearer {auth_token}'})
         assert resp.status_code == 200
 
 
 # --- Server endpoints ---
 
+
 class TestServer:
     def test_server_info(self, client, auth_token):
-        resp = client.get("/api/server/info", headers={
-            "Authorization": f"Bearer {auth_token}"
-        })
+        resp = client.get('/api/server/info', headers={'Authorization': f'Bearer {auth_token}'})
         assert resp.status_code == 200
 
     def test_server_people(self, client, auth_token):
-        resp = client.get("/api/server/people", headers={
-            "Authorization": f"Bearer {auth_token}"
-        })
+        resp = client.get('/api/server/people', headers={'Authorization': f'Bearer {auth_token}'})
         assert resp.status_code == 200
 
 
 # --- Jobs endpoints ---
 
+
 class TestJobs:
     def test_search_jobs(self, client, auth_token):
-        resp = client.get("/api/jobs/search", params={"pattern": ".*"}, headers={
-            "Authorization": f"Bearer {auth_token}"
-        })
+        resp = client.get(
+            '/api/jobs/search', params={'pattern': '.*'}, headers={'Authorization': f'Bearer {auth_token}'}
+        )
         assert resp.status_code == 200
         data = resp.json()
-        assert "results" in data
+        assert 'results' in data
 
     def test_search_depth_bounds(self, client, auth_token):
-        headers = {"Authorization": f"Bearer {auth_token}"}
+        headers = {'Authorization': f'Bearer {auth_token}'}
         # depth too high
-        resp = client.get("/api/jobs/search", params={"pattern": ".*", "depth": 99}, headers=headers)
+        resp = client.get('/api/jobs/search', params={'pattern': '.*', 'depth': 99}, headers=headers)
         assert resp.status_code == 422
         # depth too low
-        resp = client.get("/api/jobs/search", params={"pattern": ".*", "depth": 0}, headers=headers)
+        resp = client.get('/api/jobs/search', params={'pattern': '.*', 'depth': 0}, headers=headers)
         assert resp.status_code == 422
 
     def test_search_pattern_too_long(self, client, auth_token):
-        resp = client.get("/api/jobs/search", params={"pattern": "x" * 501}, headers={
-            "Authorization": f"Bearer {auth_token}"
-        })
+        resp = client.get(
+            '/api/jobs/search', params={'pattern': 'x' * 501}, headers={'Authorization': f'Bearer {auth_token}'}
+        )
         assert resp.status_code == 422
 
     def test_job_info(self, client, auth_token):
-        resp = client.get("/api/jobs/info", params={"job": "backend-api"}, headers={
-            "Authorization": f"Bearer {auth_token}"
-        })
+        resp = client.get(
+            '/api/jobs/info', params={'job': 'backend-api'}, headers={'Authorization': f'Bearer {auth_token}'}
+        )
         assert resp.status_code == 200
 
     def test_job_builds(self, client, auth_token):
-        resp = client.get("/api/jobs/builds", params={"job": "backend-api"}, headers={
-            "Authorization": f"Bearer {auth_token}"
-        })
+        resp = client.get(
+            '/api/jobs/builds', params={'job': 'backend-api'}, headers={'Authorization': f'Bearer {auth_token}'}
+        )
         assert resp.status_code == 200
 
 
 # --- Folders endpoints ---
 
+
 class TestFolders:
     def test_search_folders(self, client, auth_token):
-        resp = client.get("/api/folders/search", headers={
-            "Authorization": f"Bearer {auth_token}"
-        })
+        resp = client.get('/api/folders/search', headers={'Authorization': f'Bearer {auth_token}'})
         assert resp.status_code == 200
         data = resp.json()
-        assert "results" in data
+        assert 'results' in data
 
     def test_search_depth_bounds(self, client, auth_token):
-        headers = {"Authorization": f"Bearer {auth_token}"}
-        resp = client.get("/api/folders/search", params={"depth": 99}, headers=headers)
+        headers = {'Authorization': f'Bearer {auth_token}'}
+        resp = client.get('/api/folders/search', params={'depth': 99}, headers=headers)
         assert resp.status_code == 422
-        resp = client.get("/api/folders/search", params={"depth": 0}, headers=headers)
+        resp = client.get('/api/folders/search', params={'depth': 0}, headers=headers)
         assert resp.status_code == 422
 
     def test_folder_info(self, client, auth_token):
-        resp = client.get("/api/folders/info", params={"folder": "DevOps"}, headers={
-            "Authorization": f"Bearer {auth_token}"
-        })
+        resp = client.get(
+            '/api/folders/info', params={'folder': 'DevOps'}, headers={'Authorization': f'Bearer {auth_token}'}
+        )
         assert resp.status_code == 200
 
     def test_folder_jobs(self, client, auth_token):
-        resp = client.get("/api/folders/jobs", params={"folder": "DevOps"}, headers={
-            "Authorization": f"Bearer {auth_token}"
-        })
+        resp = client.get(
+            '/api/folders/jobs', params={'folder': 'DevOps'}, headers={'Authorization': f'Bearer {auth_token}'}
+        )
         assert resp.status_code == 200
 
 
 # --- Builds endpoints ---
 
+
 class TestBuilds:
     def test_build_info(self, client, auth_token):
-        resp = client.get("/api/builds/info", params={
-            "url": "http://jenkins.example.com/job/backend-api/42/"
-        }, headers={"Authorization": f"Bearer {auth_token}"})
+        resp = client.get(
+            '/api/builds/info',
+            params={'url': 'http://jenkins.example.com/job/backend-api/42/'},
+            headers={'Authorization': f'Bearer {auth_token}'},
+        )
         assert resp.status_code == 200
 
     def test_build_logs(self, client, auth_token):
-        resp = client.get("/api/builds/logs", params={
-            "url": "http://jenkins.example.com/job/backend-api/42/"
-        }, headers={"Authorization": f"Bearer {auth_token}"})
+        resp = client.get(
+            '/api/builds/logs',
+            params={'url': 'http://jenkins.example.com/job/backend-api/42/'},
+            headers={'Authorization': f'Bearer {auth_token}'},
+        )
         assert resp.status_code == 200
 
 
 # --- Path traversal protection ---
 
+
 class TestPathTraversal:
     def test_path_traversal_blocked(self):
         """Ensure ../../etc/passwd style paths are blocked."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            index = Path(tmpdir) / "index.html"
-            index.write_text("<html>OK</html>")
+            index = Path(tmpdir) / 'index.html'
+            index.write_text('<html>OK</html>')
             app = create_app(static_dir=tmpdir)
             client = TestClient(app)
 
-            resp = client.get("/../../etc/passwd")
+            resp = client.get('/../../etc/passwd')
             assert resp.status_code == 200
-            assert "OK" in resp.text  # Returns index.html, not /etc/passwd
+            assert 'OK' in resp.text  # Returns index.html, not /etc/passwd
 
     def test_static_file_served(self):
         """Ensure legitimate static files are served."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            index = Path(tmpdir) / "index.html"
-            index.write_text("<html>index</html>")
-            assets_dir = Path(tmpdir) / "assets"
+            index = Path(tmpdir) / 'index.html'
+            index.write_text('<html>index</html>')
+            assets_dir = Path(tmpdir) / 'assets'
             assets_dir.mkdir()
-            js_file = assets_dir / "app.js"
+            js_file = assets_dir / 'app.js'
             js_file.write_text("console.log('hello')")
 
             app = create_app(static_dir=tmpdir)
             client = TestClient(app)
 
-            resp = client.get("/assets/app.js")
+            resp = client.get('/assets/app.js')
             assert resp.status_code == 200
-            assert "hello" in resp.text
+            assert 'hello' in resp.text
 
 
 # --- Security headers ---
 
+
 class TestSecurityHeaders:
     def test_security_headers_present(self, client, auth_token):
-        resp = client.get("/api/auth/verify", headers={
-            "Authorization": f"Bearer {auth_token}"
-        })
-        assert resp.headers.get("X-Content-Type-Options") == "nosniff"
-        assert resp.headers.get("X-Frame-Options") == "DENY"
+        resp = client.get('/api/auth/verify', headers={'Authorization': f'Bearer {auth_token}'})
+        assert resp.headers.get('X-Content-Type-Options') == 'nosniff'
+        assert resp.headers.get('X-Frame-Options') == 'DENY'
 
 
 # --- Session cleanup ---
+
 
 class TestSessionCleanup:
     def test_cleanup_removes_expired(self, client, auth_token):

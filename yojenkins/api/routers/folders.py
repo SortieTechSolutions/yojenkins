@@ -8,10 +8,10 @@ from yojenkins.api.dependencies import get_yo_jenkins
 router = APIRouter()
 
 
-@router.get("/search")
+@router.get('/search')
 async def search_folders(
-    pattern: str = Query(".*", max_length=500, description="REGEX pattern to search for"),
-    depth: int = Query(4, ge=1, le=10, description="Search depth"),
+    pattern: str = Query('.*', max_length=500, description='REGEX pattern to search for'),
+    depth: int = Query(4, ge=1, le=10, description='Search depth'),
     yj=Depends(get_yo_jenkins),
 ):
     """Search for folders matching a REGEX pattern."""
@@ -20,12 +20,12 @@ async def search_folders(
         search_pattern=pattern,
         folder_depth=depth,
     )
-    return {"results": results, "urls": urls}
+    return {'results': results, 'urls': urls}
 
 
-@router.get("/info")
+@router.get('/info')
 async def folder_info(
-    folder: str = Query(..., description="Folder name or URL"),
+    folder: str = Query(..., description='Folder name or URL'),
     yj=Depends(get_yo_jenkins),
 ):
     """Get folder information."""
@@ -36,9 +36,9 @@ async def folder_info(
     return await run_in_threadpool(yj.folder.info, folder_name=folder)
 
 
-@router.get("/jobs")
+@router.get('/jobs')
 async def folder_jobs(
-    folder: str = Query(..., description="Folder name or URL"),
+    folder: str = Query(..., description='Folder name or URL'),
     yj=Depends(get_yo_jenkins),
 ):
     """List all jobs in a folder."""
@@ -48,4 +48,4 @@ async def folder_jobs(
         jobs, urls = await run_in_threadpool(yj.folder.jobs_list, folder_url=folder)
     else:
         jobs, urls = await run_in_threadpool(yj.folder.jobs_list, folder_name=folder)
-    return {"jobs": jobs, "urls": urls}
+    return {'jobs': jobs, 'urls': urls}

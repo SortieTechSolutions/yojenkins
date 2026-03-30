@@ -11,8 +11,8 @@ from yojenkins.yo_jenkins.node import Node
 # info
 # ---------------------------------------------------------------------------
 
-class TestInfo:
 
+class TestInfo:
     def test_info_returns_node_data(self, mock_rest):
         """info() returns the dict from rest.request on success."""
         expected = {'displayName': 'agent-1', 'offline': False}
@@ -49,8 +49,8 @@ class TestInfo:
 # list
 # ---------------------------------------------------------------------------
 
-class TestList:
 
+class TestList:
     def test_list_returns_nodes(self, mock_rest, mocker):
         """list() returns the tuple from item_subitem_list."""
         nodes_data = {
@@ -95,8 +95,8 @@ class TestList:
 # config
 # ---------------------------------------------------------------------------
 
-class TestConfig:
 
+class TestConfig:
     def test_config_returns_xml_content(self, mock_rest):
         """config() returns XML content from rest.request."""
         xml_content = '<slave><name>agent-1</name></slave>'
@@ -145,8 +145,8 @@ class TestConfig:
 # delete
 # ---------------------------------------------------------------------------
 
-class TestDelete:
 
+class TestDelete:
     def test_delete_success(self, mock_rest):
         """delete() returns True on success."""
         mock_rest.request.return_value = ('', {}, True)
@@ -167,8 +167,8 @@ class TestDelete:
 # disable (toggle offline)
 # ---------------------------------------------------------------------------
 
-class TestDisable:
 
+class TestDisable:
     def test_disable_sends_toggle(self, mock_rest):
         """disable() sends toggleOffline request when node is online."""
         # First call: info() -> node is online
@@ -210,8 +210,8 @@ class TestDisable:
 # enable
 # ---------------------------------------------------------------------------
 
-class TestEnable:
 
+class TestEnable:
     def test_enable_sends_toggle(self, mock_rest):
         """enable() sends toggleOffline request when node is offline."""
         mock_rest.request.side_effect = [
@@ -240,8 +240,8 @@ class TestEnable:
 # create_permanent
 # ---------------------------------------------------------------------------
 
-class TestCreatePermanent:
 
+class TestCreatePermanent:
     @pytest.fixture
     def create_kwargs(self):
         return {
@@ -287,12 +287,15 @@ class TestCreatePermanent:
         with pytest.raises(YoJenkinsException):
             node.create_permanent(**create_kwargs)
 
-    @pytest.mark.parametrize('ssh_verify,expected_class', [
-        ('known', 'KnownHostsFileKeyVerificationStrategy'),
-        ('trusted', 'ManuallyTrustedKeyVerificationStrategy'),
-        ('provided', 'ManuallyProvidedKeyVerificationStrategy'),
-        ('none', 'NonVerifyingKeyVerificationStrategy'),
-    ])
+    @pytest.mark.parametrize(
+        'ssh_verify,expected_class',
+        [
+            ('known', 'KnownHostsFileKeyVerificationStrategy'),
+            ('trusted', 'ManuallyTrustedKeyVerificationStrategy'),
+            ('provided', 'ManuallyProvidedKeyVerificationStrategy'),
+            ('none', 'NonVerifyingKeyVerificationStrategy'),
+        ],
+    )
     def test_create_permanent_ssh_verify_strategies(self, mock_rest, create_kwargs, ssh_verify, expected_class):
         """create_permanent() sets the correct SSH verification strategy."""
         create_kwargs['ssh_verify'] = ssh_verify
@@ -323,8 +326,8 @@ class TestCreatePermanent:
 # reconfig
 # ---------------------------------------------------------------------------
 
-class TestReconfig:
 
+class TestReconfig:
     def test_reconfig_success(self, mock_rest, tmp_path, mocker):
         """reconfig() reads file and posts config XML.
 

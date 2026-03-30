@@ -202,7 +202,7 @@ def log_to_history(decorated_function) -> Callable:
             config_path = Path.home() / CONFIG_DIR_NAME / 'config'
             if config_path.is_file():
                 try:
-                    with open(config_path, 'r') as f:
+                    with open(config_path) as f:
                         for line in f:
                             if line.strip() == 'history_enabled=false':
                                 history_disabled = True

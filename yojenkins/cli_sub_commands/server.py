@@ -1,6 +1,5 @@
 """Server click sub-command"""
 
-
 import click
 
 from yojenkins.__main__ import server
@@ -267,5 +266,3 @@ def server_teardown(debug, **kwargs):
     """Remove a local development server"""
     set_debug_log_level(debug)
     cli_server.server_teardown(**translate_kwargs(kwargs))
-
-
