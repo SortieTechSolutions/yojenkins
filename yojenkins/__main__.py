@@ -161,6 +161,24 @@ def tools():
     pass
 from yojenkins.cli_sub_commands import tools
 
+# -----------------------------------------------------------------------------
+@main.command(short_help='\tStart the web application server')
+@click.option('--host', type=str, default='127.0.0.1', show_default=True, help='Host to bind to')
+@click.option('--port', type=int, default=8090, show_default=True, help='Port to bind to')
+@click.option('--reload', is_flag=True, default=False, help='Enable auto-reload for development')
+def serve(host, port, reload):
+    """Start the yojenkins web application server"""
+    try:
+        import uvicorn
+    except ImportError:
+        click.secho('uvicorn is not installed. Install web dependencies:', fg='bright_red', bold=True)
+        click.secho('  pip install -r requirements-web.txt', fg='yellow')
+        sys.exit(1)
+
+    click.secho(f'Starting yojenkins web server on {host}:{port}', fg='bright_green', bold=True)
+    click.secho(f'API docs available at http://{host}:{port}/docs', fg='cyan')
+    uvicorn.run('yojenkins.api.app:app', host=host, port=port, reload=reload)
+
 ##############################################################################
 ##############################################################################
 ##############################################################################
