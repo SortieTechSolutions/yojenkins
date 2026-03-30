@@ -3,6 +3,7 @@
 import logging
 import os
 import platform
+import secrets
 import shutil
 from datetime import datetime
 
@@ -42,7 +43,7 @@ class DockerJenkinsServer:
         container_name: str = 'yojenkins-jenkins',
         registry: str = '',
         admin_user: str = 'admin',
-        password: str = 'password',
+        password: str = '',
     ):
         """Object constructor method, called at object creation
 
@@ -75,7 +76,7 @@ class DockerJenkinsServer:
             'JENKINS_HOSTNAME': host,
             'JENKINS_PORT': f'{port}',
             'JENKINS_ADMIN_ID': admin_user,
-            'JENKINS_ADMIN_PASSWORD': password,
+            'JENKINS_ADMIN_PASSWORD': password if password else secrets.token_urlsafe(16),
         }
 
         # Container Related
@@ -320,7 +321,7 @@ class DockerJenkinsServer:
                     volume_handle.remove(force=True)
                 else:
                     logger.debug(f'Using found matching/existing named volume: {volume_name}')
-            except:
+            except Exception:
                 logger.debug(f'Creating new named volume: {volume_name}')
                 self.docker_client.volumes.create(name=volume_name, driver='local')
                 logger.debug('Successfully created!')

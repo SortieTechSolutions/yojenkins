@@ -28,7 +28,7 @@ def info(debug, **kwargs):
 def status(debug, **kwargs):
     """Node status"""
     set_debug_log_level(debug)
-    click.secho(**translate_kwargs(kwargs))
+    cli_node.status(**translate_kwargs(kwargs))
 
 
 @node.command(short_help='\tList all nodes')

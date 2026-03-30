@@ -280,7 +280,7 @@ class BuildMonitor(Monitor):
                     # Stage number
                     try:
                         mu.draw_text(scr, f'{i + 1}.', y_row, x_col[0])
-                    except:
+                    except curses.error:
                         break
 
                     # Stage name

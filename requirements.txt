@@ -2,6 +2,7 @@
 
 PyYAML==6.0
 click-help-colors==0.9.4
+defusedxml>=0.7.1
 click==8.2.1
 coloredlogs==15.0.1
 docker==7.1.0

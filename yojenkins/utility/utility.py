@@ -1,5 +1,6 @@
 """General utility and tools."""
 
+import ast
 import difflib
 import json
 import logging
@@ -216,7 +217,7 @@ def load_contents_from_remote_file_url(file_type: str, remote_file_url: str, all
     # Get request headers
     logger.debug(f'Getting remote file HTTP request headers for "{remote_file_url}" ...')
     try:
-        return_content = requests.head(remote_file_url)
+        return_content = requests.head(remote_file_url, timeout=10)
     except Exception as error:
         logger.debug(f'Failed to request headers. Exception: {error}')
         return {}
@@ -251,7 +252,7 @@ def load_contents_from_remote_file_url(file_type: str, remote_file_url: str, all
 
     # Downloading the file content
     logger.debug(f"Requesting remote file: '{remote_file_url}' ...")
-    remote_request = requests.get(remote_file_url, allow_redirects=allow_redirects)
+    remote_request = requests.get(remote_file_url, allow_redirects=allow_redirects, timeout=10)
 
     # Check if no error from downloading
     if remote_request.status_code == requests.codes.ok:
@@ -1167,7 +1168,7 @@ def run_groovy_script(
 
     # Check for yojenkins Groovy script error flag
     if 'yojenkins groovy script failed' in script_result:
-        groovy_return = eval(script_result.strip(os.linesep))
+        groovy_return = ast.literal_eval(script_result.strip(os.linesep))
         logger.debug('Failed to execute Groovy script')
         logger.debug(f'Groovy Exception: {groovy_return[1]}')
         logger.debug(groovy_return[2])
