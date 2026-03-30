@@ -18,6 +18,16 @@ router = APIRouter()
 @router.post("/login", response_model=LoginResponse)
 async def login(request: LoginRequest):
     """Authenticate with a Jenkins server and receive a JWT."""
+    # Demo mode bypass
+    if request.username == "demo" and request.api_token == "demo":
+        from yojenkins.api.demo import DemoYoJenkins
+
+        yj = DemoYoJenkins()
+        user_id = str(uuid.uuid4())
+        store_session(user_id, yj)
+        token = create_access_token(user_id)
+        return LoginResponse(access_token=token)
+
     auth = Auth(Rest())
 
     profile_info = {

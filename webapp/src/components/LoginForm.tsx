@@ -66,6 +66,28 @@ export default function LoginForm({ onSuccess }: Props) {
           {loading ? 'Connecting...' : 'Connect'}
         </button>
       </form>
+      <div className="demo-divider">or</div>
+      <button
+        type="button"
+        onClick={handleDemo}
+        disabled={loading}
+        className="demo-btn"
+      >
+        Try Demo
+      </button>
     </div>
   );
+
+  async function handleDemo() {
+    setError('');
+    setLoading(true);
+    try {
+      await login({ jenkins_url: 'demo://', username: 'demo', api_token: 'demo' });
+      onSuccess();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Demo login failed');
+    } finally {
+      setLoading(false);
+    }
+  }
 }
