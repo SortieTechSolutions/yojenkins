@@ -1,6 +1,6 @@
 """Tests for yojenkins/monitor/monitor.py (Monitor base class)"""
 
-
+from time import time
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -337,6 +337,48 @@ class TestStatusToSoundParametrized:
         monitor = Monitor()
         result = monitor.status_to_sound(status)
         assert result == ''
+
+
+class TestTempMessageBox:
+    """Tests for show_temp_message / get_temp_message"""
+
+    def test_show_and_get_within_duration(self):
+        monitor = Monitor()
+        monitor.show_temp_message(['Hello', 'World'], duration=5.0)
+        result = monitor.get_temp_message()
+        assert result == ['Hello', 'World']
+
+    def test_message_expires_after_duration(self):
+        monitor = Monitor()
+        monitor.show_temp_message(['Expired'], duration=0.5)
+        # Manually set start time in the past
+        monitor._temp_message_start = time() - 1.0
+        result = monitor.get_temp_message()
+        assert result == []
+        assert monitor._temp_message_active is False
+
+    def test_get_temp_message_empty_when_inactive(self):
+        monitor = Monitor()
+        result = monitor.get_temp_message()
+        assert result == []
+
+    def test_default_duration_uses_class_attribute(self):
+        monitor = Monitor()
+        monitor.message_box_temp_duration = 2
+        monitor.show_temp_message(['Test'])
+        assert monitor._temp_message_duration == 2
+
+    def test_custom_duration_overrides_default(self):
+        monitor = Monitor()
+        monitor.message_box_temp_duration = 2
+        monitor.show_temp_message(['Test'], duration=10.0)
+        assert monitor._temp_message_duration == 10.0
+
+    def test_new_message_replaces_old(self):
+        monitor = Monitor()
+        monitor.show_temp_message(['Old'], duration=5.0)
+        monitor.show_temp_message(['New'], duration=5.0)
+        assert monitor.get_temp_message() == ['New']
 
 
 class TestServerStatusThreadLogic:

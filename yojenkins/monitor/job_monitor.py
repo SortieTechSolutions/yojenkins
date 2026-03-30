@@ -53,8 +53,6 @@ class JobMonitor(Monitor):
         # Building a job flag
         self.job_build = 0
 
-        # Temporary message box on screen
-        self.message_box_temp_duration = 1  # sec
 
     ###########################################################################
     #                         BUILD MONITOR

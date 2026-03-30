@@ -51,6 +51,9 @@ class TestBuildMonitorInit:
         assert build_monitor.build_logs is False
         assert build_monitor.message_box_temp_duration == 1
 
+    def test_initial_draw_flag_defaults_true(self, build_monitor):
+        assert build_monitor._initial_draw is True
+
     def test_thread_locks_are_lock_instances(self, build_monitor):
         assert isinstance(build_monitor._build_info_thread_lock, type(threading.Lock()))
         assert isinstance(build_monitor._build_stages_thread_lock, type(threading.Lock()))
@@ -556,6 +559,86 @@ class TestBuildMonitorDraw:
 
         draw_monitor._BuildMonitor__monitor_draw(mock_scr, 'http://jenkins/job/test/1/')
         draw_monitor.build.browser_open.assert_called_once_with(build_url='http://jenkins/job/test/1/')
+
+    @patch('yojenkins.monitor.build_monitor.mu')
+    @patch('yojenkins.monitor.build_monitor.curses')
+    def test_no_sound_on_first_draw_with_existing_status(self, mock_curses, mock_mu, draw_monitor):
+        """Sound should NOT play on first draw when a build already has a result status."""
+        mock_mu.load_keys.return_value = {
+            'QUIT': (ord('q'),), 'ABORT': (ord('a'),), 'RESUME': (ord('r'),),
+            'PAUSE': (ord('p'),), 'HELP': (ord('h'),), 'OPEN': (ord('o'),),
+            'SOUND': (ord('s'),), 'LOGS': (ord('l'),),
+        }
+        mock_mu.truncate_text.side_effect = lambda text, width: text
+
+        mock_scr = MagicMock()
+        mock_scr.getmaxyx.return_value = (40, 120)
+        mock_scr.getch.side_effect = [ord('q'), ord('q')]
+
+        draw_monitor.build_info_data = {
+            'url': 'http://jenkins/job/test/1/',
+            'jobName': 'test', 'displayName': '#1',
+            'folderFullName': '/', 'serverURL': 'http://j',
+            'builtOn': 'master', 'startDatetime': '',
+            'endDatetime': '', 'elapsedFormatted': '',
+            'estimatedDurationFormatted': '',
+            'resultText': 'SUCCESS',
+        }
+
+        draw_monitor.play_sound_thread_on = MagicMock()
+        draw_monitor._BuildMonitor__monitor_draw(mock_scr, 'http://jenkins/job/test/1/', sound=True)
+
+        # Sound should NOT have been played (suppressed on initial draw)
+        draw_monitor.play_sound_thread_on.assert_not_called()
+
+    @patch('yojenkins.monitor.build_monitor.mu')
+    @patch('yojenkins.monitor.build_monitor.curses')
+    def test_sound_plays_on_status_change_after_initial_draw(self, mock_curses, mock_mu, draw_monitor):
+        """Sound SHOULD play when status changes after the initial draw."""
+        mock_mu.load_keys.return_value = {
+            'QUIT': (ord('q'),), 'ABORT': (ord('a'),), 'RESUME': (ord('r'),),
+            'PAUSE': (ord('p'),), 'HELP': (ord('h'),), 'OPEN': (ord('o'),),
+            'SOUND': (ord('s'),), 'LOGS': (ord('l'),),
+        }
+        mock_mu.truncate_text.side_effect = lambda text, width: text
+
+        mock_scr = MagicMock()
+        mock_scr.getmaxyx.return_value = (40, 120)
+
+        # First iteration: initial draw with RUNNING (no sound file)
+        # Second iteration: status changes to SUCCESS (should trigger sound)
+        # Third/fourth: quit
+        call_count = [0]
+        original_data = {
+            'url': 'http://jenkins/job/test/1/',
+            'jobName': 'test', 'displayName': '#1',
+            'folderFullName': '/', 'serverURL': 'http://j',
+            'builtOn': 'master', 'startDatetime': '',
+            'endDatetime': '', 'elapsedFormatted': '',
+            'estimatedDurationFormatted': '',
+            'resultText': 'RUNNING',
+        }
+        draw_monitor.build_info_data = dict(original_data)
+
+        def getch_side_effect():
+            call_count[0] += 1
+            if call_count[0] == 1:
+                # After first draw, change status to SUCCESS
+                draw_monitor.build_info_data = dict(original_data)
+                draw_monitor.build_info_data['resultText'] = 'SUCCESS'
+                return -1  # no key
+            elif call_count[0] == 2:
+                return ord('q')
+            else:
+                return ord('q')
+
+        mock_scr.getch.side_effect = getch_side_effect
+
+        draw_monitor.play_sound_thread_on = MagicMock()
+        draw_monitor._BuildMonitor__monitor_draw(mock_scr, 'http://jenkins/job/test/1/', sound=True)
+
+        # Sound SHOULD have been played on the status change
+        draw_monitor.play_sound_thread_on.assert_called_once()
 
     @patch('yojenkins.monitor.build_monitor.mu')
     @patch('yojenkins.monitor.build_monitor.curses')
