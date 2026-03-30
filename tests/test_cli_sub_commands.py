@@ -25,8 +25,8 @@ def runner():
 # Top-level CLI
 # =============================================================================
 
-class TestMainCli:
 
+class TestMainCli:
     def test_main_help(self, runner):
         result = runner.invoke(main, ['--help'])
         assert result.exit_code == 0
@@ -41,8 +41,8 @@ class TestMainCli:
 # Auth
 # =============================================================================
 
-class TestAuthCli:
 
+class TestAuthCli:
     def test_auth_help(self, runner):
         result = runner.invoke(main, ['auth', '--help'])
         assert result.exit_code == 0
@@ -73,8 +73,8 @@ class TestAuthCli:
 # Server
 # =============================================================================
 
-class TestServerCli:
 
+class TestServerCli:
     def test_server_help(self, runner):
         result = runner.invoke(main, ['server', '--help'])
         assert result.exit_code == 0
@@ -110,8 +110,8 @@ class TestServerCli:
 # Node
 # =============================================================================
 
-class TestNodeCli:
 
+class TestNodeCli:
     def test_node_help(self, runner):
         result = runner.invoke(main, ['node', '--help'])
         assert result.exit_code == 0
@@ -147,8 +147,8 @@ class TestNodeCli:
 # Account
 # =============================================================================
 
-class TestAccountCli:
 
+class TestAccountCli:
     def test_account_help(self, runner):
         result = runner.invoke(main, ['account', '--help'])
         assert result.exit_code == 0
@@ -178,8 +178,8 @@ class TestAccountCli:
 # Credential
 # =============================================================================
 
-class TestCredentialCli:
 
+class TestCredentialCli:
     def test_credential_help(self, runner):
         result = runner.invoke(main, ['credential', '--help'])
         assert result.exit_code == 0
@@ -215,8 +215,8 @@ class TestCredentialCli:
 # Folder
 # =============================================================================
 
-class TestFolderCli:
 
+class TestFolderCli:
     def test_folder_help(self, runner):
         result = runner.invoke(main, ['folder', '--help'])
         assert result.exit_code == 0
@@ -252,8 +252,8 @@ class TestFolderCli:
 # Job
 # =============================================================================
 
-class TestJobCli:
 
+class TestJobCli:
     def test_job_help(self, runner):
         result = runner.invoke(main, ['job', '--help'])
         assert result.exit_code == 0
@@ -308,8 +308,8 @@ class TestJobCli:
 # Build
 # =============================================================================
 
-class TestBuildCli:
 
+class TestBuildCli:
     def test_build_help(self, runner):
         result = runner.invoke(main, ['build', '--help'])
         assert result.exit_code == 0
@@ -351,11 +351,15 @@ class TestBuildCli:
     @patch('yojenkins.cli_sub_commands.build.cli_build')
     def test_build_diff(self, mock_cli_build, runner):
         mock_cli_build.diff.return_value = None
-        result = runner.invoke(main, [
-            'build', 'diff',
-            'http://jenkins/job/a/1/',
-            'http://jenkins/job/a/2/',
-        ])
+        result = runner.invoke(
+            main,
+            [
+                'build',
+                'diff',
+                'http://jenkins/job/a/1/',
+                'http://jenkins/job/a/2/',
+            ],
+        )
         mock_cli_build.diff.assert_called_once()
 
 
@@ -363,8 +367,8 @@ class TestBuildCli:
 # Stage
 # =============================================================================
 
-class TestStageCli:
 
+class TestStageCli:
     def test_stage_help(self, runner):
         result = runner.invoke(main, ['stage', '--help'])
         assert result.exit_code == 0
@@ -374,10 +378,17 @@ class TestStageCli:
     @patch('yojenkins.cli_sub_commands.stage.cli_stage')
     def test_stage_info(self, mock_cli_stage, runner):
         mock_cli_stage.info.return_value = None
-        result = runner.invoke(main, [
-            'stage', 'info', 'my-stage',
-            '--job', 'my-job', '--latest',
-        ])
+        result = runner.invoke(
+            main,
+            [
+                'stage',
+                'info',
+                'my-stage',
+                '--job',
+                'my-job',
+                '--latest',
+            ],
+        )
         mock_cli_stage.info.assert_called_once()
 
     @patch('yojenkins.cli_sub_commands.stage.cli_stage')
@@ -390,19 +401,33 @@ class TestStageCli:
     @patch('yojenkins.cli_sub_commands.stage.cli_stage')
     def test_stage_steps(self, mock_cli_stage, runner):
         mock_cli_stage.steps.return_value = None
-        result = runner.invoke(main, [
-            'stage', 'steps', 'my-stage',
-            '--url', 'http://jenkins/job/my-job/1/',
-        ])
+        result = runner.invoke(
+            main,
+            [
+                'stage',
+                'steps',
+                'my-stage',
+                '--url',
+                'http://jenkins/job/my-job/1/',
+            ],
+        )
         mock_cli_stage.steps.assert_called_once()
 
     @patch('yojenkins.cli_sub_commands.stage.cli_stage')
     def test_stage_logs(self, mock_cli_stage, runner):
         mock_cli_stage.logs.return_value = None
-        result = runner.invoke(main, [
-            'stage', 'logs', 'my-stage',
-            '--job', 'my-job', '--number', '3',
-        ])
+        result = runner.invoke(
+            main,
+            [
+                'stage',
+                'logs',
+                'my-stage',
+                '--job',
+                'my-job',
+                '--number',
+                '3',
+            ],
+        )
         mock_cli_stage.logs.assert_called_once()
 
 
@@ -410,8 +435,8 @@ class TestStageCli:
 # Step
 # =============================================================================
 
-class TestStepCli:
 
+class TestStepCli:
     def test_step_help(self, runner):
         result = runner.invoke(main, ['step', '--help'])
         assert result.exit_code == 0
@@ -420,9 +445,14 @@ class TestStepCli:
     @patch('yojenkins.cli_sub_commands.step.cli_step')
     def test_step_info(self, mock_cli_step, runner):
         mock_cli_step.info.return_value = None
-        result = runner.invoke(main, [
-            'step', 'info', 'http://jenkins/job/my-job/1/execution/node/6/',
-        ])
+        result = runner.invoke(
+            main,
+            [
+                'step',
+                'info',
+                'http://jenkins/job/my-job/1/execution/node/6/',
+            ],
+        )
         mock_cli_step.info.assert_called_once()
 
 
@@ -430,8 +460,8 @@ class TestStepCli:
 # Tools
 # =============================================================================
 
-class TestToolsCli:
 
+class TestToolsCli:
     def test_tools_help(self, runner):
         result = runner.invoke(main, ['tools', '--help'])
         assert result.exit_code == 0
@@ -488,8 +518,8 @@ class TestToolsCli:
 # Additional Build sub-command tests
 # =============================================================================
 
-class TestBuildCliExtended:
 
+class TestBuildCliExtended:
     @patch('yojenkins.cli_sub_commands.build.cli_build')
     def test_build_status_with_job(self, mock_cli_build, runner):
         mock_cli_build.status.return_value = None
@@ -603,8 +633,8 @@ class TestBuildCliExtended:
 # Additional Job sub-command tests
 # =============================================================================
 
-class TestJobCliExtended:
 
+class TestJobCliExtended:
     @patch('yojenkins.cli_sub_commands.job.cli_job')
     def test_job_next(self, mock_cli_job, runner):
         mock_cli_job.build_next.return_value = None
@@ -688,8 +718,8 @@ class TestJobCliExtended:
 # Additional Node sub-command tests
 # =============================================================================
 
-class TestNodeCliExtended:
 
+class TestNodeCliExtended:
     @patch('yojenkins.cli_sub_commands.node.cli_node')
     def test_node_disable(self, mock_cli_node, runner):
         mock_cli_node.disable.return_value = None
@@ -725,8 +755,8 @@ class TestNodeCliExtended:
 # Additional Server sub-command tests
 # =============================================================================
 
-class TestServerCliExtended:
 
+class TestServerCliExtended:
     @patch('yojenkins.cli_sub_commands.server.cli_server')
     def test_server_queue(self, mock_cli_server, runner):
         mock_cli_server.queue.return_value = None
@@ -768,8 +798,8 @@ class TestServerCliExtended:
 # Additional Folder sub-command tests
 # =============================================================================
 
-class TestFolderCliExtended:
 
+class TestFolderCliExtended:
     @patch('yojenkins.cli_sub_commands.folder.cli_folder')
     def test_folder_jobs(self, mock_cli_folder, runner):
         mock_cli_folder.jobs.return_value = None
@@ -817,24 +847,37 @@ class TestFolderCliExtended:
 # Additional Stage sub-command tests
 # =============================================================================
 
-class TestStageCliExtended:
 
+class TestStageCliExtended:
     @patch('yojenkins.cli_sub_commands.stage.cli_stage')
     def test_stage_info_with_url(self, mock_cli_stage, runner):
         mock_cli_stage.info.return_value = None
-        result = runner.invoke(main, [
-            'stage', 'info', 'my-stage',
-            '--url', 'http://jenkins/job/my-job/1/',
-        ])
+        result = runner.invoke(
+            main,
+            [
+                'stage',
+                'info',
+                'my-stage',
+                '--url',
+                'http://jenkins/job/my-job/1/',
+            ],
+        )
         mock_cli_stage.info.assert_called_once()
 
     @patch('yojenkins.cli_sub_commands.stage.cli_stage')
     def test_stage_status(self, mock_cli_stage, runner):
         mock_cli_stage.status.return_value = None
-        result = runner.invoke(main, [
-            'stage', 'status', 'my-stage',
-            '--job', 'my-job', '--latest',
-        ])
+        result = runner.invoke(
+            main,
+            [
+                'stage',
+                'status',
+                'my-stage',
+                '--job',
+                'my-job',
+                '--latest',
+            ],
+        )
         mock_cli_stage.status.assert_called_once()
 
     @patch('yojenkins.cli_sub_commands.stage.cli_stage')

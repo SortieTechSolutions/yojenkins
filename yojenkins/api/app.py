@@ -47,8 +47,8 @@ async def lifespan(app: FastAPI):
 def create_app(static_dir: Optional[str] = None) -> FastAPI:
     """Create and configure the FastAPI application."""
     app = FastAPI(
-        title="yojenkins",
-        description="Web API for managing Jenkins servers",
+        title='yojenkins',
+        description='Web API for managing Jenkins servers',
         version=__version__,
         lifespan=lifespan,
     )
@@ -57,65 +57,65 @@ def create_app(static_dir: Optional[str] = None) -> FastAPI:
     # In production the SPA is served from the same origin, so CORS is unused.
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://localhost:3000", "http://localhost:5173"],
+        allow_origins=['http://localhost:3000', 'http://localhost:5173'],
         allow_credentials=True,
-        allow_methods=["GET", "POST", "DELETE"],
-        allow_headers=["Content-Type", "Authorization"],
+        allow_methods=['GET', 'POST', 'DELETE'],
+        allow_headers=['Content-Type', 'Authorization'],
     )
 
     # X-Content-Type-Options: nosniff — prevent MIME-sniffing attacks.
     # X-Frame-Options: DENY — prevent clickjacking via iframes.
-    @app.middleware("http")
+    @app.middleware('http')
     async def security_headers(request: Request, call_next):
         response = await call_next(request)
-        response.headers["X-Content-Type-Options"] = "nosniff"
-        response.headers["X-Frame-Options"] = "DENY"
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+        response.headers['X-Frame-Options'] = 'DENY'
         return response
 
     # Register routers
-    app.include_router(auth_router, prefix="/api/auth", tags=["auth"])
-    app.include_router(server_router, prefix="/api/server", tags=["server"])
-    app.include_router(jobs_router, prefix="/api/jobs", tags=["jobs"])
-    app.include_router(builds_router, prefix="/api/builds", tags=["builds"])
-    app.include_router(folders_router, prefix="/api/folders", tags=["folders"])
-    app.include_router(ws_router, prefix="/api/ws", tags=["websocket"])
+    app.include_router(auth_router, prefix='/api/auth', tags=['auth'])
+    app.include_router(server_router, prefix='/api/server', tags=['server'])
+    app.include_router(jobs_router, prefix='/api/jobs', tags=['jobs'])
+    app.include_router(builds_router, prefix='/api/builds', tags=['builds'])
+    app.include_router(folders_router, prefix='/api/folders', tags=['folders'])
+    app.include_router(ws_router, prefix='/api/ws', tags=['websocket'])
 
     # Exception handlers
     @app.exception_handler(AuthenticationError)
     async def auth_error_handler(request: Request, exc: AuthenticationError):
-        return JSONResponse(status_code=401, content={"detail": str(exc)})
+        return JSONResponse(status_code=401, content={'detail': str(exc)})
 
     @app.exception_handler(NotFoundError)
     async def not_found_handler(request: Request, exc: NotFoundError):
-        return JSONResponse(status_code=404, content={"detail": str(exc)})
+        return JSONResponse(status_code=404, content={'detail': str(exc)})
 
     @app.exception_handler(ValidationError)
     async def validation_handler(request: Request, exc: ValidationError):
-        return JSONResponse(status_code=400, content={"detail": str(exc)})
+        return JSONResponse(status_code=400, content={'detail': str(exc)})
 
     @app.exception_handler(RequestError)
     async def request_error_handler(request: Request, exc: RequestError):
-        return JSONResponse(status_code=502, content={"detail": str(exc)})
+        return JSONResponse(status_code=502, content={'detail': str(exc)})
 
     @app.exception_handler(YoJenkinsException)
     async def generic_handler(request: Request, exc: YoJenkinsException):
-        return JSONResponse(status_code=500, content={"detail": str(exc)})
+        return JSONResponse(status_code=500, content={'detail': str(exc)})
 
     # Serve built frontend static files (production mode)
     if static_dir:
         static_path = Path(static_dir).resolve()
-        if static_path.is_dir() and (static_path / "index.html").exists():
+        if static_path.is_dir() and (static_path / 'index.html').exists():
 
-            @app.get("/{full_path:path}")
+            @app.get('/{full_path:path}')
             async def serve_spa(full_path: str):
                 """Serve static files or index.html for SPA routing."""
                 file_path = (static_path / full_path).resolve()
                 if full_path and file_path.is_file() and str(file_path).startswith(str(static_path)):
                     return FileResponse(file_path)
-                return FileResponse(static_path / "index.html")
+                return FileResponse(static_path / 'index.html')
 
     return app
 
 
 # Module-level app instance for uvicorn: `uvicorn yojenkins.api.app:app`
-app = create_app(static_dir=os.environ.get("YOJENKINS_STATIC_DIR"))
+app = create_app(static_dir=os.environ.get('YOJENKINS_STATIC_DIR'))

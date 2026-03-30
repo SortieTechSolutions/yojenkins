@@ -233,6 +233,7 @@ class TestThreadBuildsData:
 
     def test_stops_when_threads_disabled_during_wait(self, job_monitor):
         """Thread exits if all_threads_enabled goes False while waiting for job_info_data"""
+
         def stop_thread(x):
             job_monitor.all_threads_enabled = False
 
@@ -249,9 +250,16 @@ class TestJobMonitorDraw:
     def draw_monitor(self, mock_rest, mock_auth, mock_job, mock_build):
         jm = JobMonitor(mock_rest, mock_auth, mock_job, mock_build)
         jm.color = {
-            'normal': 1, 'grey-light': 2, 'grey-dark': 3,
-            'green': 4, 'red': 5, 'magenta': 6, 'orange': 7,
-            'cyan': 8, 'blue': 9, 'yellow': 10,
+            'normal': 1,
+            'grey-light': 2,
+            'grey-dark': 3,
+            'green': 4,
+            'red': 5,
+            'magenta': 6,
+            'orange': 7,
+            'cyan': 8,
+            'blue': 9,
+            'yellow': 10,
         }
         jm.decor = {'bold': 1, 'normal': 0}
         # Mock out methods that need real curses or start threads
@@ -266,8 +274,12 @@ class TestJobMonitorDraw:
     @patch('yojenkins.monitor.job_monitor.curses')
     def test_quit_twice_returns_true(self, mock_curses, mock_mu, draw_monitor):
         mock_mu.load_keys.return_value = {
-            'QUIT': (ord('q'),), 'BUILD': (ord('b'),), 'RESUME': (ord('r'),),
-            'PAUSE': (ord('p'),), 'HELP': (ord('h'),), 'OPEN': (ord('o'),),
+            'QUIT': (ord('q'),),
+            'BUILD': (ord('b'),),
+            'RESUME': (ord('r'),),
+            'PAUSE': (ord('p'),),
+            'HELP': (ord('h'),),
+            'OPEN': (ord('o'),),
         }
 
         mock_scr = MagicMock()
@@ -282,8 +294,12 @@ class TestJobMonitorDraw:
     @patch('yojenkins.monitor.job_monitor.curses')
     def test_no_data_shows_no_data(self, mock_curses, mock_mu, draw_monitor):
         mock_mu.load_keys.return_value = {
-            'QUIT': (ord('q'),), 'BUILD': (ord('b'),), 'RESUME': (ord('r'),),
-            'PAUSE': (ord('p'),), 'HELP': (ord('h'),), 'OPEN': (ord('o'),),
+            'QUIT': (ord('q'),),
+            'BUILD': (ord('b'),),
+            'RESUME': (ord('r'),),
+            'PAUSE': (ord('p'),),
+            'HELP': (ord('h'),),
+            'OPEN': (ord('o'),),
         }
 
         mock_scr = MagicMock()
@@ -294,16 +310,19 @@ class TestJobMonitorDraw:
 
         draw_monitor._JobMonitor__monitor_draw(mock_scr, 'http://jenkins/job/test/')
 
-        no_data_calls = [c for c in mock_mu.draw_text.call_args_list
-                         if len(c[0]) > 1 and c[0][1] == 'NO DATA']
+        no_data_calls = [c for c in mock_mu.draw_text.call_args_list if len(c[0]) > 1 and c[0][1] == 'NO DATA']
         assert len(no_data_calls) > 0
 
     @patch('yojenkins.monitor.job_monitor.mu')
     @patch('yojenkins.monitor.job_monitor.curses')
     def test_with_job_info_data(self, mock_curses, mock_mu, draw_monitor):
         mock_mu.load_keys.return_value = {
-            'QUIT': (ord('q'),), 'BUILD': (ord('b'),), 'RESUME': (ord('r'),),
-            'PAUSE': (ord('p'),), 'HELP': (ord('h'),), 'OPEN': (ord('o'),),
+            'QUIT': (ord('q'),),
+            'BUILD': (ord('b'),),
+            'RESUME': (ord('r'),),
+            'PAUSE': (ord('p'),),
+            'HELP': (ord('h'),),
+            'OPEN': (ord('o'),),
         }
         mock_mu.truncate_text.side_effect = lambda text, width: text
 
@@ -325,8 +344,12 @@ class TestJobMonitorDraw:
     @patch('yojenkins.monitor.job_monitor.curses')
     def test_with_builds_data(self, mock_curses, mock_mu, draw_monitor):
         mock_mu.load_keys.return_value = {
-            'QUIT': (ord('q'),), 'BUILD': (ord('b'),), 'RESUME': (ord('r'),),
-            'PAUSE': (ord('p'),), 'HELP': (ord('h'),), 'OPEN': (ord('o'),),
+            'QUIT': (ord('q'),),
+            'BUILD': (ord('b'),),
+            'RESUME': (ord('r'),),
+            'PAUSE': (ord('p'),),
+            'HELP': (ord('h'),),
+            'OPEN': (ord('o'),),
         }
         mock_mu.truncate_text.side_effect = lambda text, width: text
 
@@ -342,14 +365,16 @@ class TestJobMonitorDraw:
         }
         draw_monitor.builds_data = [
             {
-                'displayName': '#1', 'number': 1,
+                'displayName': '#1',
+                'number': 1,
                 'timestamp': 1704067200000,
                 'durationFormatted': '1m 30s',
                 'elapsedFormatted': '1m 30s',
                 'resultText': 'SUCCESS',
             },
             {
-                'displayName': '#2', 'number': 2,
+                'displayName': '#2',
+                'number': 2,
                 'timestamp': 1704067200000,
                 'durationFormatted': None,
                 'elapsedFormatted': '2m',
@@ -359,16 +384,21 @@ class TestJobMonitorDraw:
 
         draw_monitor._JobMonitor__monitor_draw(mock_scr, 'http://jenkins/job/test/')
 
-        header_calls = [c for c in mock_mu.draw_horizontal_header.call_args_list
-                        if len(c[0]) > 5 and c[0][5] == 'BUILDS']
+        header_calls = [
+            c for c in mock_mu.draw_horizontal_header.call_args_list if len(c[0]) > 5 and c[0][5] == 'BUILDS'
+        ]
         assert len(header_calls) > 0
 
     @patch('yojenkins.monitor.job_monitor.mu')
     @patch('yojenkins.monitor.job_monitor.curses')
     def test_build_twice_triggers_build(self, mock_curses, mock_mu, draw_monitor):
         mock_mu.load_keys.return_value = {
-            'QUIT': (ord('q'),), 'BUILD': (ord('b'),), 'RESUME': (ord('r'),),
-            'PAUSE': (ord('p'),), 'HELP': (ord('h'),), 'OPEN': (ord('o'),),
+            'QUIT': (ord('q'),),
+            'BUILD': (ord('b'),),
+            'RESUME': (ord('r'),),
+            'PAUSE': (ord('p'),),
+            'HELP': (ord('h'),),
+            'OPEN': (ord('o'),),
         }
 
         mock_scr = MagicMock()
@@ -376,17 +406,19 @@ class TestJobMonitorDraw:
         mock_scr.getch.side_effect = [ord('b'), ord('b'), ord('q'), ord('q')]
 
         draw_monitor._JobMonitor__monitor_draw(mock_scr, 'http://jenkins/job/test/')
-        draw_monitor.job.build_trigger.assert_called_once_with(
-            job_url='http://jenkins/job/test/', paramters={}
-        )
+        draw_monitor.job.build_trigger.assert_called_once_with(job_url='http://jenkins/job/test/', paramters={})
 
     @patch('yojenkins.monitor.job_monitor.mu')
     @patch('yojenkins.monitor.job_monitor.curses')
     def test_build_with_parameters_passes_defaults(self, mock_curses, mock_mu, draw_monitor):
         """B shortcut extracts default parameter values from job info."""
         mock_mu.load_keys.return_value = {
-            'QUIT': (ord('q'),), 'BUILD': (ord('b'),), 'RESUME': (ord('r'),),
-            'PAUSE': (ord('p'),), 'HELP': (ord('h'),), 'OPEN': (ord('o'),),
+            'QUIT': (ord('q'),),
+            'BUILD': (ord('b'),),
+            'RESUME': (ord('r'),),
+            'PAUSE': (ord('p'),),
+            'HELP': (ord('h'),),
+            'OPEN': (ord('o'),),
         }
 
         mock_scr = MagicMock()
@@ -426,8 +458,12 @@ class TestJobMonitorDraw:
     def test_build_with_params_missing_default_uses_empty(self, mock_curses, mock_mu, draw_monitor):
         """Parameters without defaults get empty string value."""
         mock_mu.load_keys.return_value = {
-            'QUIT': (ord('q'),), 'BUILD': (ord('b'),), 'RESUME': (ord('r'),),
-            'PAUSE': (ord('p'),), 'HELP': (ord('h'),), 'OPEN': (ord('o'),),
+            'QUIT': (ord('q'),),
+            'BUILD': (ord('b'),),
+            'RESUME': (ord('r'),),
+            'PAUSE': (ord('p'),),
+            'HELP': (ord('h'),),
+            'OPEN': (ord('o'),),
         }
 
         mock_scr = MagicMock()
@@ -458,8 +494,12 @@ class TestJobMonitorDraw:
     @patch('yojenkins.monitor.job_monitor.curses')
     def test_help_toggle(self, mock_curses, mock_mu, draw_monitor):
         mock_mu.load_keys.return_value = {
-            'QUIT': (ord('q'),), 'BUILD': (ord('b'),), 'RESUME': (ord('r'),),
-            'PAUSE': (ord('p'),), 'HELP': (ord('h'),), 'OPEN': (ord('o'),),
+            'QUIT': (ord('q'),),
+            'BUILD': (ord('b'),),
+            'RESUME': (ord('r'),),
+            'PAUSE': (ord('p'),),
+            'HELP': (ord('h'),),
+            'OPEN': (ord('o'),),
         }
 
         mock_scr = MagicMock()
@@ -475,8 +515,12 @@ class TestJobMonitorDraw:
     @patch('yojenkins.monitor.job_monitor.curses')
     def test_pause_toggle(self, mock_curses, mock_mu, draw_monitor):
         mock_mu.load_keys.return_value = {
-            'QUIT': (ord('q'),), 'BUILD': (ord('b'),), 'RESUME': (ord('r'),),
-            'PAUSE': (ord('p'),), 'HELP': (ord('h'),), 'OPEN': (ord('o'),),
+            'QUIT': (ord('q'),),
+            'BUILD': (ord('b'),),
+            'RESUME': (ord('r'),),
+            'PAUSE': (ord('p'),),
+            'HELP': (ord('h'),),
+            'OPEN': (ord('o'),),
         }
 
         mock_scr = MagicMock()
@@ -485,16 +529,21 @@ class TestJobMonitorDraw:
 
         draw_monitor._JobMonitor__monitor_draw(mock_scr, 'http://jenkins/job/test/')
 
-        pause_calls = [c for c in mock_mu.draw_message_box.call_args_list
-                       if len(c[0]) > 0 and 'Monitor paused' in str(c[0][1])]
+        pause_calls = [
+            c for c in mock_mu.draw_message_box.call_args_list if len(c[0]) > 0 and 'Monitor paused' in str(c[0][1])
+        ]
         assert len(pause_calls) > 0
 
     @patch('yojenkins.monitor.job_monitor.mu')
     @patch('yojenkins.monitor.job_monitor.curses')
     def test_open_calls_browser(self, mock_curses, mock_mu, draw_monitor):
         mock_mu.load_keys.return_value = {
-            'QUIT': (ord('q'),), 'BUILD': (ord('b'),), 'RESUME': (ord('r'),),
-            'PAUSE': (ord('p'),), 'HELP': (ord('h'),), 'OPEN': (ord('o'),),
+            'QUIT': (ord('q'),),
+            'BUILD': (ord('b'),),
+            'RESUME': (ord('r'),),
+            'PAUSE': (ord('p'),),
+            'HELP': (ord('h'),),
+            'OPEN': (ord('o'),),
         }
 
         mock_scr = MagicMock()
@@ -508,8 +557,12 @@ class TestJobMonitorDraw:
     @patch('yojenkins.monitor.job_monitor.curses')
     def test_no_builds_lowers_height_limit(self, mock_curses, mock_mu, draw_monitor):
         mock_mu.load_keys.return_value = {
-            'QUIT': (ord('q'),), 'BUILD': (ord('b'),), 'RESUME': (ord('r'),),
-            'PAUSE': (ord('p'),), 'HELP': (ord('h'),), 'OPEN': (ord('o'),),
+            'QUIT': (ord('q'),),
+            'BUILD': (ord('b'),),
+            'RESUME': (ord('r'),),
+            'PAUSE': (ord('p'),),
+            'HELP': (ord('h'),),
+            'OPEN': (ord('o'),),
         }
 
         mock_scr = MagicMock()
@@ -525,8 +578,12 @@ class TestJobMonitorDraw:
     @patch('yojenkins.monitor.job_monitor.curses')
     def test_server_status_displayed(self, mock_curses, mock_mu, draw_monitor):
         mock_mu.load_keys.return_value = {
-            'QUIT': (ord('q'),), 'BUILD': (ord('b'),), 'RESUME': (ord('r'),),
-            'PAUSE': (ord('p'),), 'HELP': (ord('h'),), 'OPEN': (ord('o'),),
+            'QUIT': (ord('q'),),
+            'BUILD': (ord('b'),),
+            'RESUME': (ord('r'),),
+            'PAUSE': (ord('p'),),
+            'HELP': (ord('h'),),
+            'OPEN': (ord('o'),),
         }
 
         mock_scr = MagicMock()
@@ -538,7 +595,8 @@ class TestJobMonitorDraw:
         draw_monitor._JobMonitor__monitor_draw(mock_scr, 'http://jenkins/job/test/')
 
         server_calls = [
-            c for c in mock_mu.draw_text.call_args_list
+            c
+            for c in mock_mu.draw_text.call_args_list
             if len(c[0]) > 1 and isinstance(c[0][1], str) and 'Reachable' in c[0][1]
         ]
         assert len(server_calls) > 0
@@ -547,8 +605,12 @@ class TestJobMonitorDraw:
     @patch('yojenkins.monitor.job_monitor.curses')
     def test_server_status_no_data(self, mock_curses, mock_mu, draw_monitor):
         mock_mu.load_keys.return_value = {
-            'QUIT': (ord('q'),), 'BUILD': (ord('b'),), 'RESUME': (ord('r'),),
-            'PAUSE': (ord('p'),), 'HELP': (ord('h'),), 'OPEN': (ord('o'),),
+            'QUIT': (ord('q'),),
+            'BUILD': (ord('b'),),
+            'RESUME': (ord('r'),),
+            'PAUSE': (ord('p'),),
+            'HELP': (ord('h'),),
+            'OPEN': (ord('o'),),
         }
 
         mock_scr = MagicMock()
@@ -560,7 +622,8 @@ class TestJobMonitorDraw:
         draw_monitor._JobMonitor__monitor_draw(mock_scr, 'http://jenkins/job/test/')
 
         no_data_calls = [
-            c for c in mock_mu.draw_text.call_args_list
+            c
+            for c in mock_mu.draw_text.call_args_list
             if len(c[0]) > 1 and isinstance(c[0][1], str) and 'Server Status: NO DATA' in c[0][1]
         ]
         assert len(no_data_calls) > 0
@@ -569,8 +632,12 @@ class TestJobMonitorDraw:
     @patch('yojenkins.monitor.job_monitor.curses')
     def test_resume_resets_quit_and_build(self, mock_curses, mock_mu, draw_monitor):
         mock_mu.load_keys.return_value = {
-            'QUIT': (ord('q'),), 'BUILD': (ord('b'),), 'RESUME': (ord('r'),),
-            'PAUSE': (ord('p'),), 'HELP': (ord('h'),), 'OPEN': (ord('o'),),
+            'QUIT': (ord('q'),),
+            'BUILD': (ord('b'),),
+            'RESUME': (ord('r'),),
+            'PAUSE': (ord('p'),),
+            'HELP': (ord('h'),),
+            'OPEN': (ord('o'),),
         }
 
         mock_scr = MagicMock()
@@ -587,8 +654,12 @@ class TestJobMonitorDraw:
     def test_builds_with_null_result_text(self, mock_curses, mock_mu, draw_monitor):
         """Tests build with resultText=None uses UNKNOWN status"""
         mock_mu.load_keys.return_value = {
-            'QUIT': (ord('q'),), 'BUILD': (ord('b'),), 'RESUME': (ord('r'),),
-            'PAUSE': (ord('p'),), 'HELP': (ord('h'),), 'OPEN': (ord('o'),),
+            'QUIT': (ord('q'),),
+            'BUILD': (ord('b'),),
+            'RESUME': (ord('r'),),
+            'PAUSE': (ord('p'),),
+            'HELP': (ord('h'),),
+            'OPEN': (ord('o'),),
         }
         mock_mu.truncate_text.side_effect = lambda text, width: text
 
@@ -604,7 +675,8 @@ class TestJobMonitorDraw:
         }
         draw_monitor.builds_data = [
             {
-                'displayName': '#1', 'number': 1,
+                'displayName': '#1',
+                'number': 1,
                 'timestamp': 1704067200000,
                 'durationFormatted': '1m',
                 'elapsedFormatted': '1m',
@@ -616,7 +688,8 @@ class TestJobMonitorDraw:
 
         # Should have drawn UNKNOWN status
         unknown_calls = [
-            c for c in mock_mu.draw_text.call_args_list
+            c
+            for c in mock_mu.draw_text.call_args_list
             if len(c[0]) > 1 and isinstance(c[0][1], str) and 'UNKNOWN' in c[0][1]
         ]
         assert len(unknown_calls) > 0
@@ -626,8 +699,12 @@ class TestJobMonitorDraw:
     def test_empty_build_in_list_breaks_loop(self, mock_curses, mock_mu, draw_monitor):
         """Tests that an empty/None build entry stops iteration"""
         mock_mu.load_keys.return_value = {
-            'QUIT': (ord('q'),), 'BUILD': (ord('b'),), 'RESUME': (ord('r'),),
-            'PAUSE': (ord('p'),), 'HELP': (ord('h'),), 'OPEN': (ord('o'),),
+            'QUIT': (ord('q'),),
+            'BUILD': (ord('b'),),
+            'RESUME': (ord('r'),),
+            'PAUSE': (ord('p'),),
+            'HELP': (ord('h'),),
+            'OPEN': (ord('o'),),
         }
 
         mock_scr = MagicMock()

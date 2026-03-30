@@ -11,6 +11,7 @@ from yojenkins.yo_jenkins.rest import Rest
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _make_mock_response(
     status_code=200,
     headers=None,
@@ -48,8 +49,8 @@ def _make_future(response):
 # __init__ tests
 # ---------------------------------------------------------------------------
 
-class TestRestInit:
 
+class TestRestInit:
     @patch('yojenkins.yo_jenkins.rest.FuturesSession')
     def test_default_session_creation(self, mock_fs_cls):
         """When no session is passed, a new FuturesSession is created."""
@@ -87,8 +88,8 @@ class TestRestInit:
 # set_credentials tests
 # ---------------------------------------------------------------------------
 
-class TestSetCredentials:
 
+class TestSetCredentials:
     def test_sets_all_fields(self):
         """set_credentials stores username, api_token, server_url."""
         with patch('yojenkins.yo_jenkins.rest.FuturesSession'):
@@ -124,8 +125,8 @@ class TestSetCredentials:
 # is_reachable tests
 # ---------------------------------------------------------------------------
 
-class TestIsReachable:
 
+class TestIsReachable:
     def test_returns_true_when_request_succeeds(self):
         """is_reachable returns True when the head request returns non-empty headers."""
         with patch('yojenkins.yo_jenkins.rest.FuturesSession'):
@@ -152,8 +153,8 @@ class TestIsReachable:
 # request() method tests
 # ---------------------------------------------------------------------------
 
-class TestRequest:
 
+class TestRequest:
     def _make_rest(self):
         """Create a Rest instance with mocked session."""
         with patch('yojenkins.yo_jenkins.rest.FuturesSession'):
@@ -372,8 +373,8 @@ class TestRequest:
 # get_server_url / get_active_session tests
 # ---------------------------------------------------------------------------
 
-class TestAccessors:
 
+class TestAccessors:
     def test_get_server_url(self):
         with patch('yojenkins.yo_jenkins.rest.FuturesSession'):
             rest = Rest(server_url='http://j:8080')

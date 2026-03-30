@@ -108,7 +108,9 @@ class Build:
 
         # Check if found item type/class is a build
         if build_info['_class'] not in JenkinsItemClasses.BUILD.value['class_type']:
-            raise NotFoundError(f'Build found, but failed to match build type/class. This item is "{build_info["_class"]}"')
+            raise NotFoundError(
+                f'Build found, but failed to match build type/class. This item is "{build_info["_class"]}"'
+            )
 
         # Add additional derived information
         if 'timestamp' in build_info:
@@ -506,7 +508,9 @@ class Build:
                     while True:
                         headers = self.rest.request(request_url, 'head', is_endpoint=False, json_content=False)[1]
                         if 'content-length' not in headers:
-                            raise RequestError(f'Failed to find "content-length" key in server response headers: {headers}')
+                            raise RequestError(
+                                f'Failed to find "content-length" key in server response headers: {headers}'
+                            )
                         content_length_sample_1 = int(headers['Content-Length'])
                         sleep(1)
                         headers = self.rest.request(request_url, 'head', is_endpoint=False, json_content=False)[1]

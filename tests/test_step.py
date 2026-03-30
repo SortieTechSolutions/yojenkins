@@ -24,9 +24,7 @@ class TestStepInfo:
         result = step.info(step_url='/job/test/1/execution/node/6/log/')
         assert result == {'text': 'log output', 'length': 10}
         # strip("/") removes both leading and trailing slashes
-        step.rest.request.assert_called_once_with(
-            'job/test/1/execution/node/6/log', 'get', is_endpoint=True
-        )
+        step.rest.request.assert_called_once_with('job/test/1/execution/node/6/log', 'get', is_endpoint=True)
 
     def test_info_strips_slashes_from_url(self, step):
         step.rest.request.return_value = ({'text': 'ok', 'length': 2}, {}, True)

@@ -6,7 +6,6 @@ pytestmark = [pytest.mark.docker, pytest.mark.slow]
 
 
 class TestAuthIntegration:
-
     def test_verify_credentials(self, yojenkins_instance):
         """Auth.verify() returns True with valid admin credentials."""
         assert yojenkins_instance.auth.verify() is True

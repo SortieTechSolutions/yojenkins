@@ -285,6 +285,7 @@ class TestConfigEdgeCases:
     def test_config_writes_to_file(self, mock_rest):
         """config() writes XML to file when filepath is specified."""
         from unittest.mock import patch
+
         cred = Credential(mock_rest)
         mock_rest.request.side_effect = [
             ({'credentials': [{'displayName': 'my-cred', 'id': 'cred-1'}]}, {}, True),
@@ -299,6 +300,7 @@ class TestConfigEdgeCases:
     def test_config_write_failure_exits(self, mock_rest):
         """config() exits when write_xml_to_file returns False."""
         from unittest.mock import patch
+
         cred = Credential(mock_rest)
         mock_rest.request.side_effect = [
             ({'credentials': [{'displayName': 'my-cred', 'id': 'cred-1'}]}, {}, True),
@@ -330,10 +332,16 @@ class TestInfoEdgeCases:
         """info() uses the first match when multiple credentials match."""
         cred = Credential(mock_rest)
         mock_rest.request.side_effect = [
-            ({'credentials': [
-                {'displayName': 'my-cred', 'id': 'cred-1'},
-                {'displayName': 'my-cred', 'id': 'cred-2'},
-            ]}, {}, True),
+            (
+                {
+                    'credentials': [
+                        {'displayName': 'my-cred', 'id': 'cred-1'},
+                        {'displayName': 'my-cred', 'id': 'cred-2'},
+                    ]
+                },
+                {},
+                True,
+            ),
             ({'id': 'cred-1', 'displayName': 'my-cred'}, {}, True),
         ]
         result = cred.info(credential='my-cred', folder='root', domain='global')
@@ -374,6 +382,7 @@ class TestGetTemplate:
     def test_get_template_writes_to_file(self, mock_rest, tmp_path):
         """get_template() writes template to file when filepath is given."""
         from unittest.mock import patch
+
         cred = Credential(mock_rest)
         filepath = str(tmp_path / 'template.xml')
         with patch('yojenkins.yo_jenkins.credential.utility.write_xml_to_file', return_value=True) as mock_write:
@@ -384,6 +393,7 @@ class TestGetTemplate:
     def test_get_template_write_failure_exits(self, mock_rest, tmp_path):
         """get_template() exits when file write fails."""
         from unittest.mock import patch
+
         cred = Credential(mock_rest)
         with patch('yojenkins.yo_jenkins.credential.utility.write_xml_to_file', return_value=False):
             with pytest.raises(YoJenkinsException):

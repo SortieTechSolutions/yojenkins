@@ -16,6 +16,7 @@ def account(mock_rest):
 
 # --- Account.__init__ ---
 
+
 class TestAccountInit:
     def test_init_sets_rest(self, mock_rest):
         acc = Account(rest=mock_rest)
@@ -27,6 +28,7 @@ class TestAccountInit:
 
 
 # --- Account.list ---
+
 
 class TestAccountList:
     @patch('yojenkins.yo_jenkins.account.utility.run_groovy_script')
@@ -59,6 +61,7 @@ class TestAccountList:
 
 # --- Account.info ---
 
+
 class TestAccountInfo:
     @patch('yojenkins.yo_jenkins.account.utility.run_groovy_script')
     def test_info_returns_matching_user(self, mock_groovy, account):
@@ -89,6 +92,7 @@ class TestAccountInfo:
 
 # --- Account.create ---
 
+
 class TestAccountCreate:
     @patch('yojenkins.yo_jenkins.account.utility.run_groovy_script')
     def test_create_success(self, mock_groovy, account):
@@ -112,6 +116,7 @@ class TestAccountCreate:
 
 # --- Account.delete ---
 
+
 class TestAccountDelete:
     @patch('yojenkins.yo_jenkins.account.utility.run_groovy_script')
     def test_delete_success(self, mock_groovy, account):
@@ -127,6 +132,7 @@ class TestAccountDelete:
 
 
 # --- Account.permission ---
+
 
 class TestAccountPermission:
     @patch('yojenkins.yo_jenkins.account.utility.run_groovy_script')
@@ -154,6 +160,7 @@ class TestAccountPermission:
 
 
 # --- Account.permission_list ---
+
 
 class TestAccountPermissionList:
     @patch('yojenkins.yo_jenkins.account.utility.run_groovy_script')

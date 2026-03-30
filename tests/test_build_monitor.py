@@ -264,9 +264,16 @@ class TestBuildMonitorDraw:
     def draw_monitor(self, mock_rest, mock_auth, mock_build):
         bm = BuildMonitor(mock_rest, mock_auth, mock_build)
         bm.color = {
-            'normal': 1, 'grey-light': 2, 'grey-dark': 3,
-            'green': 4, 'red': 5, 'magenta': 6, 'orange': 7,
-            'cyan': 8, 'blue': 9, 'yellow': 10,
+            'normal': 1,
+            'grey-light': 2,
+            'grey-dark': 3,
+            'green': 4,
+            'red': 5,
+            'magenta': 6,
+            'orange': 7,
+            'cyan': 8,
+            'blue': 9,
+            'yellow': 10,
         }
         bm.decor = {'bold': 1, 'normal': 0}
         # Mock out methods that need real curses or start threads
@@ -281,9 +288,14 @@ class TestBuildMonitorDraw:
     @patch('yojenkins.monitor.build_monitor.curses')
     def test_monitor_draw_quit_twice_returns_true(self, mock_curses, mock_mu, draw_monitor):
         mock_mu.load_keys.return_value = {
-            'QUIT': (ord('q'),), 'ABORT': (ord('a'),), 'RESUME': (ord('r'),),
-            'PAUSE': (ord('p'),), 'HELP': (ord('h'),), 'OPEN': (ord('o'),),
-            'SOUND': (ord('s'),), 'LOGS': (ord('l'),),
+            'QUIT': (ord('q'),),
+            'ABORT': (ord('a'),),
+            'RESUME': (ord('r'),),
+            'PAUSE': (ord('p'),),
+            'HELP': (ord('h'),),
+            'OPEN': (ord('o'),),
+            'SOUND': (ord('s'),),
+            'LOGS': (ord('l'),),
         }
 
         mock_scr = MagicMock()
@@ -299,9 +311,14 @@ class TestBuildMonitorDraw:
     @patch('yojenkins.monitor.build_monitor.curses')
     def test_monitor_draw_logs_returns_true(self, mock_curses, mock_mu, draw_monitor):
         mock_mu.load_keys.return_value = {
-            'QUIT': (ord('q'),), 'ABORT': (ord('a'),), 'RESUME': (ord('r'),),
-            'PAUSE': (ord('p'),), 'HELP': (ord('h'),), 'OPEN': (ord('o'),),
-            'SOUND': (ord('s'),), 'LOGS': (ord('l'),),
+            'QUIT': (ord('q'),),
+            'ABORT': (ord('a'),),
+            'RESUME': (ord('r'),),
+            'PAUSE': (ord('p'),),
+            'HELP': (ord('h'),),
+            'OPEN': (ord('o'),),
+            'SOUND': (ord('s'),),
+            'LOGS': (ord('l'),),
         }
 
         mock_scr = MagicMock()
@@ -316,9 +333,14 @@ class TestBuildMonitorDraw:
     @patch('yojenkins.monitor.build_monitor.curses')
     def test_monitor_draw_no_data_shows_no_data(self, mock_curses, mock_mu, draw_monitor):
         mock_mu.load_keys.return_value = {
-            'QUIT': (ord('q'),), 'ABORT': (ord('a'),), 'RESUME': (ord('r'),),
-            'PAUSE': (ord('p'),), 'HELP': (ord('h'),), 'OPEN': (ord('o'),),
-            'SOUND': (ord('s'),), 'LOGS': (ord('l'),),
+            'QUIT': (ord('q'),),
+            'ABORT': (ord('a'),),
+            'RESUME': (ord('r'),),
+            'PAUSE': (ord('p'),),
+            'HELP': (ord('h'),),
+            'OPEN': (ord('o'),),
+            'SOUND': (ord('s'),),
+            'LOGS': (ord('l'),),
         }
 
         mock_scr = MagicMock()
@@ -336,9 +358,14 @@ class TestBuildMonitorDraw:
     @patch('yojenkins.monitor.build_monitor.curses')
     def test_monitor_draw_with_build_info_data(self, mock_curses, mock_mu, draw_monitor):
         mock_mu.load_keys.return_value = {
-            'QUIT': (ord('q'),), 'ABORT': (ord('a'),), 'RESUME': (ord('r'),),
-            'PAUSE': (ord('p'),), 'HELP': (ord('h'),), 'OPEN': (ord('o'),),
-            'SOUND': (ord('s'),), 'LOGS': (ord('l'),),
+            'QUIT': (ord('q'),),
+            'ABORT': (ord('a'),),
+            'RESUME': (ord('r'),),
+            'PAUSE': (ord('p'),),
+            'HELP': (ord('h'),),
+            'OPEN': (ord('o'),),
+            'SOUND': (ord('s'),),
+            'LOGS': (ord('l'),),
         }
         mock_mu.truncate_text.side_effect = lambda text, width: text
 
@@ -369,9 +396,14 @@ class TestBuildMonitorDraw:
     @patch('yojenkins.monitor.build_monitor.curses')
     def test_monitor_draw_abort_twice_triggers_abort(self, mock_curses, mock_mu, draw_monitor):
         mock_mu.load_keys.return_value = {
-            'QUIT': (ord('q'),), 'ABORT': (ord('a'),), 'RESUME': (ord('r'),),
-            'PAUSE': (ord('p'),), 'HELP': (ord('h'),), 'OPEN': (ord('o'),),
-            'SOUND': (ord('s'),), 'LOGS': (ord('l'),),
+            'QUIT': (ord('q'),),
+            'ABORT': (ord('a'),),
+            'RESUME': (ord('r'),),
+            'PAUSE': (ord('p'),),
+            'HELP': (ord('h'),),
+            'OPEN': (ord('o'),),
+            'SOUND': (ord('s'),),
+            'LOGS': (ord('l'),),
         }
 
         mock_scr = MagicMock()
@@ -386,9 +418,14 @@ class TestBuildMonitorDraw:
     @patch('yojenkins.monitor.build_monitor.curses')
     def test_monitor_draw_with_stages(self, mock_curses, mock_mu, draw_monitor):
         mock_mu.load_keys.return_value = {
-            'QUIT': (ord('q'),), 'ABORT': (ord('a'),), 'RESUME': (ord('r'),),
-            'PAUSE': (ord('p'),), 'HELP': (ord('h'),), 'OPEN': (ord('o'),),
-            'SOUND': (ord('s'),), 'LOGS': (ord('l'),),
+            'QUIT': (ord('q'),),
+            'ABORT': (ord('a'),),
+            'RESUME': (ord('r'),),
+            'PAUSE': (ord('p'),),
+            'HELP': (ord('h'),),
+            'OPEN': (ord('o'),),
+            'SOUND': (ord('s'),),
+            'LOGS': (ord('l'),),
         }
         mock_mu.truncate_text.side_effect = lambda text, width: text
 
@@ -417,17 +454,23 @@ class TestBuildMonitorDraw:
         draw_monitor._BuildMonitor__monitor_draw(mock_scr, 'http://jenkins/job/test/1/')
 
         # Verify stages header was drawn
-        header_calls = [c for c in mock_mu.draw_horizontal_header.call_args_list
-                        if len(c[0]) > 5 and c[0][5] == 'STAGES']
+        header_calls = [
+            c for c in mock_mu.draw_horizontal_header.call_args_list if len(c[0]) > 5 and c[0][5] == 'STAGES'
+        ]
         assert len(header_calls) > 0
 
     @patch('yojenkins.monitor.build_monitor.mu')
     @patch('yojenkins.monitor.build_monitor.curses')
     def test_monitor_draw_border_color_success(self, mock_curses, mock_mu, draw_monitor):
         mock_mu.load_keys.return_value = {
-            'QUIT': (ord('q'),), 'ABORT': (ord('a'),), 'RESUME': (ord('r'),),
-            'PAUSE': (ord('p'),), 'HELP': (ord('h'),), 'OPEN': (ord('o'),),
-            'SOUND': (ord('s'),), 'LOGS': (ord('l'),),
+            'QUIT': (ord('q'),),
+            'ABORT': (ord('a'),),
+            'RESUME': (ord('r'),),
+            'PAUSE': (ord('p'),),
+            'HELP': (ord('h'),),
+            'OPEN': (ord('o'),),
+            'SOUND': (ord('s'),),
+            'LOGS': (ord('l'),),
         }
         mock_mu.truncate_text.side_effect = lambda text, width: text
 
@@ -437,10 +480,14 @@ class TestBuildMonitorDraw:
 
         draw_monitor.build_info_data = {
             'url': 'http://jenkins/job/test/1/',
-            'jobName': 'test', 'displayName': '#1',
-            'folderFullName': '/', 'serverURL': 'http://j',
-            'builtOn': 'master', 'startDatetime': '',
-            'endDatetime': '', 'elapsedFormatted': '',
+            'jobName': 'test',
+            'displayName': '#1',
+            'folderFullName': '/',
+            'serverURL': 'http://j',
+            'builtOn': 'master',
+            'startDatetime': '',
+            'endDatetime': '',
+            'elapsedFormatted': '',
             'estimatedDurationFormatted': '',
             'resultText': 'SUCCESS',
         }
@@ -455,9 +502,14 @@ class TestBuildMonitorDraw:
     @patch('yojenkins.monitor.build_monitor.curses')
     def test_monitor_draw_border_color_failure(self, mock_curses, mock_mu, draw_monitor):
         mock_mu.load_keys.return_value = {
-            'QUIT': (ord('q'),), 'ABORT': (ord('a'),), 'RESUME': (ord('r'),),
-            'PAUSE': (ord('p'),), 'HELP': (ord('h'),), 'OPEN': (ord('o'),),
-            'SOUND': (ord('s'),), 'LOGS': (ord('l'),),
+            'QUIT': (ord('q'),),
+            'ABORT': (ord('a'),),
+            'RESUME': (ord('r'),),
+            'PAUSE': (ord('p'),),
+            'HELP': (ord('h'),),
+            'OPEN': (ord('o'),),
+            'SOUND': (ord('s'),),
+            'LOGS': (ord('l'),),
         }
         mock_mu.truncate_text.side_effect = lambda text, width: text
 
@@ -467,10 +519,14 @@ class TestBuildMonitorDraw:
 
         draw_monitor.build_info_data = {
             'url': 'http://jenkins/job/test/1/',
-            'jobName': 'test', 'displayName': '#1',
-            'folderFullName': '/', 'serverURL': 'http://j',
-            'builtOn': 'master', 'startDatetime': '',
-            'endDatetime': '', 'elapsedFormatted': '',
+            'jobName': 'test',
+            'displayName': '#1',
+            'folderFullName': '/',
+            'serverURL': 'http://j',
+            'builtOn': 'master',
+            'startDatetime': '',
+            'endDatetime': '',
+            'elapsedFormatted': '',
             'estimatedDurationFormatted': '',
             'resultText': 'FAILURE',
         }
@@ -484,9 +540,14 @@ class TestBuildMonitorDraw:
     @patch('yojenkins.monitor.build_monitor.curses')
     def test_monitor_draw_server_status_displayed(self, mock_curses, mock_mu, draw_monitor):
         mock_mu.load_keys.return_value = {
-            'QUIT': (ord('q'),), 'ABORT': (ord('a'),), 'RESUME': (ord('r'),),
-            'PAUSE': (ord('p'),), 'HELP': (ord('h'),), 'OPEN': (ord('o'),),
-            'SOUND': (ord('s'),), 'LOGS': (ord('l'),),
+            'QUIT': (ord('q'),),
+            'ABORT': (ord('a'),),
+            'RESUME': (ord('r'),),
+            'PAUSE': (ord('p'),),
+            'HELP': (ord('h'),),
+            'OPEN': (ord('o'),),
+            'SOUND': (ord('s'),),
+            'LOGS': (ord('l'),),
         }
 
         mock_scr = MagicMock()
@@ -499,7 +560,8 @@ class TestBuildMonitorDraw:
 
         # Find draw_text call with server status text
         server_calls = [
-            c for c in mock_mu.draw_text.call_args_list
+            c
+            for c in mock_mu.draw_text.call_args_list
             if len(c[0]) > 1 and isinstance(c[0][1], str) and 'Reachable' in c[0][1]
         ]
         assert len(server_calls) > 0
@@ -508,9 +570,14 @@ class TestBuildMonitorDraw:
     @patch('yojenkins.monitor.build_monitor.curses')
     def test_monitor_draw_help_toggle(self, mock_curses, mock_mu, draw_monitor):
         mock_mu.load_keys.return_value = {
-            'QUIT': (ord('q'),), 'ABORT': (ord('a'),), 'RESUME': (ord('r'),),
-            'PAUSE': (ord('p'),), 'HELP': (ord('h'),), 'OPEN': (ord('o'),),
-            'SOUND': (ord('s'),), 'LOGS': (ord('l'),),
+            'QUIT': (ord('q'),),
+            'ABORT': (ord('a'),),
+            'RESUME': (ord('r'),),
+            'PAUSE': (ord('p'),),
+            'HELP': (ord('h'),),
+            'OPEN': (ord('o'),),
+            'SOUND': (ord('s'),),
+            'LOGS': (ord('l'),),
         }
 
         mock_scr = MagicMock()
@@ -528,9 +595,14 @@ class TestBuildMonitorDraw:
     @patch('yojenkins.monitor.build_monitor.curses')
     def test_monitor_draw_pause_toggle(self, mock_curses, mock_mu, draw_monitor):
         mock_mu.load_keys.return_value = {
-            'QUIT': (ord('q'),), 'ABORT': (ord('a'),), 'RESUME': (ord('r'),),
-            'PAUSE': (ord('p'),), 'HELP': (ord('h'),), 'OPEN': (ord('o'),),
-            'SOUND': (ord('s'),), 'LOGS': (ord('l'),),
+            'QUIT': (ord('q'),),
+            'ABORT': (ord('a'),),
+            'RESUME': (ord('r'),),
+            'PAUSE': (ord('p'),),
+            'HELP': (ord('h'),),
+            'OPEN': (ord('o'),),
+            'SOUND': (ord('s'),),
+            'LOGS': (ord('l'),),
         }
 
         mock_scr = MagicMock()
@@ -540,17 +612,23 @@ class TestBuildMonitorDraw:
 
         draw_monitor._BuildMonitor__monitor_draw(mock_scr, 'http://jenkins/job/test/1/')
 
-        pause_calls = [c for c in mock_mu.draw_message_box.call_args_list
-                       if len(c[0]) > 0 and 'Monitor paused' in str(c[0][1])]
+        pause_calls = [
+            c for c in mock_mu.draw_message_box.call_args_list if len(c[0]) > 0 and 'Monitor paused' in str(c[0][1])
+        ]
         assert len(pause_calls) > 0
 
     @patch('yojenkins.monitor.build_monitor.mu')
     @patch('yojenkins.monitor.build_monitor.curses')
     def test_monitor_draw_open_calls_browser(self, mock_curses, mock_mu, draw_monitor):
         mock_mu.load_keys.return_value = {
-            'QUIT': (ord('q'),), 'ABORT': (ord('a'),), 'RESUME': (ord('r'),),
-            'PAUSE': (ord('p'),), 'HELP': (ord('h'),), 'OPEN': (ord('o'),),
-            'SOUND': (ord('s'),), 'LOGS': (ord('l'),),
+            'QUIT': (ord('q'),),
+            'ABORT': (ord('a'),),
+            'RESUME': (ord('r'),),
+            'PAUSE': (ord('p'),),
+            'HELP': (ord('h'),),
+            'OPEN': (ord('o'),),
+            'SOUND': (ord('s'),),
+            'LOGS': (ord('l'),),
         }
 
         mock_scr = MagicMock()
@@ -565,9 +643,14 @@ class TestBuildMonitorDraw:
     def test_no_sound_on_first_draw_with_existing_status(self, mock_curses, mock_mu, draw_monitor):
         """Sound should NOT play on first draw when a build already has a result status."""
         mock_mu.load_keys.return_value = {
-            'QUIT': (ord('q'),), 'ABORT': (ord('a'),), 'RESUME': (ord('r'),),
-            'PAUSE': (ord('p'),), 'HELP': (ord('h'),), 'OPEN': (ord('o'),),
-            'SOUND': (ord('s'),), 'LOGS': (ord('l'),),
+            'QUIT': (ord('q'),),
+            'ABORT': (ord('a'),),
+            'RESUME': (ord('r'),),
+            'PAUSE': (ord('p'),),
+            'HELP': (ord('h'),),
+            'OPEN': (ord('o'),),
+            'SOUND': (ord('s'),),
+            'LOGS': (ord('l'),),
         }
         mock_mu.truncate_text.side_effect = lambda text, width: text
 
@@ -577,10 +660,14 @@ class TestBuildMonitorDraw:
 
         draw_monitor.build_info_data = {
             'url': 'http://jenkins/job/test/1/',
-            'jobName': 'test', 'displayName': '#1',
-            'folderFullName': '/', 'serverURL': 'http://j',
-            'builtOn': 'master', 'startDatetime': '',
-            'endDatetime': '', 'elapsedFormatted': '',
+            'jobName': 'test',
+            'displayName': '#1',
+            'folderFullName': '/',
+            'serverURL': 'http://j',
+            'builtOn': 'master',
+            'startDatetime': '',
+            'endDatetime': '',
+            'elapsedFormatted': '',
             'estimatedDurationFormatted': '',
             'resultText': 'SUCCESS',
         }
@@ -596,9 +683,14 @@ class TestBuildMonitorDraw:
     def test_sound_plays_on_status_change_after_initial_draw(self, mock_curses, mock_mu, draw_monitor):
         """Sound SHOULD play when status changes after the initial draw."""
         mock_mu.load_keys.return_value = {
-            'QUIT': (ord('q'),), 'ABORT': (ord('a'),), 'RESUME': (ord('r'),),
-            'PAUSE': (ord('p'),), 'HELP': (ord('h'),), 'OPEN': (ord('o'),),
-            'SOUND': (ord('s'),), 'LOGS': (ord('l'),),
+            'QUIT': (ord('q'),),
+            'ABORT': (ord('a'),),
+            'RESUME': (ord('r'),),
+            'PAUSE': (ord('p'),),
+            'HELP': (ord('h'),),
+            'OPEN': (ord('o'),),
+            'SOUND': (ord('s'),),
+            'LOGS': (ord('l'),),
         }
         mock_mu.truncate_text.side_effect = lambda text, width: text
 
@@ -611,10 +703,14 @@ class TestBuildMonitorDraw:
         call_count = [0]
         original_data = {
             'url': 'http://jenkins/job/test/1/',
-            'jobName': 'test', 'displayName': '#1',
-            'folderFullName': '/', 'serverURL': 'http://j',
-            'builtOn': 'master', 'startDatetime': '',
-            'endDatetime': '', 'elapsedFormatted': '',
+            'jobName': 'test',
+            'displayName': '#1',
+            'folderFullName': '/',
+            'serverURL': 'http://j',
+            'builtOn': 'master',
+            'startDatetime': '',
+            'endDatetime': '',
+            'elapsedFormatted': '',
             'estimatedDurationFormatted': '',
             'resultText': 'RUNNING',
         }
@@ -644,9 +740,14 @@ class TestBuildMonitorDraw:
     @patch('yojenkins.monitor.build_monitor.curses')
     def test_monitor_draw_no_stages_lowers_height_limit(self, mock_curses, mock_mu, draw_monitor):
         mock_mu.load_keys.return_value = {
-            'QUIT': (ord('q'),), 'ABORT': (ord('a'),), 'RESUME': (ord('r'),),
-            'PAUSE': (ord('p'),), 'HELP': (ord('h'),), 'OPEN': (ord('o'),),
-            'SOUND': (ord('s'),), 'LOGS': (ord('l'),),
+            'QUIT': (ord('q'),),
+            'ABORT': (ord('a'),),
+            'RESUME': (ord('r'),),
+            'PAUSE': (ord('p'),),
+            'HELP': (ord('h'),),
+            'OPEN': (ord('o'),),
+            'SOUND': (ord('s'),),
+            'LOGS': (ord('l'),),
         }
 
         mock_scr = MagicMock()

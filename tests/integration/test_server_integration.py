@@ -6,7 +6,6 @@ pytestmark = [pytest.mark.docker, pytest.mark.slow]
 
 
 class TestServerIntegration:
-
     def test_server_info(self, yojenkins_instance):
         """Server.info() returns a dict with expected keys."""
         info = yojenkins_instance.server.info()

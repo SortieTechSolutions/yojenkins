@@ -6,7 +6,6 @@ from yojenkins.yo_jenkins.yojenkins import YoJenkins
 
 
 class TestYoJenkinsInit:
-
     def test_init_sets_auth(self):
         mock_auth = MagicMock()
         mock_auth.get_rest.return_value = MagicMock()

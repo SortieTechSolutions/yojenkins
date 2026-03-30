@@ -59,8 +59,7 @@ def _mock_yj():
 @pytest.fixture(autouse=True)
 def _patch_history_file_io():
     """Prevent log_to_history from touching the filesystem in all tests."""
-    with patch('pathlib.Path.is_file', return_value=True), \
-         patch('builtins.open', MagicMock()):
+    with patch('pathlib.Path.is_file', return_value=True), patch('builtins.open', MagicMock()):
         yield
 
 
@@ -70,7 +69,6 @@ def _patch_history_file_io():
 
 
 class TestCliFolderHandlers:
-
     @patch('yojenkins.cli.cli_folder.cu.standard_out')
     @patch('yojenkins.cli.cli_folder.cu.config_yo_jenkins')
     @patch('yojenkins.cli.cli_folder.cu.is_full_url', return_value=False)
@@ -186,8 +184,7 @@ class TestCliFolderHandlers:
         mock_config.return_value = mock_yj
 
         cli_folder.create(
-            name='new-folder', folder='parent', type='folder',
-            config_file=None, config_is_json=False, **PROFILE_TOKEN
+            name='new-folder', folder='parent', type='folder', config_file=None, config_is_json=False, **PROFILE_TOKEN
         )
         mock_yj.folder.create.assert_called_once()
 
@@ -199,9 +196,7 @@ class TestCliFolderHandlers:
         mock_config.return_value = mock_yj
 
         cli_folder.copy(folder='parent', original='orig', new='new-copy', **PROFILE_TOKEN)
-        mock_yj.folder.copy.assert_called_once_with(
-            original_name='orig', new_name='new-copy', folder_name='parent'
-        )
+        mock_yj.folder.copy.assert_called_once_with(original_name='orig', new_name='new-copy', folder_name='parent')
 
 
 # ============================================================================
@@ -210,7 +205,6 @@ class TestCliFolderHandlers:
 
 
 class TestCliJobHandlers:
-
     @patch('yojenkins.cli.cli_job.cu.standard_out')
     @patch('yojenkins.cli.cli_job.cu.config_yo_jenkins')
     @patch('yojenkins.cli.cli_job.cu.is_full_url', return_value=False)
@@ -375,7 +369,6 @@ class TestCliJobHandlers:
 
 
 class TestCliBuildHandlers:
-
     @patch('yojenkins.cli.cli_build.cu.standard_out')
     @patch('yojenkins.cli.cli_build.cu.config_yo_jenkins')
     @patch('yojenkins.cli.cli_build.cu.is_full_url', return_value=False)
@@ -420,8 +413,7 @@ class TestCliBuildHandlers:
         mock_yj.build.stage_list.return_value = ([{'name': 's1'}], ['s1'])
 
         cli_build.stages(
-            job='my-job', number=1, url=None, latest=False, opt_list=False,
-            **PROFILE_TOKEN, **COMMON_KWARGS
+            job='my-job', number=1, url=None, latest=False, opt_list=False, **PROFILE_TOKEN, **COMMON_KWARGS
         )
         mock_yj.build.stage_list.assert_called_once()
 
@@ -433,8 +425,7 @@ class TestCliBuildHandlers:
         mock_config.return_value = mock_yj
 
         cli_build.logs(
-            job='my-job', number=1, url=None, latest=False,
-            tail=0, download_dir=None, follow=False, **PROFILE_TOKEN
+            job='my-job', number=1, url=None, latest=False, tail=0, download_dir=None, follow=False, **PROFILE_TOKEN
         )
         mock_yj.build.logs.assert_called_once()
 
@@ -448,8 +439,7 @@ class TestCliBuildHandlers:
         mock_yj.build.parameters.return_value = ([{'name': 'p1'}], ['p1'])
 
         cli_build.parameters(
-            job='my-job', number=1, url=None, latest=False, opt_list=False,
-            **PROFILE_TOKEN, **COMMON_KWARGS
+            job='my-job', number=1, url=None, latest=False, opt_list=False, **PROFILE_TOKEN, **COMMON_KWARGS
         )
         mock_yj.build.parameters.assert_called_once()
 
@@ -457,10 +447,7 @@ class TestCliBuildHandlers:
     def test_build_info_missing_number_and_latest_exits(self, mock_is_build_url):
         """Should sys.exit(1) when job is given but no --number or --latest."""
         with pytest.raises(SystemExit) as exc_info:
-            cli_build.info(
-                job='my-job', number=None, url=None, latest=False,
-                **PROFILE_TOKEN, **COMMON_KWARGS
-            )
+            cli_build.info(job='my-job', number=None, url=None, latest=False, **PROFILE_TOKEN, **COMMON_KWARGS)
         assert exc_info.value.code == 1
 
     @patch('yojenkins.cli.cli_build.cu.config_yo_jenkins')
@@ -471,9 +458,13 @@ class TestCliBuildHandlers:
         cli_build.diff(
             build_url_1='http://j:8080/job/a/1/',
             build_url_2='http://j:8080/job/a/2/',
-            logs=False, line_pattern=(), char_ignore=0,
-            no_color=False, diff_only=False, diff_guide=False,
-            **PROFILE_TOKEN
+            logs=False,
+            line_pattern=(),
+            char_ignore=0,
+            no_color=False,
+            diff_only=False,
+            diff_guide=False,
+            **PROFILE_TOKEN,
         )
         mock_yj.build.diff.assert_called_once()
 
@@ -486,10 +477,7 @@ class TestCliBuildHandlers:
         mock_config.return_value = mock_yj
         mock_yj.build.rebuild.return_value = 456
 
-        cli_build.rebuild(
-            job='my-job', number=1, url=None, latest=False, follow_logs=False,
-            **PROFILE_TOKEN
-        )
+        cli_build.rebuild(job='my-job', number=1, url=None, latest=False, follow_logs=False, **PROFILE_TOKEN)
         mock_yj.build.rebuild.assert_called_once()
         mock_secho.assert_called_with('success. queue number: 456', fg='bright_green', bold=True)
 
@@ -500,7 +488,6 @@ class TestCliBuildHandlers:
 
 
 class TestCliServerHandlers:
-
     @patch('yojenkins.cli.cli_server.cu.standard_out')
     @patch('yojenkins.cli.cli_server.cu.config_yo_jenkins')
     def test_server_info(self, mock_config, mock_stdout):
@@ -593,7 +580,6 @@ class TestCliServerHandlers:
 
 
 class TestCliCredentialHandlers:
-
     @patch('yojenkins.cli.cli_credential.cu.standard_out')
     @patch('yojenkins.cli.cli_credential.cu.config_yo_jenkins')
     def test_credential_list(self, mock_config, mock_stdout):
@@ -601,10 +587,7 @@ class TestCliCredentialHandlers:
         mock_config.return_value = mock_yj
         mock_yj.credential.list.return_value = ([{'id': 'c1'}], ['c1'])
 
-        cli_credential.list(
-            opt_list=False, folder='/', domain='_', keys='',
-            **PROFILE_TOKEN, **COMMON_KWARGS
-        )
+        cli_credential.list(opt_list=False, folder='/', domain='_', keys='', **PROFILE_TOKEN, **COMMON_KWARGS)
         mock_yj.credential.list.assert_called_once()
 
     @patch('yojenkins.cli.cli_credential.cu.standard_out')
@@ -642,7 +625,6 @@ class TestCliCredentialHandlers:
 
 
 class TestCliNodeHandlers:
-
     @patch('yojenkins.cli.cli_node.cu.standard_out')
     @patch('yojenkins.cli.cli_node.cu.config_yo_jenkins')
     def test_node_info(self, mock_config, mock_stdout):
@@ -708,7 +690,6 @@ class TestCliNodeHandlers:
 
 
 class TestCliAccountHandlers:
-
     @patch('yojenkins.cli.cli_account.cu.standard_out')
     @patch('yojenkins.cli.cli_account.cu.config_yo_jenkins')
     def test_account_list(self, mock_config, mock_stdout):
@@ -736,12 +717,15 @@ class TestCliAccountHandlers:
         mock_config.return_value = mock_yj
 
         cli_account.create(
-            user_id='newuser', password='pass123', is_admin=False,
-            email='test@example.com', description='test user', **PROFILE_TOKEN
+            user_id='newuser',
+            password='pass123',
+            is_admin=False,
+            email='test@example.com',
+            description='test user',
+            **PROFILE_TOKEN,
         )
         mock_yj.account.create.assert_called_once_with(
-            user_id='newuser', password='pass123', is_admin=False,
-            email='test@example.com', description='test user'
+            user_id='newuser', password='pass123', is_admin=False, email='test@example.com', description='test user'
         )
 
     @patch('click.secho')
@@ -760,9 +744,7 @@ class TestCliAccountHandlers:
         mock_config.return_value = mock_yj
 
         cli_account.permission(user_id='admin', action='add', permission_id='Overall/Read', **PROFILE_TOKEN)
-        mock_yj.account.permission.assert_called_once_with(
-            user_id='admin', action='add', permission_id='Overall/Read'
-        )
+        mock_yj.account.permission.assert_called_once_with(user_id='admin', action='add', permission_id='Overall/Read')
 
     @patch('yojenkins.cli.cli_account.cu.standard_out')
     @patch('yojenkins.cli.cli_account.cu.config_yo_jenkins')
@@ -782,7 +764,6 @@ class TestCliAccountHandlers:
 
 
 class TestCliAuthHandlers:
-
     @patch('yojenkins.cli.cli_auth.cu.standard_out')
     @patch('yojenkins.cli.cli_auth.Auth')
     def test_auth_show(self, mock_auth_cls, mock_stdout):
@@ -842,7 +823,6 @@ class TestCliAuthHandlers:
 
 
 class TestCliStageHandlers:
-
     @patch('yojenkins.cli.cli_stage.cu.standard_out')
     @patch('yojenkins.cli.cli_stage.cu.config_yo_jenkins')
     @patch('yojenkins.cli.cli_stage.cu.is_full_url', return_value=False)
@@ -851,10 +831,7 @@ class TestCliStageHandlers:
         mock_config.return_value = mock_yj
         mock_yj.stage.info.return_value = {'name': 'Build'}
 
-        cli_stage.info(
-            name='Build', job='my-job', number=1, url=None, latest=False,
-            **PROFILE_TOKEN, **COMMON_KWARGS
-        )
+        cli_stage.info(name='Build', job='my-job', number=1, url=None, latest=False, **PROFILE_TOKEN, **COMMON_KWARGS)
         mock_yj.stage.info.assert_called_once()
 
     @patch('yojenkins.cli.cli_stage.cu.standard_out')
@@ -866,8 +843,14 @@ class TestCliStageHandlers:
         mock_yj.stage.step_list.return_value = ([{'name': 'step1'}], ['step1'])
 
         cli_stage.steps(
-            name='Build', job='my-job', number=1, url=None, latest=False, opt_list=False,
-            **PROFILE_TOKEN, **COMMON_KWARGS
+            name='Build',
+            job='my-job',
+            number=1,
+            url=None,
+            latest=False,
+            opt_list=False,
+            **PROFILE_TOKEN,
+            **COMMON_KWARGS,
         )
         mock_yj.stage.step_list.assert_called_once()
 
@@ -878,8 +861,7 @@ class TestCliStageHandlers:
         mock_config.return_value = mock_yj
 
         cli_stage.logs(
-            name='Build', job='my-job', number=1, url=None, latest=False, download_dir=None,
-            **PROFILE_TOKEN
+            name='Build', job='my-job', number=1, url=None, latest=False, download_dir=None, **PROFILE_TOKEN
         )
         mock_yj.stage.logs.assert_called_once()
 
@@ -888,8 +870,7 @@ class TestCliStageHandlers:
         """Should exit when job given without --number or --latest."""
         with pytest.raises(SystemExit):
             cli_stage.info(
-                name='Build', job='my-job', number=None, url=None, latest=False,
-                **PROFILE_TOKEN, **COMMON_KWARGS
+                name='Build', job='my-job', number=None, url=None, latest=False, **PROFILE_TOKEN, **COMMON_KWARGS
             )
 
 
@@ -899,7 +880,6 @@ class TestCliStageHandlers:
 
 
 class TestCliStepHandlers:
-
     @patch('yojenkins.cli.cli_step.cu.standard_out')
     @patch('yojenkins.cli.cli_step.cu.config_yo_jenkins')
     @patch('yojenkins.cli.cli_step.cu.is_full_url', return_value=True)
@@ -927,7 +907,6 @@ class TestCliStepHandlers:
 
 
 class TestCliToolsHandlers:
-
     @patch('yojenkins.cli.cli_tools.browser_open')
     def test_documentation(self, mock_browser):
         mock_browser.return_value = True
@@ -969,8 +948,7 @@ class TestCliToolsHandlers:
         mock_yj.rest.request.return_value = ({'key': 'value'}, {}, True)
 
         cli_tools.rest_request(
-            request_text='/api/json', request_type='GET',
-            raw=False, clean_html=False, **PROFILE_TOKEN
+            request_text='/api/json', request_type='GET', raw=False, clean_html=False, **PROFILE_TOKEN
         )
         mock_yj.rest.request.assert_called_once()
 
@@ -983,8 +961,7 @@ class TestCliToolsHandlers:
 
         with pytest.raises(SystemExit):
             cli_tools.rest_request(
-                request_text='/api/json', request_type='GET',
-                raw=False, clean_html=False, **PROFILE_TOKEN
+                request_text='/api/json', request_type='GET', raw=False, clean_html=False, **PROFILE_TOKEN
             )
 
     @patch('click.echo')
@@ -1029,8 +1006,7 @@ class TestCliToolsHandlers:
 
         with pytest.raises(SystemExit) as exc_info:
             cli_tools.rest_request(
-                request_text='/api/json', request_type='HEAD',
-                raw=False, clean_html=False, **PROFILE_TOKEN
+                request_text='/api/json', request_type='HEAD', raw=False, clean_html=False, **PROFILE_TOKEN
             )
         assert exc_info.value.code == 0
 
@@ -1043,8 +1019,7 @@ class TestCliToolsHandlers:
         mock_yj.rest.request.return_value = ('<b>text</b>', {}, True)
 
         cli_tools.rest_request(
-            request_text='/api/json', request_type='GET',
-            raw=True, clean_html=True, **PROFILE_TOKEN
+            request_text='/api/json', request_type='GET', raw=True, clean_html=True, **PROFILE_TOKEN
         )
         mock_html_clean.assert_called_once()
 
@@ -1057,8 +1032,7 @@ class TestCliToolsHandlers:
 
         with pytest.raises(SystemExit):
             cli_tools.rest_request(
-                request_text='/api/json', request_type='GET',
-                raw=False, clean_html=False, **PROFILE_TOKEN
+                request_text='/api/json', request_type='GET', raw=False, clean_html=False, **PROFILE_TOKEN
             )
 
     @patch('click.confirm', return_value=True)
@@ -1159,7 +1133,6 @@ class TestCliToolsHandlers:
 
 
 class TestCliBuildHandlersExtended:
-
     @patch('yojenkins.cli.cli_build.cu.standard_out')
     @patch('yojenkins.cli.cli_build.cu.config_yo_jenkins')
     @patch('yojenkins.cli.cli_build.cu.is_full_url', return_value=True)
@@ -1170,8 +1143,12 @@ class TestCliBuildHandlersExtended:
         mock_yj.build.info.return_value = {'number': 1}
 
         cli_build.info(
-            job=None, number=None, url='http://j:8080/job/my-job/1/',
-            latest=False, **PROFILE_TOKEN, **{**COMMON_KWARGS}
+            job=None,
+            number=None,
+            url='http://j:8080/job/my-job/1/',
+            latest=False,
+            **PROFILE_TOKEN,
+            **{**COMMON_KWARGS},
         )
         mock_yj.build.info.assert_called_once()
 
@@ -1186,8 +1163,7 @@ class TestCliBuildHandlersExtended:
         mock_yj.build.info.return_value = {'number': 1}
 
         cli_build.info(
-            job='http://j:8080/job/my-job/1/', number=None, url=None,
-            latest=True, **PROFILE_TOKEN, **{**COMMON_KWARGS}
+            job='http://j:8080/job/my-job/1/', number=None, url=None, latest=True, **PROFILE_TOKEN, **{**COMMON_KWARGS}
         )
         mock_yj.build.info.assert_called_once()
 
@@ -1280,8 +1256,7 @@ class TestCliBuildHandlersExtended:
         mock_config.return_value = mock_yj
 
         cli_build.logs(
-            job='my-job', number=1, url=None, latest=False,
-            tail=0, download_dir='/tmp', follow=False, **PROFILE_TOKEN
+            job='my-job', number=1, url=None, latest=False, tail=0, download_dir='/tmp', follow=False, **PROFILE_TOKEN
         )
         mock_yj.build.logs.assert_called_once()
         mock_secho.assert_called_with('success', fg='bright_green', bold=True)
@@ -1295,10 +1270,7 @@ class TestCliBuildHandlersExtended:
         mock_config.return_value = mock_yj
         mock_yj.build.rebuild.return_value = 789
 
-        cli_build.rebuild(
-            job='my-job', number=1, url=None, latest=False, follow_logs=True,
-            **PROFILE_TOKEN
-        )
+        cli_build.rebuild(job='my-job', number=1, url=None, latest=False, follow_logs=True, **PROFILE_TOKEN)
         mock_follow.assert_called_once_with(mock_yj, 789)
 
     @patch('yojenkins.cli.cli_build.wait_for_build_and_monitor')
@@ -1311,8 +1283,7 @@ class TestCliBuildHandlersExtended:
         mock_yj.build.rebuild.return_value = 888
 
         cli_build.rebuild(
-            job='my-job', number=1, url=None, latest=False, follow_logs=False, monitor=True,
-            **PROFILE_TOKEN
+            job='my-job', number=1, url=None, latest=False, follow_logs=False, monitor=True, **PROFILE_TOKEN
         )
         mock_monitor.assert_called_once_with(mock_yj, 888)
 
@@ -1326,8 +1297,7 @@ class TestCliBuildHandlersExtended:
         mock_yj.build.stage_list.return_value = ([{'name': 's1'}], ['s1'])
 
         cli_build.stages(
-            job='my-job', number=1, url=None, latest=False, opt_list=True,
-            **PROFILE_TOKEN, **COMMON_KWARGS
+            job='my-job', number=1, url=None, latest=False, opt_list=True, **PROFILE_TOKEN, **COMMON_KWARGS
         )
         call_args = mock_stdout.call_args[0]
         assert call_args[0] == ['s1']
@@ -1342,8 +1312,7 @@ class TestCliBuildHandlersExtended:
         mock_yj.build.parameters.return_value = ([{'name': 'p1'}], ['p1'])
 
         cli_build.parameters(
-            job='my-job', number=1, url=None, latest=False, opt_list=True,
-            **PROFILE_TOKEN, **COMMON_KWARGS
+            job='my-job', number=1, url=None, latest=False, opt_list=True, **PROFILE_TOKEN, **COMMON_KWARGS
         )
         call_args = mock_stdout.call_args[0]
         assert call_args[0] == ['p1']
@@ -1370,8 +1339,14 @@ class TestCliBuildHandlersExtended:
     def test_build_logs_missing_number_and_latest_exits(self, mock_is_build_url):
         with pytest.raises(SystemExit) as exc_info:
             cli_build.logs(
-                job='my-job', number=None, url=None, latest=False,
-                tail=0, download_dir=None, follow=False, **PROFILE_TOKEN
+                job='my-job',
+                number=None,
+                url=None,
+                latest=False,
+                tail=0,
+                download_dir=None,
+                follow=False,
+                **PROFILE_TOKEN,
             )
         assert exc_info.value.code == 1
 
@@ -1380,9 +1355,7 @@ class TestCliBuildHandlersExtended:
     @patch('yojenkins.cli.cli_build.cu.is_full_url', return_value=True)
     @patch('yojenkins.cli.cli_build.is_complete_build_url', return_value=False)
     def test_build_browser_url_skips_auth(self, mock_is_build_url, mock_is_url, mock_config, mock_browser):
-        cli_build.browser(
-            job=None, number=None, url='http://jenkins/job/my-job/42', latest=False, **PROFILE_TOKEN
-        )
+        cli_build.browser(job=None, number=None, url='http://jenkins/job/my-job/42', latest=False, **PROFILE_TOKEN)
         mock_browser.assert_called_once_with('http://jenkins/job/my-job/42')
         mock_config.assert_not_called()
 
@@ -1402,8 +1375,7 @@ class TestCliBuildHandlersExtended:
     def test_build_stages_missing_number_and_latest_exits(self, mock_is_build_url):
         with pytest.raises(SystemExit) as exc_info:
             cli_build.stages(
-                job='my-job', number=None, url=None, latest=False, opt_list=False,
-                **PROFILE_TOKEN, **COMMON_KWARGS
+                job='my-job', number=None, url=None, latest=False, opt_list=False, **PROFILE_TOKEN, **COMMON_KWARGS
             )
         assert exc_info.value.code == 1
 
@@ -1411,18 +1383,14 @@ class TestCliBuildHandlersExtended:
     def test_build_parameters_missing_number_and_latest_exits(self, mock_is_build_url):
         with pytest.raises(SystemExit) as exc_info:
             cli_build.parameters(
-                job='my-job', number=None, url=None, latest=False, opt_list=False,
-                **PROFILE_TOKEN, **COMMON_KWARGS
+                job='my-job', number=None, url=None, latest=False, opt_list=False, **PROFILE_TOKEN, **COMMON_KWARGS
             )
         assert exc_info.value.code == 1
 
     @patch('yojenkins.cli.cli_build.is_complete_build_url', return_value=False)
     def test_build_rebuild_missing_number_and_latest_exits(self, mock_is_build_url):
         with pytest.raises(SystemExit) as exc_info:
-            cli_build.rebuild(
-                job='my-job', number=None, url=None, latest=False, follow_logs=False,
-                **PROFILE_TOKEN
-            )
+            cli_build.rebuild(job='my-job', number=None, url=None, latest=False, follow_logs=False, **PROFILE_TOKEN)
         assert exc_info.value.code == 1
 
 
@@ -1432,7 +1400,6 @@ class TestCliBuildHandlersExtended:
 
 
 class TestCliServerHandlersExtended:
-
     @patch('click.secho')
     @patch('yojenkins.cli.cli_server.YoJenkins')
     @patch('yojenkins.cli.cli_server.Auth')
@@ -1468,7 +1435,6 @@ class TestCliServerHandlersExtended:
 
 
 class TestCliServerDeploy:
-
     @patch('yojenkins.cli.cli_server.print2')
     @patch('yojenkins.cli.cli_server.click.echo')
     @patch('yojenkins.cli.cli_server.DockerJenkinsServer')
@@ -1488,11 +1454,21 @@ class TestCliServerDeploy:
 
         with patch('builtins.open', mock_open()):
             cli_server.server_deploy(
-                config_file='', plugins_file='', protocol_schema='http',
-                host='localhost', port=8080, image_base='jenkins/jenkins:lts',
-                extra_setup_script='', image_rebuild=False, new_volume=False,
-                new_volume_name='', bind_mount_dir='', container_name='yojenkins-jenkins',
-                registry='', admin_user='admin', password='',
+                config_file='',
+                plugins_file='',
+                protocol_schema='http',
+                host='localhost',
+                port=8080,
+                image_base='jenkins/jenkins:lts',
+                extra_setup_script='',
+                image_rebuild=False,
+                new_volume=False,
+                new_volume_name='',
+                bind_mount_dir='',
+                container_name='yojenkins-jenkins',
+                registry='',
+                admin_user='admin',
+                password='',
             )
         mock_djs.setup.assert_called_once()
 
@@ -1506,11 +1482,21 @@ class TestCliServerDeploy:
 
         with pytest.raises(SystemExit):
             cli_server.server_deploy(
-                config_file='', plugins_file='', protocol_schema='http',
-                host='localhost', port=8080, image_base='jenkins/jenkins:lts',
-                extra_setup_script='', image_rebuild=False, new_volume=False,
-                new_volume_name='', bind_mount_dir='', container_name='',
-                registry='', admin_user='admin', password='',
+                config_file='',
+                plugins_file='',
+                protocol_schema='http',
+                host='localhost',
+                port=8080,
+                image_base='jenkins/jenkins:lts',
+                extra_setup_script='',
+                image_rebuild=False,
+                new_volume=False,
+                new_volume_name='',
+                bind_mount_dir='',
+                container_name='',
+                registry='',
+                admin_user='admin',
+                password='',
             )
 
     @patch('yojenkins.cli.cli_server.DockerJenkinsServer')
@@ -1524,16 +1510,25 @@ class TestCliServerDeploy:
 
         with pytest.raises(SystemExit):
             cli_server.server_deploy(
-                config_file='', plugins_file='', protocol_schema='http',
-                host='localhost', port=8080, image_base='jenkins/jenkins:lts',
-                extra_setup_script='', image_rebuild=False, new_volume=False,
-                new_volume_name='', bind_mount_dir='', container_name='',
-                registry='', admin_user='admin', password='',
+                config_file='',
+                plugins_file='',
+                protocol_schema='http',
+                host='localhost',
+                port=8080,
+                image_base='jenkins/jenkins:lts',
+                extra_setup_script='',
+                image_rebuild=False,
+                new_volume=False,
+                new_volume_name='',
+                bind_mount_dir='',
+                container_name='',
+                registry='',
+                admin_user='admin',
+                password='',
             )
 
 
 class TestCliServerTeardown:
-
     @patch('yojenkins.cli.cli_server.print2')
     @patch('pathlib.Path.unlink')
     @patch('yojenkins.cli.cli_server.DockerJenkinsServer')
@@ -1583,7 +1578,6 @@ class TestCliServerTeardown:
 
 
 class TestCliJobHandlersExtended:
-
     @patch('yojenkins.cli.cli_job.cu.standard_out')
     @patch('yojenkins.cli.cli_job.cu.config_yo_jenkins')
     @patch('yojenkins.cli.cli_job.cu.is_full_url', return_value=True)
@@ -1605,8 +1599,13 @@ class TestCliJobHandlersExtended:
         mock_yj.job.search.return_value = ([{'name': 'job1'}], ['job1'])
 
         cli_job.search(
-            search_pattern='.*test.*', search_folder='', depth=4,
-            fullname=False, opt_list=False, **PROFILE_TOKEN, **COMMON_KWARGS
+            search_pattern='.*test.*',
+            search_folder='',
+            depth=4,
+            fullname=False,
+            opt_list=False,
+            **PROFILE_TOKEN,
+            **COMMON_KWARGS,
         )
         mock_yj.job.search.assert_called_once()
 
@@ -1620,8 +1619,13 @@ class TestCliJobHandlersExtended:
 
         with pytest.raises(SystemExit) as exc_info:
             cli_job.search(
-                search_pattern='nope', search_folder='', depth=4,
-                fullname=False, opt_list=False, **PROFILE_TOKEN, **COMMON_KWARGS
+                search_pattern='nope',
+                search_folder='',
+                depth=4,
+                fullname=False,
+                opt_list=False,
+                **PROFILE_TOKEN,
+                **COMMON_KWARGS,
             )
         assert exc_info.value.code == 1
 
@@ -1692,9 +1696,14 @@ class TestCliJobHandlersExtended:
         mock_yj.job.config.return_value = '<project></project>'
 
         cli_job.config(
-            job='my-job', filepath=None,
-            opt_pretty=False, opt_yaml=False, opt_xml=False,
-            opt_toml=False, opt_json=False, **PROFILE_TOKEN
+            job='my-job',
+            filepath=None,
+            opt_pretty=False,
+            opt_yaml=False,
+            opt_xml=False,
+            opt_toml=False,
+            opt_json=False,
+            **PROFILE_TOKEN,
         )
         mock_stdout.assert_called_once()
 
@@ -1727,7 +1736,6 @@ class TestCliJobHandlersExtended:
 
 
 class TestCliFolderHandlersExtended:
-
     @patch('yojenkins.cli.cli_folder.cu.standard_out')
     @patch('yojenkins.cli.cli_folder.cu.config_yo_jenkins')
     @patch('yojenkins.cli.cli_folder.cu.is_full_url', return_value=False)
@@ -1737,8 +1745,13 @@ class TestCliFolderHandlersExtended:
         mock_yj.folder.search.return_value = ([{'name': 'f1'}], ['f1'])
 
         cli_folder.search(
-            search_pattern='.*', search_folder='', depth=4,
-            fullname=False, opt_list=False, **PROFILE_TOKEN, **COMMON_KWARGS
+            search_pattern='.*',
+            search_folder='',
+            depth=4,
+            fullname=False,
+            opt_list=False,
+            **PROFILE_TOKEN,
+            **COMMON_KWARGS,
         )
         mock_yj.folder.search.assert_called_once()
 
@@ -1752,8 +1765,13 @@ class TestCliFolderHandlersExtended:
 
         with pytest.raises(SystemExit) as exc_info:
             cli_folder.search(
-                search_pattern='nope', search_folder='', depth=4,
-                fullname=False, opt_list=False, **PROFILE_TOKEN, **COMMON_KWARGS
+                search_pattern='nope',
+                search_folder='',
+                depth=4,
+                fullname=False,
+                opt_list=False,
+                **PROFILE_TOKEN,
+                **COMMON_KWARGS,
             )
         assert exc_info.value.code == 1
 
@@ -1766,9 +1784,14 @@ class TestCliFolderHandlersExtended:
         mock_yj.folder.config.return_value = '<folder></folder>'
 
         cli_folder.config(
-            folder='my-folder', filepath=None,
-            opt_pretty=False, opt_yaml=False, opt_xml=False,
-            opt_toml=False, opt_json=False, **PROFILE_TOKEN
+            folder='my-folder',
+            filepath=None,
+            opt_pretty=False,
+            opt_yaml=False,
+            opt_xml=False,
+            opt_toml=False,
+            opt_json=False,
+            **PROFILE_TOKEN,
         )
         mock_stdout.assert_called_once()
 
@@ -1779,7 +1802,6 @@ class TestCliFolderHandlersExtended:
 
 
 class TestCliStageHandlersExtended:
-
     @patch('yojenkins.cli.cli_stage.print2')
     @patch('yojenkins.cli.cli_stage.cu.config_yo_jenkins')
     @patch('yojenkins.cli.cli_stage.cu.is_full_url', return_value=False)
@@ -1788,10 +1810,7 @@ class TestCliStageHandlersExtended:
         mock_config.return_value = mock_yj
         mock_yj.stage.status_text.return_value = 'SUCCESS'
 
-        cli_stage.status(
-            name='Build', job='my-job', number=1, url=None, latest=False,
-            **PROFILE_TOKEN
-        )
+        cli_stage.status(name='Build', job='my-job', number=1, url=None, latest=False, **PROFILE_TOKEN)
         mock_print2.assert_called_with('SUCCESS', bold=True, color='green')
 
     @patch('yojenkins.cli.cli_stage.print2')
@@ -1802,10 +1821,7 @@ class TestCliStageHandlersExtended:
         mock_config.return_value = mock_yj
         mock_yj.stage.status_text.return_value = 'FAILURE'
 
-        cli_stage.status(
-            name='Build', job='my-job', number=1, url=None, latest=False,
-            **PROFILE_TOKEN
-        )
+        cli_stage.status(name='Build', job='my-job', number=1, url=None, latest=False, **PROFILE_TOKEN)
         mock_print2.assert_called_with('FAILURE', bold=True, color='red')
 
     @patch('yojenkins.cli.cli_stage.print2')
@@ -1816,10 +1832,7 @@ class TestCliStageHandlersExtended:
         mock_config.return_value = mock_yj
         mock_yj.stage.status_text.return_value = 'UNKNOWN'
 
-        cli_stage.status(
-            name='Build', job='my-job', number=1, url=None, latest=False,
-            **PROFILE_TOKEN
-        )
+        cli_stage.status(name='Build', job='my-job', number=1, url=None, latest=False, **PROFILE_TOKEN)
         mock_print2.assert_called_with('UNKNOWN', bold=True, color='black')
 
     @patch('yojenkins.cli.cli_stage.print2')
@@ -1830,9 +1843,7 @@ class TestCliStageHandlersExtended:
         mock_yj.stage.status_text.return_value = 'SUCCESS'
 
         cli_stage.status(
-            name='Build', job=None, number=None,
-            url='http://j:8080/job/my-job/1/', latest=False,
-            **PROFILE_TOKEN
+            name='Build', job=None, number=None, url='http://j:8080/job/my-job/1/', latest=False, **PROFILE_TOKEN
         )
         mock_yj.stage.status_text.assert_called_once()
 
@@ -1844,9 +1855,13 @@ class TestCliStageHandlersExtended:
         mock_yj.stage.info.return_value = {'name': 'Build'}
 
         cli_stage.info(
-            name='Build', job=None, number=None,
-            url='http://j:8080/job/my-job/1/', latest=False,
-            **PROFILE_TOKEN, **COMMON_KWARGS
+            name='Build',
+            job=None,
+            number=None,
+            url='http://j:8080/job/my-job/1/',
+            latest=False,
+            **PROFILE_TOKEN,
+            **COMMON_KWARGS,
         )
         mock_yj.stage.info.assert_called_once()
 
@@ -1858,9 +1873,14 @@ class TestCliStageHandlersExtended:
         mock_yj.stage.step_list.return_value = ([{'name': 'step1'}], ['step1'])
 
         cli_stage.steps(
-            name='Build', job=None, number=None,
-            url='http://j:8080/job/my-job/1/', latest=False,
-            opt_list=True, **PROFILE_TOKEN, **COMMON_KWARGS
+            name='Build',
+            job=None,
+            number=None,
+            url='http://j:8080/job/my-job/1/',
+            latest=False,
+            opt_list=True,
+            **PROFILE_TOKEN,
+            **COMMON_KWARGS,
         )
         call_args = mock_stdout.call_args[0]
         assert call_args[0] == ['step1']
@@ -1871,34 +1891,40 @@ class TestCliStageHandlersExtended:
         mock_config.return_value = mock_yj
 
         cli_stage.logs(
-            name='Build', job=None, number=None,
-            url='http://j:8080/job/my-job/1/', latest=False,
-            download_dir=None, **PROFILE_TOKEN
+            name='Build',
+            job=None,
+            number=None,
+            url='http://j:8080/job/my-job/1/',
+            latest=False,
+            download_dir=None,
+            **PROFILE_TOKEN,
         )
         mock_yj.stage.logs.assert_called_once()
 
     @patch('yojenkins.cli.cli_stage.fail_out', side_effect=SystemExit(1))
     def test_stage_status_missing_number_and_latest_exits(self, mock_fail):
         with pytest.raises(SystemExit):
-            cli_stage.status(
-                name='Build', job='my-job', number=None, url=None, latest=False,
-                **PROFILE_TOKEN
-            )
+            cli_stage.status(name='Build', job='my-job', number=None, url=None, latest=False, **PROFILE_TOKEN)
 
     @patch('yojenkins.cli.cli_stage.fail_out', side_effect=SystemExit(1))
     def test_stage_steps_missing_number_and_latest_exits(self, mock_fail):
         with pytest.raises(SystemExit):
             cli_stage.steps(
-                name='Build', job='my-job', number=None, url=None, latest=False,
-                opt_list=False, **PROFILE_TOKEN, **COMMON_KWARGS
+                name='Build',
+                job='my-job',
+                number=None,
+                url=None,
+                latest=False,
+                opt_list=False,
+                **PROFILE_TOKEN,
+                **COMMON_KWARGS,
             )
 
     @patch('yojenkins.cli.cli_stage.fail_out', side_effect=SystemExit(1))
     def test_stage_logs_missing_number_and_latest_exits(self, mock_fail):
         with pytest.raises(SystemExit):
             cli_stage.logs(
-                name='Build', job='my-job', number=None, url=None, latest=False,
-                download_dir=None, **PROFILE_TOKEN
+                name='Build', job='my-job', number=None, url=None, latest=False, download_dir=None, **PROFILE_TOKEN
             )
 
 
@@ -1908,7 +1934,6 @@ class TestCliStageHandlersExtended:
 
 
 class TestCliAuthHandlersExtended:
-
     @patch('click.secho')
     @patch('yojenkins.cli.cli_auth.Auth')
     def test_auth_token_with_profile(self, mock_auth_cls, mock_secho):
@@ -1917,8 +1942,7 @@ class TestCliAuthHandlersExtended:
         mock_auth_cls.return_value = mock_auth
 
         cli_auth.token(
-            profile='default', token=None, name='my-token',
-            server_base_url=None, username=None, password='pass'
+            profile='default', token=None, name='my-token', server_base_url=None, username=None, password='pass'
         )
         mock_auth.profile_add_new_token.assert_called_once()
         mock_secho.assert_called_with('success', fg='bright_green', bold=True)
@@ -1931,8 +1955,12 @@ class TestCliAuthHandlersExtended:
         mock_auth_cls.return_value = mock_auth
 
         cli_auth.token(
-            profile=None, token=None, name='my-token',
-            server_base_url='http://localhost:8080', username='admin', password='pass'
+            profile=None,
+            token=None,
+            name='my-token',
+            server_base_url='http://localhost:8080',
+            username='admin',
+            password='pass',
         )
         mock_auth.generate_token.assert_called_once()
         mock_secho.assert_called_with('generated-token', fg='bright_green', bold=True)
@@ -1946,8 +1974,12 @@ class TestCliAuthHandlersExtended:
         mock_auth_cls.return_value = mock_auth
 
         cli_auth.token(
-            profile=None, token='some-token', name='my-token',
-            server_base_url='http://localhost:8080', username='admin', password='pass'
+            profile=None,
+            token='some-token',
+            name='my-token',
+            server_base_url='http://localhost:8080',
+            username='admin',
+            password='pass',
         )
         mock_auth.generate_token.assert_called_once()
 
@@ -1958,7 +1990,6 @@ class TestCliAuthHandlersExtended:
 
 
 class TestCliCredentialHandlersExtended:
-
     @patch('yojenkins.cli.cli_credential.cu.standard_out')
     @patch('yojenkins.cli.cli_credential.cu.config_yo_jenkins')
     def test_credential_config(self, mock_config, mock_stdout):
@@ -1967,9 +1998,16 @@ class TestCliCredentialHandlersExtended:
         mock_yj.credential.config.return_value = '<credential></credential>'
 
         cli_credential.config(
-            credential='cred-1', folder='/', domain='_', filepath=None,
-            opt_pretty=False, opt_yaml=False, opt_xml=False,
-            opt_toml=False, opt_json=False, **PROFILE_TOKEN
+            credential='cred-1',
+            folder='/',
+            domain='_',
+            filepath=None,
+            opt_pretty=False,
+            opt_yaml=False,
+            opt_xml=False,
+            opt_toml=False,
+            opt_json=False,
+            **PROFILE_TOKEN,
         )
         mock_stdout.assert_called_once()
 
@@ -1981,9 +2019,14 @@ class TestCliCredentialHandlersExtended:
         mock_yj.credential.get_template.return_value = '<template></template>'
 
         cli_credential.get_template(
-            type='secret-text', filepath=None,
-            opt_pretty=False, opt_yaml=False, opt_xml=False,
-            opt_toml=False, opt_json=False, **PROFILE_TOKEN
+            type='secret-text',
+            filepath=None,
+            opt_pretty=False,
+            opt_yaml=False,
+            opt_xml=False,
+            opt_toml=False,
+            opt_json=False,
+            **PROFILE_TOKEN,
         )
         mock_stdout.assert_called_once()
 
@@ -1994,17 +2037,13 @@ class TestCliCredentialHandlersExtended:
 
 
 class TestCliNodeHandlersExtended:
-
     @patch('click.secho')
     @patch('yojenkins.cli.cli_node.cu.config_yo_jenkins')
     def test_node_create_permanent(self, mock_config, mock_secho):
         mock_yj = _mock_yj()
         mock_config.return_value = mock_yj
 
-        cli_node.create_permanent(
-            name='my-node', host='192.168.1.1', credential='ssh-cred',
-            **PROFILE_TOKEN
-        )
+        cli_node.create_permanent(name='my-node', host='192.168.1.1', credential='ssh-cred', **PROFILE_TOKEN)
         mock_yj.node.create_permanent.assert_called_once()
 
     @patch('yojenkins.cli.cli_node.cu.standard_out')
@@ -2015,7 +2054,12 @@ class TestCliNodeHandlersExtended:
         mock_yj.node.config.return_value = '<node></node>'
 
         cli_node.config(
-            name='my-node', filepath=None,
-            opt_pretty=False, opt_yaml=False, opt_xml=False,
-            opt_toml=False, opt_json=False, **PROFILE_TOKEN
+            name='my-node',
+            filepath=None,
+            opt_pretty=False,
+            opt_yaml=False,
+            opt_xml=False,
+            opt_toml=False,
+            opt_json=False,
+            **PROFILE_TOKEN,
         )

@@ -1,6 +1,5 @@
 """Job click sub-command"""
 
-
 import click
 
 from yojenkins.__main__ import job
@@ -106,9 +105,7 @@ def build_exist(debug, **kwargs):
 @click.option(
     '--follow-logs', type=bool, required=False, is_flag=True, help='Wait for build, follow logs when build starts'
 )
-@click.option(
-    '--monitor', type=bool, required=False, is_flag=True, help='Wait for build, then open build monitor UI'
-)
+@click.option('--monitor', type=bool, required=False, is_flag=True, help='Wait for build, then open build monitor UI')
 def build(debug, **kwargs):
     """Build a job
 

@@ -173,7 +173,9 @@ class Auth:
             generated_token = request_return_content['data']['tokenValue']
             logger.debug(f'Successfully generated server API token "{token_name}"!')
         except KeyError:
-            raise RequestError('Failed to generate API token. Failed to find "tokenValue" in the POST request return header')
+            raise RequestError(
+                'Failed to generate API token. Failed to find "tokenValue" in the POST request return header'
+            )
 
         return generated_token
 
@@ -639,12 +641,16 @@ class Auth:
 
         # Check network connection
         if not self.rest.is_reachable():
-            raise AuthenticationError(f'Jenkins server connection failed: {self.jenkins_profile["jenkins_server_url"]}')
+            raise AuthenticationError(
+                f'Jenkins server connection failed: {self.jenkins_profile["jenkins_server_url"]}'
+            )
 
         # Checking authentication
         logger.debug(f'Checking authentication to Jenkins server: {self.jenkins_profile["jenkins_server_url"]} ...')
         if not self.verify():
-            raise AuthenticationError(f'Jenkins server authentication failed for user: {self.jenkins_profile["username"]}')
+            raise AuthenticationError(
+                f'Jenkins server authentication failed for user: {self.jenkins_profile["username"]}'
+            )
 
         return True
 
@@ -679,7 +685,9 @@ class Auth:
         try:
             request_url = self.jenkins_profile['jenkins_server_url'].strip('/') + '/me/api/json'
         except KeyError:
-            raise AuthenticationError('Failed to find profile key "jenkins_server_url". Profile may not have loaded correctly')
+            raise AuthenticationError(
+                'Failed to find profile key "jenkins_server_url". Profile may not have loaded correctly'
+            )
         request_success = self.rest.request(target=request_url, is_endpoint=False, request_type='head')[2]
         if not request_success:
             messages = ['Failed server authentication with specified user credentials']

@@ -43,8 +43,17 @@ class TestStatusEnum:
 
     def test_status_has_all_expected_members(self):
         expected = {
-            'RUNNING', 'SUCCESS', 'FAILURE', 'QUEUED', 'ABORTED',
-            'UNSTABLE', 'PAUSED_INPUT', 'NOT_FOUND', 'NOT_RUN', 'NONE', 'UNKNOWN',
+            'RUNNING',
+            'SUCCESS',
+            'FAILURE',
+            'QUEUED',
+            'ABORTED',
+            'UNSTABLE',
+            'PAUSED_INPUT',
+            'NOT_FOUND',
+            'NOT_RUN',
+            'NONE',
+            'UNKNOWN',
         }
         assert set(Status.__members__.keys()) == expected
 
@@ -120,8 +129,17 @@ class TestColorEnum:
 
     def test_color_items_has_all_status_keys(self):
         expected_keys = {
-            'RUNNING', 'SUCCESS', 'FAILURE', 'QUEUED', 'ABORTED',
-            'UNSTABLE', 'PAUSED_INPUT', 'NOT_FOUND', 'NOT_RUN', 'NONE', 'UNKNOWN',
+            'RUNNING',
+            'SUCCESS',
+            'FAILURE',
+            'QUEUED',
+            'ABORTED',
+            'UNSTABLE',
+            'PAUSED_INPUT',
+            'NOT_FOUND',
+            'NOT_RUN',
+            'NONE',
+            'UNKNOWN',
         }
         assert set(Color.ITEMS.value.keys()) == expected_keys
 
@@ -152,8 +170,17 @@ class TestSoundEnum:
 
     def test_sound_items_has_all_status_keys(self):
         expected_keys = {
-            'RUNNING', 'SUCCESS', 'FAILURE', 'QUEUED', 'ABORTED',
-            'UNSTABLE', 'PAUSED_INPUT', 'NOT_FOUND', 'NOT_RUN', 'NONE', 'UNKNOWN',
+            'RUNNING',
+            'SUCCESS',
+            'FAILURE',
+            'QUEUED',
+            'ABORTED',
+            'UNSTABLE',
+            'PAUSED_INPUT',
+            'NOT_FOUND',
+            'NOT_RUN',
+            'NONE',
+            'UNKNOWN',
         }
         assert set(Sound.ITEMS.value.keys()) == expected_keys
 

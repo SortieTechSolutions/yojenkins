@@ -7,7 +7,12 @@ import click
 
 from yojenkins.cli import cli_utility as cu
 from yojenkins.cli.cli_utility import log_to_history
-from yojenkins.utility.utility import browser_open, is_complete_build_url, wait_for_build_and_follow_logs, wait_for_build_and_monitor
+from yojenkins.utility.utility import (
+    browser_open,
+    is_complete_build_url,
+    wait_for_build_and_follow_logs,
+    wait_for_build_and_monitor,
+)
 from yojenkins.yo_jenkins.status import Status
 
 # Getting the logger reference
@@ -54,7 +59,8 @@ def info(profile: str, token: str, job: str, number: int, url: str, latest: bool
         click.echo(
             click.style(
                 f'INPUT ERROR: For job name, specify --number or --latest.{hint} See --help',
-                fg='bright_red', bold=True
+                fg='bright_red',
+                bold=True,
             )
         )
         sys.exit(1)
@@ -90,7 +96,8 @@ def status(profile: str, token: str, job: str, number: int, url: str, latest: bo
         click.echo(
             click.style(
                 f'INPUT ERROR: For job name, specify --number or --latest.{hint} See --help',
-                fg='bright_red', bold=True
+                fg='bright_red',
+                bold=True,
             )
         )
         sys.exit(1)
@@ -140,7 +147,8 @@ def abort(profile: str, token: str, job: str, number: int, url: str, latest: boo
         click.echo(
             click.style(
                 f'INPUT ERROR: For job name, specify --number or --latest.{hint} See --help',
-                fg='bright_red', bold=True
+                fg='bright_red',
+                bold=True,
             )
         )
         sys.exit(1)
@@ -173,7 +181,8 @@ def delete(profile: str, token: str, job: str, number: int, url: str, latest: bo
         click.echo(
             click.style(
                 f'INPUT ERROR: For job name, specify --number or --latest.{hint} See --help',
-                fg='bright_red', bold=True
+                fg='bright_red',
+                bold=True,
             )
         )
         sys.exit(1)
@@ -207,7 +216,8 @@ def stages(profile: str, token: str, opt_list: bool, job: str, number: int, url:
         click.echo(
             click.style(
                 f'INPUT ERROR: For job name, specify --number or --latest.{hint} See --help',
-                fg='bright_red', bold=True
+                fg='bright_red',
+                bold=True,
             )
         )
         sys.exit(1)
@@ -255,7 +265,8 @@ def logs(
         click.echo(
             click.style(
                 f'INPUT ERROR: For job name, specify --number or --latest.{hint} See --help',
-                fg='bright_red', bold=True
+                fg='bright_red',
+                bold=True,
             )
         )
         sys.exit(1)
@@ -305,7 +316,8 @@ def browser(profile: str, token: str, job: str, number: int, url: str, latest: b
         click.echo(
             click.style(
                 f'INPUT ERROR: For job name, specify --number or --latest.{hint} See --help',
-                fg='bright_red', bold=True
+                fg='bright_red',
+                bold=True,
             )
         )
         sys.exit(1)
@@ -343,7 +355,8 @@ def monitor(profile: str, token: str, job: str, number: int, url: str, latest: b
         click.echo(
             click.style(
                 f'INPUT ERROR: For job name, specify --number or --latest.{hint} See --help',
-                fg='bright_red', bold=True
+                fg='bright_red',
+                bold=True,
             )
         )
         sys.exit(1)
@@ -378,7 +391,8 @@ def parameters(
         click.echo(
             click.style(
                 f'INPUT ERROR: For job name, specify --number or --latest.{hint} See --help',
-                fg='bright_red', bold=True
+                fg='bright_red',
+                bold=True,
             )
         )
         sys.exit(1)
@@ -394,7 +408,9 @@ def parameters(
 
 
 @log_to_history
-def rebuild(profile: str, token: str, job: str, number: int, url: str, latest: bool, follow_logs: bool, monitor: bool = False) -> None:
+def rebuild(
+    profile: str, token: str, job: str, number: int, url: str, latest: bool, follow_logs: bool, monitor: bool = False
+) -> None:
     """Rebuild a build with same setup/parameters
 
     Args:
@@ -415,7 +431,8 @@ def rebuild(profile: str, token: str, job: str, number: int, url: str, latest: b
         click.echo(
             click.style(
                 f'INPUT ERROR: For job name, specify --number or --latest.{hint} See --help',
-                fg='bright_red', bold=True
+                fg='bright_red',
+                bold=True,
             )
         )
         sys.exit(1)

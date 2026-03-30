@@ -16,6 +16,7 @@ def server(mock_rest, mock_auth):
 
 # --- Server.__init__ ---
 
+
 class TestServerInit:
     def test_init_sets_rest_and_auth(self, mock_rest, mock_auth):
         srv = Server(rest=mock_rest, auth=mock_auth)
@@ -28,6 +29,7 @@ class TestServerInit:
 
 
 # --- Server.info ---
+
 
 class TestServerInfo:
     def test_info_returns_data_on_success(self, server):
@@ -43,6 +45,7 @@ class TestServerInfo:
 
 
 # --- Server.people ---
+
 
 class TestServerPeople:
     def test_people_returns_users_and_names(self, server):
@@ -70,6 +73,7 @@ class TestServerPeople:
 
 # --- Server.queue_info ---
 
+
 class TestServerQueueInfo:
     def test_queue_info_returns_data(self, server):
         queue_data = {'items': []}
@@ -84,6 +88,7 @@ class TestServerQueueInfo:
 
 
 # --- Server.queue_list ---
+
 
 class TestServerQueueList:
     def test_queue_list_returns_items(self, server):
@@ -104,6 +109,7 @@ class TestServerQueueList:
 
 
 # --- Server.plugin_list ---
+
 
 class TestServerPluginList:
     def test_plugin_list_returns_plugins_and_descriptions(self, server):
@@ -132,6 +138,7 @@ class TestServerPluginList:
 
 # --- Server.restart ---
 
+
 class TestServerRestart:
     def test_restart_force(self, server):
         server.rest.request.return_value = ('', {}, True)
@@ -156,6 +163,7 @@ class TestServerRestart:
 
 
 # --- Server.shutdown ---
+
 
 class TestServerShutdown:
     def test_shutdown_force(self, server):
@@ -182,6 +190,7 @@ class TestServerShutdown:
 
 # --- Server.quiet ---
 
+
 class TestServerQuiet:
     def test_quiet_enable(self, server):
         server.rest.request.return_value = ('', {}, True)
@@ -206,6 +215,7 @@ class TestServerQuiet:
 
 
 # --- Server.browser_open ---
+
 
 class TestServerBrowserOpen:
     @patch('yojenkins.yo_jenkins.server.utility.browser_open', return_value=True)

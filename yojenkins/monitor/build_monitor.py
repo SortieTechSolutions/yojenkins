@@ -306,8 +306,7 @@ class BuildMonitor(Monitor):
                 # Play sound when any stage is stuck in PAUSED_PENDING_INPUT
                 if sound and not self.playing_sound:
                     has_paused_stage = any(
-                        stage.get('status') == StageStatus.PAUSED_INPUT.value
-                        for stage in self.build_stages_data
+                        stage.get('status') == StageStatus.PAUSED_INPUT.value for stage in self.build_stages_data
                     )
                     if has_paused_stage and not self._stage_paused_sound_played:
                         sound_file = Sound.ITEMS.value['PAUSED_INPUT']

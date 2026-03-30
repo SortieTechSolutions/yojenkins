@@ -74,7 +74,9 @@ class TestGetCredentials:
         _write_creds_file(tmp_path, profiles)
 
         auth = Auth(rest=mock_rest)
-        with patch.object(auth, '_detect_creds_file', return_value=(True, str(tmp_path / CONFIG_DIR_NAME / CREDS_FILE_NAME))):
+        with patch.object(
+            auth, '_detect_creds_file', return_value=(True, str(tmp_path / CONFIG_DIR_NAME / CREDS_FILE_NAME))
+        ):
             with patch('yojenkins.yo_jenkins.auth.Path') as MockPath:
                 MockPath.home.return_value = tmp_path
                 result = auth.get_credentials(profile='staging')
@@ -85,11 +87,13 @@ class TestGetCredentials:
 
     def test_priority1_json_string_profile(self, mock_rest):
         """Priority 1 (variant): --profile with a JSON string is parsed directly."""
-        json_profile = json.dumps({
-            'jenkins_server_url': 'http://json-server:8080',
-            'username': 'jsonuser',
-            'api_token': 'jsontoken',
-        })
+        json_profile = json.dumps(
+            {
+                'jenkins_server_url': 'http://json-server:8080',
+                'username': 'jsonuser',
+                'api_token': 'jsontoken',
+            }
+        )
         auth = Auth(rest=mock_rest)
         result = auth.get_credentials(profile=json_profile)
 
@@ -123,7 +127,9 @@ class TestGetCredentials:
         _write_creds_file(tmp_path, profiles)
 
         auth = Auth(rest=mock_rest)
-        with patch.object(auth, '_detect_creds_file', return_value=(True, str(tmp_path / CONFIG_DIR_NAME / CREDS_FILE_NAME))):
+        with patch.object(
+            auth, '_detect_creds_file', return_value=(True, str(tmp_path / CONFIG_DIR_NAME / CREDS_FILE_NAME))
+        ):
             with patch('yojenkins.yo_jenkins.auth.Path') as MockPath:
                 MockPath.home.return_value = tmp_path
                 with patch.dict(os.environ, {PROFILE_ENV_VAR: 'envprofile'}):
@@ -145,7 +151,9 @@ class TestGetCredentials:
         _write_creds_file(tmp_path, profiles)
 
         auth = Auth(rest=mock_rest)
-        with patch.object(auth, '_detect_creds_file', return_value=(True, str(tmp_path / CONFIG_DIR_NAME / CREDS_FILE_NAME))):
+        with patch.object(
+            auth, '_detect_creds_file', return_value=(True, str(tmp_path / CONFIG_DIR_NAME / CREDS_FILE_NAME))
+        ):
             with patch('yojenkins.yo_jenkins.auth.Path') as MockPath:
                 MockPath.home.return_value = tmp_path
                 with patch.dict(os.environ, {PROFILE_ENV_VAR: 'nonexistent'}, clear=False):
@@ -172,7 +180,9 @@ class TestGetCredentials:
 
         auth = Auth(rest=mock_rest)
         env_clean = {k: v for k, v in os.environ.items() if k != PROFILE_ENV_VAR}
-        with patch.object(auth, '_detect_creds_file', return_value=(True, str(tmp_path / CONFIG_DIR_NAME / CREDS_FILE_NAME))):
+        with patch.object(
+            auth, '_detect_creds_file', return_value=(True, str(tmp_path / CONFIG_DIR_NAME / CREDS_FILE_NAME))
+        ):
             with patch('yojenkins.yo_jenkins.auth.Path') as MockPath:
                 MockPath.home.return_value = tmp_path
                 with patch.dict(os.environ, env_clean, clear=True):
@@ -195,7 +205,9 @@ class TestGetCredentials:
 
         auth = Auth(rest=mock_rest)
         env_clean = {k: v for k, v in os.environ.items() if k != PROFILE_ENV_VAR}
-        with patch.object(auth, '_detect_creds_file', return_value=(True, str(tmp_path / CONFIG_DIR_NAME / CREDS_FILE_NAME))):
+        with patch.object(
+            auth, '_detect_creds_file', return_value=(True, str(tmp_path / CONFIG_DIR_NAME / CREDS_FILE_NAME))
+        ):
             with patch('yojenkins.yo_jenkins.auth.Path') as MockPath:
                 MockPath.home.return_value = tmp_path
                 with patch.dict(os.environ, env_clean, clear=True):
@@ -218,7 +230,9 @@ class TestGetCredentials:
 
         auth = Auth(rest=mock_rest)
         env_clean = {k: v for k, v in os.environ.items() if k != PROFILE_ENV_VAR}
-        with patch.object(auth, '_detect_creds_file', return_value=(True, str(tmp_path / CONFIG_DIR_NAME / CREDS_FILE_NAME))):
+        with patch.object(
+            auth, '_detect_creds_file', return_value=(True, str(tmp_path / CONFIG_DIR_NAME / CREDS_FILE_NAME))
+        ):
             with patch('yojenkins.yo_jenkins.auth.Path') as MockPath:
                 MockPath.home.return_value = tmp_path
                 with patch.dict(os.environ, env_clean, clear=True):
@@ -238,7 +252,9 @@ class TestGetCredentials:
         _write_creds_file(tmp_path, profiles)
 
         auth = Auth(rest=mock_rest)
-        with patch.object(auth, '_detect_creds_file', return_value=(True, str(tmp_path / CONFIG_DIR_NAME / CREDS_FILE_NAME))):
+        with patch.object(
+            auth, '_detect_creds_file', return_value=(True, str(tmp_path / CONFIG_DIR_NAME / CREDS_FILE_NAME))
+        ):
             with patch('yojenkins.yo_jenkins.auth.Path') as MockPath:
                 MockPath.home.return_value = tmp_path
                 with pytest.raises(YoJenkinsException):
@@ -258,7 +274,9 @@ class TestGetCredentials:
 
         auth = Auth(rest=mock_rest)
         env_clean = {k: v for k, v in os.environ.items() if k != PROFILE_ENV_VAR}
-        with patch.object(auth, '_detect_creds_file', return_value=(True, str(tmp_path / CONFIG_DIR_NAME / CREDS_FILE_NAME))):
+        with patch.object(
+            auth, '_detect_creds_file', return_value=(True, str(tmp_path / CONFIG_DIR_NAME / CREDS_FILE_NAME))
+        ):
             with patch('yojenkins.yo_jenkins.auth.Path') as MockPath:
                 MockPath.home.return_value = tmp_path
                 with patch.dict(os.environ, env_clean, clear=True):
@@ -578,7 +596,10 @@ class TestDetectConfigDir:
 
     def test_detect_creds_file_exists(self, mock_rest, tmp_path):
         """_detect_creds_file returns True when creds file exists."""
-        _write_creds_file(tmp_path, {'default': {'jenkins_server_url': 'http://x', 'username': 'u', 'api_token': 't', 'active': True}})
+        _write_creds_file(
+            tmp_path,
+            {'default': {'jenkins_server_url': 'http://x', 'username': 'u', 'api_token': 't', 'active': True}},
+        )
         auth = Auth(rest=mock_rest)
         with patch('yojenkins.yo_jenkins.auth.Path') as MockPath:
             MockPath.home.return_value = tmp_path
@@ -729,7 +750,9 @@ class TestProfileAddNewToken:
         }
         _write_creds_file(tmp_path, profiles)
         auth = Auth(rest=mock_rest)
-        with patch.object(auth, '_detect_creds_file', return_value=(True, str(tmp_path / CONFIG_DIR_NAME / CREDS_FILE_NAME))):
+        with patch.object(
+            auth, '_detect_creds_file', return_value=(True, str(tmp_path / CONFIG_DIR_NAME / CREDS_FILE_NAME))
+        ):
             with patch.object(auth, '_update_profiles', return_value=True):
                 result = auth.profile_add_new_token('default', token='new-provided-token')
         assert result == 'new-provided-token'
@@ -746,7 +769,9 @@ class TestProfileAddNewToken:
         }
         _write_creds_file(tmp_path, profiles)
         auth = Auth(rest=mock_rest)
-        with patch.object(auth, '_detect_creds_file', return_value=(True, str(tmp_path / CONFIG_DIR_NAME / CREDS_FILE_NAME))):
+        with patch.object(
+            auth, '_detect_creds_file', return_value=(True, str(tmp_path / CONFIG_DIR_NAME / CREDS_FILE_NAME))
+        ):
             with pytest.raises(YoJenkinsException):
                 auth.profile_add_new_token('nonexistent')
 
@@ -767,7 +792,9 @@ class TestProfileAddNewToken:
         }
         _write_creds_file(tmp_path, profiles)
         auth = Auth(rest=mock_rest)
-        with patch.object(auth, '_detect_creds_file', return_value=(True, str(tmp_path / CONFIG_DIR_NAME / CREDS_FILE_NAME))):
+        with patch.object(
+            auth, '_detect_creds_file', return_value=(True, str(tmp_path / CONFIG_DIR_NAME / CREDS_FILE_NAME))
+        ):
             with patch.object(auth, '_update_profiles', return_value=True):
                 result = auth.profile_add_new_token('minimal', token='my-token')
         assert result == 'my-token'
@@ -784,7 +811,9 @@ class TestProfileAddNewToken:
         }
         _write_creds_file(tmp_path, profiles)
         auth = Auth(rest=mock_rest)
-        with patch.object(auth, '_detect_creds_file', return_value=(True, str(tmp_path / CONFIG_DIR_NAME / CREDS_FILE_NAME))):
+        with patch.object(
+            auth, '_detect_creds_file', return_value=(True, str(tmp_path / CONFIG_DIR_NAME / CREDS_FILE_NAME))
+        ):
             with patch.object(auth, '_update_profiles', return_value=False):
                 with pytest.raises(YoJenkinsException):
                     auth.profile_add_new_token('default', token='t')
@@ -871,7 +900,9 @@ class TestConfigure:
         auth_file.write_text(json.dumps(auth_setup))
 
         auth = Auth(rest=mock_rest)
-        with patch.object(auth, '_detect_creds_file', return_value=(True, str(tmp_path / CONFIG_DIR_NAME / CREDS_FILE_NAME))):
+        with patch.object(
+            auth, '_detect_creds_file', return_value=(True, str(tmp_path / CONFIG_DIR_NAME / CREDS_FILE_NAME))
+        ):
             with patch.object(auth, '_update_profiles', return_value=True):
                 result = auth.configure(auth_file=str(auth_file))
         assert result is True

@@ -23,6 +23,7 @@ def folder_obj(mock_rest):
 
 # ---------- Constructor ----------
 
+
 class TestConstructor:
     def test_init_sets_rest_and_sdk(self, mock_rest):
         sdk = MagicMock()
@@ -34,6 +35,7 @@ class TestConstructor:
 
 
 # ---------- info ----------
+
 
 class TestInfo:
     def test_info_by_url(self, folder_obj):
@@ -83,6 +85,7 @@ class TestInfo:
 
 
 # ---------- __recursive_search ----------
+
 
 class TestRecursiveSearch:
     def test_empty_folder(self, folder_obj):
@@ -177,6 +180,7 @@ class TestRecursiveSearch:
 
 # ---------- search ----------
 
+
 class TestSearch:
     def test_search_entire_jenkins(self, folder_obj):
         folder_obj.jenkins_sdk.get_all_jobs.return_value = [
@@ -201,6 +205,7 @@ class TestSearch:
 
 
 # ---------- subfolder_list ----------
+
 
 class TestSubfolderList:
     @patch('yojenkins.yo_jenkins.folder.utility.item_subitem_list')
@@ -228,6 +233,7 @@ class TestSubfolderList:
 
 # ---------- jobs_list ----------
 
+
 class TestJobsList:
     @patch('yojenkins.yo_jenkins.folder.utility.item_subitem_list')
     def test_returns_jobs(self, mock_subitem_list, folder_obj):
@@ -250,6 +256,7 @@ class TestJobsList:
 
 # ---------- view_list ----------
 
+
 class TestViewList:
     @patch('yojenkins.yo_jenkins.folder.utility.item_subitem_list')
     def test_returns_views(self, mock_subitem_list, folder_obj):
@@ -262,6 +269,7 @@ class TestViewList:
 
 
 # ---------- config ----------
+
 
 class TestConfig:
     def test_get_config_xml(self, folder_obj):
@@ -298,6 +306,7 @@ class TestConfig:
 
 # ---------- create ----------
 
+
 class TestCreate:
     def test_create_no_folder_exits(self, folder_obj):
         with pytest.raises(YoJenkinsException):
@@ -328,6 +337,7 @@ class TestCreate:
 
 # ---------- copy ----------
 
+
 class TestCopy:
     def test_copy_no_folder_exits(self, folder_obj):
         with pytest.raises(YoJenkinsException):
@@ -348,6 +358,7 @@ class TestCopy:
 
 
 # ---------- delete ----------
+
 
 class TestDelete:
     def test_delete_no_args_exits(self, folder_obj):
@@ -377,6 +388,7 @@ class TestDelete:
 
 # ---------- browser_open ----------
 
+
 class TestBrowserOpen:
     @patch('yojenkins.yo_jenkins.folder.utility.browser_open', return_value=True)
     def test_browser_open_by_url(self, mock_browser, folder_obj):
@@ -395,6 +407,7 @@ class TestBrowserOpen:
 
 # ---------- config edge cases ----------
 
+
 class TestConfigEdgeCases:
     def test_config_by_name(self, folder_obj):
         xml_content = '<folder/>'
@@ -404,6 +417,7 @@ class TestConfigEdgeCases:
 
 
 # ---------- item_list ----------
+
 
 class TestItemList:
     def test_item_list_returns_all_items(self, folder_obj):
@@ -427,6 +441,7 @@ class TestItemList:
 
 
 # ---------- create edge cases ----------
+
 
 class TestCreateEdgeCases:
     @patch('yojenkins.yo_jenkins.folder.utility.item_exists_in_folder', return_value=False)
@@ -472,6 +487,7 @@ class TestCreateEdgeCases:
 
 
 # ---------- copy edge cases ----------
+
 
 class TestCopyEdgeCases:
     @patch('yojenkins.yo_jenkins.folder.utility.has_special_char', return_value=False)

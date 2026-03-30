@@ -8,11 +8,11 @@ from yojenkins.api.dependencies import get_yo_jenkins
 router = APIRouter()
 
 
-@router.get("/search")
+@router.get('/search')
 async def search_jobs(
-    pattern: str = Query(..., max_length=500, description="REGEX pattern to search for"),
-    folder: str = Query("", description="Folder to search within"),
-    depth: int = Query(4, ge=1, le=10, description="Search depth"),
+    pattern: str = Query(..., max_length=500, description='REGEX pattern to search for'),
+    folder: str = Query('', description='Folder to search within'),
+    depth: int = Query(4, ge=1, le=10, description='Search depth'),
     yj=Depends(get_yo_jenkins),
 ):
     """Search for jobs matching a REGEX pattern."""
@@ -22,12 +22,12 @@ async def search_jobs(
         folder_name=folder,
         folder_depth=depth,
     )
-    return {"results": results, "urls": urls}
+    return {'results': results, 'urls': urls}
 
 
-@router.get("/info")
+@router.get('/info')
 async def job_info(
-    job: str = Query(..., description="Job name or URL"),
+    job: str = Query(..., description='Job name or URL'),
     yj=Depends(get_yo_jenkins),
 ):
     """Get job information."""
@@ -38,9 +38,9 @@ async def job_info(
     return await run_in_threadpool(yj.job.info, job_name=job)
 
 
-@router.post("/build")
+@router.post('/build')
 async def trigger_build(
-    job: str = Query(..., description="Job name or URL"),
+    job: str = Query(..., description='Job name or URL'),
     yj=Depends(get_yo_jenkins),
 ):
     """Trigger a build for the specified job."""
@@ -50,12 +50,12 @@ async def trigger_build(
         queue_number = await run_in_threadpool(yj.job.build_trigger, job_url=job)
     else:
         queue_number = await run_in_threadpool(yj.job.build_trigger, job_name=job)
-    return {"queue_number": queue_number}
+    return {'queue_number': queue_number}
 
 
-@router.get("/builds")
+@router.get('/builds')
 async def job_builds(
-    job: str = Query(..., description="Job name or URL"),
+    job: str = Query(..., description='Job name or URL'),
     yj=Depends(get_yo_jenkins),
 ):
     """List all builds for a job."""
@@ -65,4 +65,4 @@ async def job_builds(
         builds, urls = await run_in_threadpool(yj.job.build_list, job_url=job)
     else:
         builds, urls = await run_in_threadpool(yj.job.build_list, job_name=job)
-    return {"builds": builds, "urls": urls}
+    return {'builds': builds, 'urls': urls}

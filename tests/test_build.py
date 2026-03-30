@@ -99,8 +99,8 @@ class TestBuildInfo:
         build_info = _make_build_info()
 
         build_obj.rest.request.side_effect = [
-            (job_info, {}, True),     # job info request
-            (build_info, {}, True),   # build info request
+            (job_info, {}, True),  # job info request
+            (build_info, {}, True),  # build info request
         ]
 
         result = build_obj.info(job_name='my_job', build_number=42)
@@ -769,15 +769,19 @@ class TestBuildParametersEdgeCases:
         """parameters() with no build_url gets URL from info."""
         build_info = _make_build_info()
         build_info['actions'] = [
-            {'_class': 'hudson.model.ParametersAction', 'parameters': [
-                {'name': 'BRANCH', 'value': 'main', '_class': 'StringParameterValue'}
-            ]}
+            {
+                '_class': 'hudson.model.ParametersAction',
+                'parameters': [{'name': 'BRANCH', 'value': 'main', '_class': 'StringParameterValue'}],
+            }
         ]
         with patch.object(build_obj, 'info', return_value=build_info):
             with patch('yojenkins.yo_jenkins.build.utility.build_url_complete', return_value=None):
-                with patch('yojenkins.yo_jenkins.build.utility.get_item_action', return_value=[
-                    {'parameters': [{'name': 'BRANCH', 'value': 'main', '_class': 'StringParameterValue'}]}
-                ]):
+                with patch(
+                    'yojenkins.yo_jenkins.build.utility.get_item_action',
+                    return_value=[
+                        {'parameters': [{'name': 'BRANCH', 'value': 'main', '_class': 'StringParameterValue'}]}
+                    ],
+                ):
                     params, params_list = build_obj.parameters(job_name='my_job', latest=True)
         assert params[0]['name'] == 'BRANCH'
 
@@ -792,18 +796,19 @@ class TestBuildRebuild:
         """rebuild() triggers build with parameters."""
         build_info = _make_build_info()
         build_info['actions'] = [
-            {'_class': 'hudson.model.ParametersAction', 'parameters': [
-                {'name': 'BRANCH', 'value': 'main'}
-            ]}
+            {'_class': 'hudson.model.ParametersAction', 'parameters': [{'name': 'BRANCH', 'value': 'main'}]}
         ]
         build_obj.rest.request.return_value = ({}, {'Location': 'http://localhost:8080/queue/item/99/'}, True)
         with patch.object(build_obj, 'info', return_value=build_info):
             with patch('yojenkins.yo_jenkins.build.utility.build_url_complete', return_value=None):
-                with patch('yojenkins.yo_jenkins.build.utility.get_item_action', return_value=[
-                    {'parameters': [{'name': 'BRANCH', 'value': 'main'}]}
-                ]):
-                    with patch('yojenkins.yo_jenkins.build.utility.build_url_to_other_url',
-                               return_value='http://localhost:8080/job/my_job'):
+                with patch(
+                    'yojenkins.yo_jenkins.build.utility.get_item_action',
+                    return_value=[{'parameters': [{'name': 'BRANCH', 'value': 'main'}]}],
+                ):
+                    with patch(
+                        'yojenkins.yo_jenkins.build.utility.build_url_to_other_url',
+                        return_value='http://localhost:8080/job/my_job',
+                    ):
                         queue_num = build_obj.rebuild(job_name='my_job', latest=True)
         assert queue_num == 99
 
@@ -815,8 +820,10 @@ class TestBuildRebuild:
         with patch.object(build_obj, 'info', return_value=build_info):
             with patch('yojenkins.yo_jenkins.build.utility.build_url_complete', return_value=None):
                 with patch('yojenkins.yo_jenkins.build.utility.get_item_action', return_value=[]):
-                    with patch('yojenkins.yo_jenkins.build.utility.build_url_to_other_url',
-                               return_value='http://localhost:8080/job/my_job'):
+                    with patch(
+                        'yojenkins.yo_jenkins.build.utility.build_url_to_other_url',
+                        return_value='http://localhost:8080/job/my_job',
+                    ):
                         queue_num = build_obj.rebuild(job_name='my_job', latest=True)
         assert queue_num == 50
 
@@ -830,15 +837,13 @@ class TestBuildStatusTextEdgeCases:
     def test_status_queued(self, build_obj):
         """status_text() returns QUEUED when build is in queue."""
         build_info = _make_build_info()
-        build_obj.rest.request.return_value = (
-            {'items': [{'task': {'url': JOB_URL}, 'id': 1}]}, {}, True
-        )
+        build_obj.rest.request.return_value = ({'items': [{'task': {'url': JOB_URL}, 'id': 1}]}, {}, True)
         with patch.object(build_obj, 'info', return_value=build_info):
             with patch('yojenkins.yo_jenkins.build.utility.build_url_complete', return_value=BUILD_URL):
-                with patch('yojenkins.yo_jenkins.build.utility.queue_find',
-                           return_value=[{'id': 1, 'task': {'url': JOB_URL}}]):
-                    with patch('yojenkins.yo_jenkins.build.utility.build_url_to_other_url',
-                               return_value=JOB_URL):
+                with patch(
+                    'yojenkins.yo_jenkins.build.utility.queue_find', return_value=[{'id': 1, 'task': {'url': JOB_URL}}]
+                ):
+                    with patch('yojenkins.yo_jenkins.build.utility.build_url_to_other_url', return_value=JOB_URL):
                         result = build_obj.status_text(build_url=BUILD_URL)
         assert result == 'QUEUED'
 

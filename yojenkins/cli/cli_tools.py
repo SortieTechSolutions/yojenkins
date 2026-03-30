@@ -123,7 +123,7 @@ def history(profile: str, clear: bool, enable: bool = False, disable: bool = Fal
         config_path.parent.mkdir(parents=True, exist_ok=True)
         lines = []
         if config_path.is_file():
-            with open(config_path, 'r') as f:
+            with open(config_path) as f:
                 lines = [l for l in f.readlines() if not l.strip().startswith('history_enabled=')]
         lines.append(f'history_enabled={"true" if enable else "false"}\n')
         with open(config_path, 'w') as f:

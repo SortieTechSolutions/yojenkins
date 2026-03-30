@@ -167,7 +167,9 @@ class Folder:
             folder_info['_class'] not in JenkinsItemClasses.FOLDER.value['class_type']
             and JenkinsItemClasses.FOLDER.value['item_type'] not in folder_info
         ):
-            raise NotFoundError(f'Folder found, but failed to match type/class. This item is "{folder_info["_class"]}"')
+            raise NotFoundError(
+                f'Folder found, but failed to match type/class. This item is "{folder_info["_class"]}"'
+            )
 
         return folder_info
 
@@ -399,7 +401,9 @@ class Folder:
 
         supported_create_items = ['folder', 'view', 'job']
         if type.strip().lower() not in supported_create_items:
-            raise ValidationError(f'Failed to match supported "{type}" items to create: {", ".join(supported_create_items)}')
+            raise ValidationError(
+                f'Failed to match supported "{type}" items to create: {", ".join(supported_create_items)}'
+            )
 
         if config:
             # Use item configuration from file if provided
