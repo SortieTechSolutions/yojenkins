@@ -84,7 +84,6 @@ setuptools.setup(
     long_description=read('README.md'),
     long_description_content_type='text/markdown',
     python_requires='>=3.7',
-    setup_requires=['wheel'],
     py_modules=["yojenkins"],
     entry_points={
         "console_scripts": [
