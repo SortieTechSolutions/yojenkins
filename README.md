@@ -79,8 +79,10 @@ Opens a local server at `http://127.0.0.1:8090` with both the REST API and React
 
 | Variable                | Description                                              |
 |-------------------------|----------------------------------------------------------|
-| `YOJENKINS_SECRET_KEY`  | JWT signing key. Random per-restart if unset.            |
-| `YOJENKINS_STATIC_DIR`  | Override path to built frontend assets.                  |
+| `YOJENKINS_SECRET_KEY`      | JWT signing key. Random per-restart if unset.            |
+| `YOJENKINS_STATIC_DIR`      | Override path to built frontend assets.                  |
+| `YOJENKINS_TOKEN`           | API token override for CLI authentication.               |
+| `YOJENKINS_DISABLE_HISTORY` | Set to `true` to disable CLI command history tracking.   |
 
 **API docs:** Visit `/docs` on the running server for the interactive Swagger UI.
 
