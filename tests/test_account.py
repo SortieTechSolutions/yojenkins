@@ -1,9 +1,11 @@
 """Tests for yojenkins.yo_jenkins.account.Account"""
 
+from unittest.mock import patch
+
 import pytest
-from unittest.mock import patch, MagicMock
 
 from yojenkins.yo_jenkins.account import Account
+from yojenkins.yo_jenkins.exceptions import YoJenkinsException
 
 
 @pytest.fixture
@@ -41,7 +43,7 @@ class TestAccountList:
     @patch('yojenkins.yo_jenkins.account.utility.run_groovy_script')
     def test_list_fail_out_on_failure(self, mock_groovy, account):
         mock_groovy.return_value = ([], False, 'some error')
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             account.list()
 
     @patch('yojenkins.yo_jenkins.account.utility.run_groovy_script')
@@ -71,7 +73,7 @@ class TestAccountInfo:
     @patch('yojenkins.yo_jenkins.account.utility.run_groovy_script')
     def test_info_fail_out_on_request_failure(self, mock_groovy, account):
         mock_groovy.return_value = ([], False, 'error')
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             account.info('alice')
 
     @patch('yojenkins.yo_jenkins.account.utility.run_groovy_script')
@@ -81,7 +83,7 @@ class TestAccountInfo:
             True,
             '',
         )
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             account.info('nonexistent')
 
 
@@ -97,7 +99,7 @@ class TestAccountCreate:
     @patch('yojenkins.yo_jenkins.account.utility.run_groovy_script')
     def test_create_fail_out(self, mock_groovy, account):
         mock_groovy.return_value = ('', False, 'creation error')
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             account.create('newuser', 'pass123', is_admin=False, email='', description='')
 
     @patch('yojenkins.yo_jenkins.account.utility.run_groovy_script')
@@ -120,7 +122,7 @@ class TestAccountDelete:
     @patch('yojenkins.yo_jenkins.account.utility.run_groovy_script')
     def test_delete_fail_out(self, mock_groovy, account):
         mock_groovy.return_value = ('', False, 'delete error')
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             account.delete('olduser')
 
 
@@ -147,7 +149,7 @@ class TestAccountPermission:
 
     @patch('yojenkins.yo_jenkins.account.utility.parse_and_check_input_string_list', return_value='perm1')
     def test_permission_invalid_action_fail_out(self, mock_parse, account):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             account.permission('alice', 'invalid', 'perm1')
 
 
@@ -172,5 +174,5 @@ class TestAccountPermissionList:
     @patch('yojenkins.yo_jenkins.account.utility.run_groovy_script')
     def test_permission_list_fail_out(self, mock_groovy, account):
         mock_groovy.return_value = ([], False, 'error')
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             account.permission_list()

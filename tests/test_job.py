@@ -1,8 +1,10 @@
 """Tests for yojenkins/yo_jenkins/job.py"""
 
-import pytest
-from unittest.mock import MagicMock, patch, mock_open
+from unittest.mock import MagicMock, patch
 
+import pytest
+
+from yojenkins.yo_jenkins.exceptions import YoJenkinsException
 
 # Valid Jenkins job class type for use in fixtures
 JOB_CLASS = 'org.jenkinsci.plugins.workflow.job.WorkflowJob'
@@ -92,12 +94,12 @@ class TestJobInfo:
         assert result['name'] == 'my-job'
 
     def test_info_no_name_no_url_exits(self, job_instance):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.info()
 
     def test_info_request_failure_exits(self, job_instance):
         job_instance.rest.request.return_value = ({}, {}, False)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.info(job_url='http://localhost:8080/job/bad/')
 
     def test_info_wrong_class_exits(self, job_instance):
@@ -107,7 +109,7 @@ class TestJobInfo:
             'url': 'http://localhost:8080/job/a-folder/',
         }
         job_instance.rest.request.return_value = (job_info, {}, True)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.info(job_url='http://localhost:8080/job/a-folder/')
 
     def test_info_adds_derived_fields(self, job_instance):
@@ -238,7 +240,7 @@ class TestJobSearch:
     def test_search_jenkins_exception_exits(self, job_instance):
         import jenkins
         job_instance.jenkins_sdk.get_all_jobs.side_effect = jenkins.JenkinsException('Server error\n<html>')
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.search('anything')
 
 
@@ -287,7 +289,7 @@ class TestBuildTrigger:
         assert 'BRANCH=main' in post_call[0][0]
 
     def test_trigger_no_name_no_url_exits(self, job_instance):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.build_trigger()
 
     def test_trigger_no_headers_exits(self, job_instance):
@@ -301,7 +303,7 @@ class TestBuildTrigger:
             (job_info, {}, True),
             ({}, {}, True),  # empty headers
         ]
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.build_trigger(job_url='http://localhost:8080/job/my-job/')
 
 
@@ -322,11 +324,11 @@ class TestJobConfig:
 
     def test_get_config_failure_exits(self, job_instance):
         job_instance.rest.request.return_value = ('', {}, False)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.config(job_url='http://localhost:8080/job/my-job/')
 
     def test_config_no_name_no_url_exits(self, job_instance):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.config()
 
     def test_config_by_name(self, job_instance):
@@ -360,17 +362,17 @@ class TestJobCreate:
 
     @patch('yojenkins.yo_jenkins.job.utility.item_exists_in_folder', return_value=False)
     def test_create_no_folder_exits(self, mock_exists, job_instance):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.create(name='new-job')
 
     @patch('yojenkins.yo_jenkins.job.utility.item_exists_in_folder', return_value=True)
     def test_create_already_exists_exits(self, mock_exists, job_instance):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.create(name='existing-job', folder_url='http://localhost:8080/job/folder/')
 
     @patch('yojenkins.yo_jenkins.job.utility.item_exists_in_folder', return_value=False)
     def test_create_blank_name_exits(self, mock_exists, job_instance):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.create(name='', folder_url='http://localhost:8080/job/folder/')
 
 
@@ -387,12 +389,12 @@ class TestJobDelete:
         assert 'doDelete' in call_args[0][0]
 
     def test_delete_no_name_no_url_exits(self, job_instance):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.delete()
 
     def test_delete_failure_exits(self, job_instance):
         job_instance.rest.request.return_value = ({}, {}, False)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.delete(job_url='http://localhost:8080/job/my-job/')
 
 
@@ -409,12 +411,12 @@ class TestJobEnableDisable:
         assert '/enable' in call_args[0][0]
 
     def test_enable_no_name_no_url_exits(self, job_instance):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.enable()
 
     def test_enable_failure_exits(self, job_instance):
         job_instance.rest.request.return_value = ({}, {}, False)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.enable(job_url='http://localhost:8080/job/my-job/')
 
     def test_disable_success(self, job_instance):
@@ -425,12 +427,12 @@ class TestJobEnableDisable:
         assert '/disable' in call_args[0][0]
 
     def test_disable_no_name_no_url_exits(self, job_instance):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.disable()
 
     def test_disable_failure_exits(self, job_instance):
         job_instance.rest.request.return_value = ({}, {}, False)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.disable(job_url='http://localhost:8080/job/my-job/')
 
 
@@ -447,11 +449,11 @@ class TestBrowserOpen:
 
     @patch('yojenkins.yo_jenkins.job.utility.browser_open', return_value=False)
     def test_browser_open_failure_exits(self, mock_browser, job_instance):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.browser_open(job_url='http://localhost:8080/job/my-job/')
 
     def test_browser_open_no_name_no_url_exits(self, job_instance):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.browser_open()
 
 
@@ -479,7 +481,7 @@ class TestBuildNumbers:
             'url': 'http://localhost:8080/job/my-job/',
         }
         job_instance.rest.request.return_value = (job_info, {}, True)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.build_next_number(job_url='http://localhost:8080/job/my-job/')
 
     def test_build_last_number_from_info(self, job_instance):
@@ -516,15 +518,15 @@ class TestJobRename:
         assert 'newName=new-name' in call_args[0][0]
 
     def test_rename_blank_name_exits(self, job_instance):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.rename('', job_url='http://localhost:8080/job/old/')
 
     def test_rename_special_chars_exits(self, job_instance):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.rename('bad@name!', job_url='http://localhost:8080/job/old/')
 
     def test_rename_no_name_no_url_exits(self, job_instance):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.rename('new-name')
 
 
@@ -541,12 +543,12 @@ class TestWipeWorkspace:
         assert 'doWipeOutWorkspace' in call_args[0][0]
 
     def test_wipe_workspace_no_name_no_url_exits(self, job_instance):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.wipe_workspace()
 
     def test_wipe_workspace_failure_exits(self, job_instance):
         job_instance.rest.request.return_value = ({}, {}, False)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.wipe_workspace(job_url='http://localhost:8080/job/my-job/')
 
 
@@ -581,13 +583,13 @@ class TestBuildSetNextNumber:
         job_instance.jenkins_sdk.set_next_build_number.assert_called_once()
 
     def test_set_next_number_no_args_exits(self, job_instance):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.build_set_next_number(100)
 
     def test_set_next_number_jenkins_exception_exits(self, job_instance):
         import jenkins
         job_instance.jenkins_sdk.set_next_build_number.side_effect = jenkins.JenkinsException('Error\n<html>')
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.build_set_next_number(100, job_url='http://localhost:8080/job/my-job/')
 
 
@@ -611,7 +613,7 @@ class TestQueueInfo:
         assert 'fullUrl' in result
 
     def test_queue_info_no_args_exits(self, job_instance):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.queue_info()
 
     def test_queue_info_empty_response(self, job_instance):
@@ -626,7 +628,7 @@ class TestQueueInfo:
 
 class TestInQueueCheck:
     def test_in_queue_check_no_args_exits(self, job_instance):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.in_queue_check()
 
     def test_in_queue_check_found(self, job_instance):
@@ -662,7 +664,7 @@ class TestInQueueCheck:
 
 class TestQueueAbort:
     def test_queue_abort_no_number_exits(self, job_instance):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.queue_abort(0)
 
     def test_queue_abort_success(self, job_instance):
@@ -711,7 +713,7 @@ class TestJobParameters:
             'actions': [],
         }
         job_instance.rest.request.return_value = (job_info, {}, True)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.parameters(job_url='http://localhost:8080/job/my-job/')
 
     def test_parameters_bool_default(self, job_instance):
@@ -788,7 +790,7 @@ class TestJobConfigEdgeCases:
     @patch('yojenkins.yo_jenkins.job.utility.write_xml_to_file', return_value=False)
     def test_config_write_failure_exits(self, mock_write, job_instance):
         job_instance.rest.request.return_value = ('<project/>', {}, True)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.config(filepath='/tmp/config.xml', job_url='http://localhost:8080/job/my-job/')
 
 
@@ -811,7 +813,7 @@ class TestJobDisable:
 
     def test_disable_failure_exits(self, job_instance):
         job_instance.rest.request.return_value = ({}, {}, False)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.disable(job_url='http://localhost:8080/job/my-job/')
 
 
@@ -837,15 +839,15 @@ class TestJobRename:
 
     def test_rename_failure_exits(self, job_instance):
         job_instance.rest.request.return_value = ({}, {}, False)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.rename(new_name='new-job', job_url='http://localhost:8080/job/my-job/')
 
     def test_rename_blank_name_exits(self, job_instance):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.rename(new_name='', job_url='http://localhost:8080/job/my-job/')
 
     def test_rename_special_char_exits(self, job_instance):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.rename(new_name='bad@name', job_url='http://localhost:8080/job/my-job/')
 
 
@@ -893,12 +895,12 @@ class TestJobMonitor:
         job_instance.rest.request.return_value = ({}, {}, True)
         job_instance.JM = MagicMock()
         job_instance.JM.monitor_start.return_value = False
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.monitor(job_url='http://localhost:8080/job/my-job/')
 
     def test_monitor_job_not_found_exits(self, job_instance):
         job_instance.rest.request.return_value = ({}, {}, False)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.monitor(job_url='http://localhost:8080/job/my-job/')
 
 
@@ -920,20 +922,20 @@ class TestJobCreate:
         assert result is True
 
     def test_create_no_folder_exits(self, job_instance):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.create(name='new-job')
 
     def test_create_blank_name_exits(self, job_instance):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.create(name='', folder_url='http://localhost:8080/job/folder/')
 
     def test_create_special_char_name_exits(self, job_instance):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.create(name='bad@name', folder_url='http://localhost:8080/job/folder/')
 
     def test_create_already_exists_exits(self, job_instance):
         with patch('yojenkins.yo_jenkins.job.utility.item_exists_in_folder', return_value=True):
-            with pytest.raises(SystemExit):
+            with pytest.raises(YoJenkinsException):
                 job_instance.create(
                     name='existing-job',
                     folder_url='http://localhost:8080/job/folder/',
@@ -955,7 +957,7 @@ class TestJobCreate:
 
     def test_create_config_file_read_error_exits(self, job_instance):
         with patch('yojenkins.yo_jenkins.job.utility.item_exists_in_folder', return_value=False):
-            with pytest.raises(SystemExit):
+            with pytest.raises(YoJenkinsException):
                 job_instance.create(
                     name='new-job',
                     folder_url='http://localhost:8080/job/folder/',
@@ -1012,7 +1014,7 @@ class TestJobQueueCancel:
         assert result is True
 
     def test_queue_abort_no_number_exits(self, job_instance):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.queue_abort(build_queue_number=0)
 
     def test_queue_abort_failure_exits(self, job_instance):
@@ -1020,7 +1022,7 @@ class TestJobQueueCancel:
         job_instance.in_queue_check = MagicMock(return_value=[
             {'id': 1, 'task': {'url': 'http://localhost:8080/job/x/'}}
         ])
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             job_instance.queue_abort(build_queue_number=999)
 
 
@@ -1036,5 +1038,5 @@ class TestJobBrowserOpen:
 
     def test_browser_open_failure_exits(self, job_instance):
         with patch('yojenkins.yo_jenkins.job.utility.browser_open', return_value=False):
-            with pytest.raises(SystemExit):
+            with pytest.raises(YoJenkinsException):
                 job_instance.browser_open(job_url='http://localhost:8080/job/my-job/')

@@ -1,8 +1,10 @@
 """Tests for yojenkins.yo_jenkins.stage.Stage"""
 
-import pytest
 from unittest.mock import MagicMock, patch
 
+import pytest
+
+from yojenkins.yo_jenkins.exceptions import YoJenkinsException
 from yojenkins.yo_jenkins.stage import Stage
 
 
@@ -84,7 +86,7 @@ class TestStageInfo:
             [{'name': 'Deploy'}],
             ['Deploy'],
         )
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             stage.info(stage_name='NonExistent', build_url='http://localhost:8080/job/test/1/')
 
     def test_info_case_insensitive_stage_name(self, stage):
@@ -105,7 +107,7 @@ class TestStageInfo:
             ['Build'],
         )
         stage.rest.request.return_value = ({}, {}, True)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             stage.info(stage_name='Build', build_url='http://localhost:8080/job/test/1/')
 
 
@@ -167,7 +169,7 @@ class TestStageStepList:
             'numberOfSteps': 0,
         }
         with patch.object(stage, 'info', return_value=stage_info_no_steps):
-            with pytest.raises(SystemExit):
+            with pytest.raises(YoJenkinsException):
                 stage.step_list(stage_name='Build', build_url='http://localhost:8080/job/test/1/')
 
     def test_step_list_adds_default_parameter_description(self, stage):
@@ -235,5 +237,5 @@ class TestStageLogs:
             'stageFlowNodes': [{'bad_key': 'value'}],
         }
         with patch.object(stage, 'info', return_value=bad_stage_info):
-            with pytest.raises(SystemExit):
+            with pytest.raises(YoJenkinsException):
                 stage.step_list(stage_name='Build', build_url='http://localhost:8080/job/test/1/')

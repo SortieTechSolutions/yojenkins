@@ -2,6 +2,7 @@
 
 import pytest
 
+from yojenkins.yo_jenkins.exceptions import YoJenkinsException
 from yojenkins.yo_jenkins.step import Step
 
 
@@ -35,10 +36,10 @@ class TestStepInfo:
 
     def test_info_fail_out_on_empty_response(self, step):
         step.rest.request.return_value = ({}, {}, True)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             step.info(step_url='/job/test/1/execution/node/6/log/')
 
     def test_info_fail_out_on_none_response(self, step):
         step.rest.request.return_value = (None, {}, True)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             step.info(step_url='/job/test/1/execution/node/6/log/')

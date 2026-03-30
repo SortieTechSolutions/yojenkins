@@ -1,8 +1,6 @@
 """Tests for yojenkins/cli/cli_decorators.py"""
 
 import click
-import pytest
-from click.testing import CliRunner
 
 from yojenkins.cli.cli_decorators import debug, format_output, list, profile
 

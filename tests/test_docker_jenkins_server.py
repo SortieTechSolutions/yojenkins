@@ -1,8 +1,8 @@
 """Tests for yojenkins/docker_container/docker_jenkins_server.py"""
 
-import pytest
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, patch
 
+import pytest
 from docker.errors import DockerException
 
 

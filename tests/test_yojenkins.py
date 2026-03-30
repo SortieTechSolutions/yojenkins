@@ -1,6 +1,6 @@
 """Tests for yojenkins/yo_jenkins/yojenkins.py - Composite root class"""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 from yojenkins.yo_jenkins.yojenkins import YoJenkins
 

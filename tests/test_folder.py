@@ -1,11 +1,12 @@
 """Tests for yojenkins/yo_jenkins/folder.py"""
 
-import pytest
 from unittest.mock import MagicMock, patch
 
+import pytest
+
+from yojenkins.yo_jenkins.exceptions import YoJenkinsException
 from yojenkins.yo_jenkins.folder import Folder
 from yojenkins.yo_jenkins.jenkins_item_classes import JenkinsItemClasses
-
 
 FOLDER_CLASS = JenkinsItemClasses.FOLDER.value['class_type'][0]
 JOB_CLASS = JenkinsItemClasses.JOB.value['class_type'][0]
@@ -63,12 +64,12 @@ class TestInfo:
         assert result['name'] == 'my-folder'
 
     def test_info_no_args_exits(self, folder_obj):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             folder_obj.info()
 
     def test_info_request_failure_exits(self, folder_obj):
         folder_obj.rest.request.return_value = ({}, {}, False)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             folder_obj.info(folder_url='http://localhost:8080/job/bad/')
 
     def test_info_wrong_class_exits(self, folder_obj):
@@ -77,7 +78,7 @@ class TestInfo:
             'name': 'not-a-folder',
         }
         folder_obj.rest.request.return_value = (folder_data, {}, True)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             folder_obj.info(folder_url='http://localhost:8080/job/not-a-folder/')
 
 
@@ -277,12 +278,12 @@ class TestConfig:
         )
 
     def test_config_no_args_exits(self, folder_obj):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             folder_obj.config()
 
     def test_config_request_failure_exits(self, folder_obj):
         folder_obj.rest.request.return_value = ('', {}, False)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             folder_obj.config(folder_url='http://localhost:8080/job/bad/')
 
     @patch('yojenkins.yo_jenkins.folder.utility.write_xml_to_file', return_value=True)
@@ -299,16 +300,16 @@ class TestConfig:
 
 class TestCreate:
     def test_create_no_folder_exits(self, folder_obj):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             folder_obj.create(name='new-folder')
 
     def test_create_blank_name_exits(self, folder_obj):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             folder_obj.create(name='', folder_url='http://localhost:8080/job/parent/')
 
     @patch('yojenkins.yo_jenkins.folder.utility.has_special_char', return_value=True)
     def test_create_special_chars_exits(self, mock_special, folder_obj):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             folder_obj.create(name='bad@name', folder_url='http://localhost:8080/job/parent/')
 
     @patch('yojenkins.yo_jenkins.folder.utility.item_exists_in_folder', return_value=False)
@@ -321,7 +322,7 @@ class TestCreate:
     @patch('yojenkins.yo_jenkins.folder.utility.item_exists_in_folder', return_value=True)
     @patch('yojenkins.yo_jenkins.folder.utility.has_special_char', return_value=False)
     def test_create_already_exists_exits(self, mock_special, mock_exists, folder_obj):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             folder_obj.create(name='existing', folder_url='http://localhost:8080/job/parent/', config='')
 
 
@@ -329,7 +330,7 @@ class TestCreate:
 
 class TestCopy:
     def test_copy_no_folder_exits(self, folder_obj):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             folder_obj.copy('orig', 'new')
 
     @patch('yojenkins.yo_jenkins.folder.utility.item_exists_in_folder', return_value=True)
@@ -342,7 +343,7 @@ class TestCopy:
     @patch('yojenkins.yo_jenkins.folder.utility.has_special_char', return_value=False)
     def test_copy_original_not_found_exits(self, mock_special, folder_obj):
         with patch('yojenkins.yo_jenkins.folder.utility.item_exists_in_folder', return_value=False):
-            with pytest.raises(SystemExit):
+            with pytest.raises(YoJenkinsException):
                 folder_obj.copy('missing', 'new', folder_url='http://localhost:8080/job/parent/')
 
 
@@ -350,7 +351,7 @@ class TestCopy:
 
 class TestDelete:
     def test_delete_no_args_exits(self, folder_obj):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             folder_obj.delete()
 
     def test_delete_success_by_url(self, folder_obj):
@@ -365,7 +366,7 @@ class TestDelete:
 
     def test_delete_failure_exits(self, folder_obj):
         folder_obj.rest.request.return_value = ({}, {}, False)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             folder_obj.delete(folder_url='http://localhost:8080/job/my-folder/')
 
     def test_delete_by_name(self, folder_obj):
@@ -383,12 +384,12 @@ class TestBrowserOpen:
         assert result is True
 
     def test_browser_open_no_args_exits(self, folder_obj):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             folder_obj.browser_open()
 
     @patch('yojenkins.yo_jenkins.folder.utility.browser_open', return_value=False)
     def test_browser_open_failure_exits(self, mock_browser, folder_obj):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             folder_obj.browser_open(folder_url='http://localhost:8080/job/my-folder/')
 
 
@@ -421,7 +422,7 @@ class TestItemList:
         assert len(urls) == 2
 
     def test_item_list_no_args_exits(self, folder_obj):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             folder_obj.item_list()
 
 
@@ -432,7 +433,7 @@ class TestCreateEdgeCases:
     @patch('yojenkins.yo_jenkins.folder.utility.has_special_char', return_value=False)
     def test_create_request_failure_exits(self, mock_special, mock_exists, folder_obj):
         folder_obj.rest.request.return_value = ({}, {}, False)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             folder_obj.create(name='new-folder', folder_url='http://localhost:8080/job/parent/', config='')
 
     @patch('yojenkins.yo_jenkins.folder.utility.item_exists_in_folder', return_value=False)
@@ -461,7 +462,7 @@ class TestCreateEdgeCases:
 
     @patch('yojenkins.yo_jenkins.folder.utility.has_special_char', return_value=False)
     def test_create_unsupported_type_exits(self, mock_special, folder_obj):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             folder_obj.create(
                 name='item',
                 folder_url='http://localhost:8080/job/parent/',
@@ -475,22 +476,22 @@ class TestCreateEdgeCases:
 class TestCopyEdgeCases:
     @patch('yojenkins.yo_jenkins.folder.utility.has_special_char', return_value=False)
     def test_copy_blank_original_exits(self, mock_special, folder_obj):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             folder_obj.copy('', 'new', folder_url='http://localhost:8080/job/parent/')
 
     @patch('yojenkins.yo_jenkins.folder.utility.has_special_char', return_value=False)
     def test_copy_blank_new_name_exits(self, mock_special, folder_obj):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             folder_obj.copy('orig', '', folder_url='http://localhost:8080/job/parent/')
 
     @patch('yojenkins.yo_jenkins.folder.utility.has_special_char', side_effect=[False, True])
     def test_copy_special_char_new_name_exits(self, mock_special, folder_obj):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             folder_obj.copy('orig', 'bad@name', folder_url='http://localhost:8080/job/parent/')
 
     @patch('yojenkins.yo_jenkins.folder.utility.item_exists_in_folder', return_value=True)
     @patch('yojenkins.yo_jenkins.folder.utility.has_special_char', return_value=False)
     def test_copy_request_failure_exits(self, mock_special, mock_exists, folder_obj):
         folder_obj.rest.request.return_value = ({}, {}, False)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             folder_obj.copy('orig', 'new', folder_url='http://localhost:8080/job/parent/')

@@ -18,6 +18,7 @@ from json2xml.utils import readfromstring
 from yojenkins import __version__
 from yojenkins.utility._compat import tomli_w
 from yojenkins.yo_jenkins.auth import Auth
+from yojenkins.yo_jenkins.exceptions import YoJenkinsException
 from yojenkins.yo_jenkins.rest import Rest
 from yojenkins.yo_jenkins.yojenkins import YoJenkins
 from yojenkins.utility.utility import (
@@ -100,17 +101,8 @@ def config_yo_jenkins(profile: str, token: str) -> YoJenkins:
         Initialized YoJenkins object
     """
     auth = Auth(Rest())
-
-    # Get the credential profile
-    if not auth.get_credentials(profile):
-        click.secho('Failed to find any credentials', fg='bright_red', bold=True)
-        sys.exit(1)
-
-    # Create authentication
-    if not auth.create_auth(token=token):
-        click.secho('Failed authentication', fg='bright_red', bold=True)
-        sys.exit(1)
-
+    auth.get_credentials(profile)
+    auth.create_auth(token=token)
     return YoJenkins(auth)
 
 
@@ -226,6 +218,10 @@ def log_to_history(decorated_function) -> Callable:
         except Exception as error:
             logger.debug(f'Failed to write command history file: {error}')
 
-        return decorated_function(*args, **kwargs)
+        try:
+            return decorated_function(*args, **kwargs)
+        except YoJenkinsException as exc:
+            click.secho(str(exc), fg='bright_red', bold=True)
+            sys.exit(1)
 
     return wrapper

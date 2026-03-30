@@ -1,11 +1,12 @@
 """Tests for yojenkins.yo_jenkins.build module"""
 
-import pytest
 from unittest.mock import MagicMock, patch
 
-from yojenkins.yo_jenkins.build import Build
-from yojenkins.yo_jenkins.status import BuildStatus
+import pytest
 
+from yojenkins.yo_jenkins.build import Build
+from yojenkins.yo_jenkins.exceptions import YoJenkinsException
+from yojenkins.yo_jenkins.status import BuildStatus
 
 # ---------------------------------------------------------------------------
 # Helpers / fixtures
@@ -122,7 +123,7 @@ class TestBuildInfo:
 
     def test_info_no_job_no_url_fails(self, build_obj):
         """info() without job_name, job_url, or build_url calls fail_out."""
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             build_obj.info()
 
     def test_info_build_number_exceeds_last_fails(self, build_obj):
@@ -130,7 +131,7 @@ class TestBuildInfo:
         job_info = _make_job_info(last_build_number=10)
         build_obj.rest.request.return_value = (job_info, {}, True)
 
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             build_obj.info(job_name='my_job', build_number=999)
 
     def test_info_invalid_build_class_fails(self, build_obj):
@@ -138,14 +139,14 @@ class TestBuildInfo:
         bad_build = _make_build_info(build_class='com.cloudbees.hudson.plugins.folder.Folder')
         build_obj.rest.request.return_value = (bad_build, {}, True)
 
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             build_obj.info(build_url=BUILD_URL)
 
     def test_info_failed_request_by_url_fails(self, build_obj):
         """info() fails when REST request for build URL returns falsy data."""
         build_obj.rest.request.return_value = ({}, {}, True)
 
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             build_obj.info(build_url=BUILD_URL)
 
     def test_info_running_build_has_running_status(self, build_obj):
@@ -180,7 +181,7 @@ class TestBuildInfo:
         job_info = _make_job_info()
         build_obj.rest.request.return_value = (job_info, {}, True)
 
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             build_obj.info(job_name='my_job', build_number=None, latest=False)
 
 
@@ -203,13 +204,12 @@ class TestBuildAbort:
         assert '/stop' in call_args[0][0]
         assert call_args[0][1] == 'post'
 
-    def test_abort_failure_calls_failures_out(self, build_obj):
-        """abort() calls failures_out (prints messages) when request fails."""
+    def test_abort_failure_raises_exception(self, build_obj):
+        """abort() raises RequestError when request fails."""
         build_obj.rest.request.return_value = ({}, {}, False)
 
-        with patch('yojenkins.yo_jenkins.build.failures_out') as mock_failures_out:
+        with pytest.raises(YoJenkinsException):
             build_obj.abort(build_url=BUILD_URL)
-            mock_failures_out.assert_called_once()
 
     @patch('yojenkins.yo_jenkins.build.utility.build_url_to_build_number', return_value=42)
     def test_abort_by_job_name_gets_info_first(self, mock_bn, build_obj):
@@ -245,7 +245,7 @@ class TestBuildDelete:
         """delete() calls fail_out when request fails."""
         build_obj.rest.request.return_value = ({}, {}, False)
 
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             build_obj.delete(build_url=BUILD_URL)
 
     @patch('yojenkins.yo_jenkins.build.utility.build_url_to_build_number', return_value=42)
@@ -301,14 +301,14 @@ class TestBuildStageList:
         """stage_list() fails when response has no 'stages' key."""
         build_obj.rest.request.return_value = ({'other': 'data'}, {}, True)
 
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             build_obj.stage_list(build_url=BUILD_URL)
 
     def test_stage_list_request_failure_exits(self, build_obj):
         """stage_list() fails when the REST request fails."""
         build_obj.rest.request.return_value = ({}, {}, False)
 
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             build_obj.stage_list(build_url=BUILD_URL)
 
 
@@ -345,7 +345,7 @@ class TestBuildLogs:
         """logs() fails when REST request fails."""
         build_obj.rest.request.return_value = ('', {}, False)
 
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             build_obj.logs(build_url=BUILD_URL)
 
     def test_logs_without_build_url_uses_info(self, build_obj):
@@ -405,7 +405,7 @@ class TestBuildRebuild:
 
         with patch.object(build_obj, 'info', return_value=build_info):
             build_obj.rest.request.return_value = ({}, {}, True)
-            with pytest.raises(SystemExit):
+            with pytest.raises(YoJenkinsException):
                 build_obj.rebuild(build_url=BUILD_URL)
 
 
@@ -449,12 +449,12 @@ class TestBuildDiff:
 
     def test_diff_empty_url_1_fails(self, build_obj):
         """diff() fails when BUILD_URL_1 is empty."""
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             build_obj.diff(build_url_1='', build_url_2=BUILD_URL)
 
     def test_diff_empty_url_2_fails(self, build_obj):
         """diff() fails when BUILD_URL_2 is empty."""
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             build_obj.diff(build_url_1=BUILD_URL, build_url_2='')
 
     def test_diff_logs_fetch_failure_exits(self, build_obj):
@@ -464,7 +464,7 @@ class TestBuildDiff:
 
         build_obj.rest.request.return_value = ('', {}, False)
 
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             build_obj.diff(build_url_1=build_url_1, build_url_2=build_url_2, logs=True)
 
     def test_diff_logs_second_fetch_failure_exits(self, build_obj):
@@ -477,7 +477,7 @@ class TestBuildDiff:
             ('', {}, False),
         ]
 
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             build_obj.diff(build_url_1=build_url_1, build_url_2=build_url_2, logs=True)
 
 
@@ -512,7 +512,7 @@ class TestBuildStatusText:
         queue_all = {'items': []}
         with patch.object(build_obj, 'info', return_value=build_info):
             build_obj.rest.request.return_value = (queue_all, {}, True)
-            with pytest.raises(SystemExit):
+            with pytest.raises(YoJenkinsException):
                 build_obj.status_text(build_url=BUILD_URL)
 
     def test_status_text_no_args_exits(self, build_obj):
@@ -521,7 +521,7 @@ class TestBuildStatusText:
         # No job_url or job_name extractable, build_url is empty
         with patch.object(build_obj, 'info', return_value=build_info):
             build_obj.rest.request.return_value = ({'items': []}, {}, True)
-            with pytest.raises(SystemExit):
+            with pytest.raises(YoJenkinsException):
                 build_obj.status_text(build_url='', job_name='', job_url='')
 
 
@@ -541,7 +541,7 @@ class TestBuildBrowserOpen:
     @patch('yojenkins.yo_jenkins.build.utility.browser_open', return_value=False)
     def test_browser_open_failure_exits(self, mock_browser, build_obj):
         """browser_open() exits when browser_open utility fails."""
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             build_obj.browser_open(build_url=BUILD_URL)
 
     @patch('yojenkins.yo_jenkins.build.utility.browser_open', return_value=True)
@@ -580,7 +580,7 @@ class TestBuildParameters:
         build_info = _make_build_info()
         build_info['actions'] = []
         with patch.object(build_obj, 'info', return_value=build_info):
-            with pytest.raises(SystemExit):
+            with pytest.raises(YoJenkinsException):
                 build_obj.parameters(build_url=BUILD_URL)
 
 
@@ -604,14 +604,14 @@ class TestBuildInfoEdgeCases:
     def test_info_job_request_failure_exits(self, build_obj):
         """info() exits when job info request fails."""
         build_obj.rest.request.return_value = ({}, {}, False)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             build_obj.info(job_name='my_job', build_number=1)
 
     def test_info_job_wrong_class_exits(self, build_obj):
         """info() exits when job class is not a job type."""
         job_info = {'_class': 'com.cloudbees.hudson.plugins.folder.Folder', 'fullName': 'f'}
         build_obj.rest.request.return_value = (job_info, {}, True)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             build_obj.info(job_name='my_job', build_number=1)
 
     def test_info_build_request_failure_exits(self, build_obj):
@@ -621,7 +621,7 @@ class TestBuildInfoEdgeCases:
             (job_info, {}, True),
             ({}, {}, False),
         ]
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             build_obj.info(job_name='my_job', build_number=5)
 
     def test_info_result_unknown_when_no_result_key(self, build_obj):
@@ -687,7 +687,6 @@ class TestBuildLogsEdgeCases:
 
     def test_logs_download_to_file(self, build_obj, tmp_path):
         """logs() with download_dir saves to file."""
-        import requests
         mock_response = MagicMock()
         mock_response.iter_content.return_value = [b'log data']
         mock_response.raise_for_status = MagicMock()
@@ -700,7 +699,7 @@ class TestBuildLogsEdgeCases:
     def test_logs_download_failure_exits(self, build_obj, tmp_path):
         """logs() download failure calls fail_out."""
         with patch('yojenkins.yo_jenkins.build.requests.get', side_effect=Exception('net error')):
-            with pytest.raises(SystemExit):
+            with pytest.raises(YoJenkinsException):
                 build_obj.logs(build_url=BUILD_URL, download_dir=str(tmp_path))
 
     def test_logs_follow_progressive_text(self, build_obj):
@@ -756,7 +755,7 @@ class TestBuildMonitor:
         build_obj.rest.request.return_value = ({}, {}, True)
         build_obj.build_monitor = MagicMock()
         build_obj.build_monitor.monitor_start.return_value = False
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             build_obj.monitor(build_url=BUILD_URL)
 
 
@@ -848,5 +847,5 @@ class TestBuildStatusTextEdgeCases:
         job_info = _make_job_info()
         job_info['lastBuild'] = None
         build_obj.rest.request.return_value = (job_info, {}, True)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             build_obj.status_text(job_name='my_job', build_number=1)

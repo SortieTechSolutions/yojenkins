@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 
 from yojenkins.utility import utility
-from yojenkins.utility.utility import fail_out
+from yojenkins.yo_jenkins.exceptions import NotFoundError, RequestError, ValidationError
 from yojenkins.yo_jenkins.rest import Rest
 
 # Getting the logger reference
@@ -37,7 +37,7 @@ class Account:
             script_filepath=script_filepath, json_return=True, rest=self.rest
         )
         if not success:
-            fail_out(f'Failed to list account. {error}')
+            raise RequestError(f'Failed to list account. {error}')
 
         # Get a list of only account ids
         account_list_id = [account['id'] for account in account_list if 'id' in account]
@@ -61,12 +61,12 @@ class Account:
             script_filepath=script_filepath, json_return=True, rest=self.rest
         )
         if not success:
-            fail_out(f'Failed to get account info. {error}')
+            raise RequestError(f'Failed to get account info. {error}')
         for user in user_list:
             if user['id'] == user_id:
                 logger.debug(f'Successfully found account: {user_id}')
                 return user
-        fail_out(f'Failed to find account: {user_id}')
+        raise NotFoundError(f'Failed to find account: {user_id}')
 
     def create(self, user_id: str, password: str, is_admin: bool, email: str, description: str) -> bool:
         """Create a new user account
@@ -93,7 +93,7 @@ class Account:
             script_filepath=script_filepath, json_return=False, rest=self.rest, **kwargs
         )
         if not success:
-            fail_out(f'Failed to create account. {error}')
+            raise RequestError(f'Failed to create account. {error}')
         return True
 
     def delete(self, user_id: str) -> bool:
@@ -111,7 +111,7 @@ class Account:
             script_filepath=script_filepath, json_return=False, rest=self.rest, **kwargs
         )
         if not success:
-            fail_out(f'Failed to delete account. {error}')
+            raise RequestError(f'Failed to delete account. {error}')
         return True
 
     def permission(self, user_id: str, action: str, permission_id: str) -> bool:
@@ -147,14 +147,14 @@ class Account:
                 'permission_enabled': 'false',
             }
         else:
-            fail_out(f'Invalid permission action specified: {action}')
+            raise ValidationError(f'Invalid permission action specified: {action}')
 
         script_filepath = self.groovy_script_directory / 'user_permission_add_remove.groovy'
         _, success, error = utility.run_groovy_script(
             script_filepath=script_filepath, json_return=False, rest=self.rest, **kwargs
         )
         if not success:
-            fail_out(f'Failed to {action} account permissions. {error}')
+            raise RequestError(f'Failed to {action} account permissions. {error}')
         return True
 
     def permission_list(self) -> tuple[list, list]:
@@ -171,7 +171,7 @@ class Account:
             script_filepath=script_filepath, json_return=True, rest=self.rest
         )
         if not success:
-            fail_out(f'Failed to list all available permissions. {error}')
+            raise RequestError(f'Failed to list all available permissions. {error}')
 
         # Capitalize last part of permission ID and remove "GENERIC" sub-string
         # Example: "hudson.security.Permission.GenericRead" becomes "hudson.security.Permission.READ"
