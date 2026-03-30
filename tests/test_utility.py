@@ -1314,3 +1314,35 @@ class TestWaitForBuildAndFollowLogs:
             # Source code passes unsupported kwargs to fail_out, causing TypeError
             with pytest.raises((SystemExit, TypeError)):
                 wait_for_build_and_follow_logs(mock_yj, queue_id=1)
+
+
+# ---------------------------------------------------------------------------
+# TestWaitForBuildAndMonitor
+# ---------------------------------------------------------------------------
+class TestWaitForBuildAndMonitor:
+    """Tests for wait_for_build_and_monitor."""
+
+    def test_waits_then_starts_monitor(self):
+        from yojenkins.utility.utility import wait_for_build_and_monitor
+        mock_yj = MagicMock()
+        mock_yj.job.queue_info.return_value = {
+            'executable': {'number': 7},
+            'jobUrl': 'http://localhost:8080/job/my_job/',
+        }
+        with patch('yojenkins.utility.utility.logger') as mock_logger:
+            mock_logger.level = 5  # debug level, skip spinner
+            wait_for_build_and_monitor(mock_yj, queue_id=42, sound=True)
+        mock_yj.build.monitor.assert_called_once_with(
+            job_url='http://localhost:8080/job/my_job/',
+            build_number=7,
+            sound=True,
+        )
+
+    def test_stuck_build_exits(self):
+        from yojenkins.utility.utility import wait_for_build_and_monitor
+        mock_yj = MagicMock()
+        mock_yj.job.queue_info.return_value = {'stuck': True}
+        with patch('yojenkins.utility.utility.logger') as mock_logger:
+            mock_logger.level = 5
+            with pytest.raises((SystemExit, TypeError)):
+                wait_for_build_and_monitor(mock_yj, queue_id=1)
