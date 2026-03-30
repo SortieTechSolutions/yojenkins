@@ -4,7 +4,7 @@ These tests invoke real CLI commands via CliRunner and verify the full pipeline:
 Click parsing → translate_kwargs → handler → business logic → output formatting.
 
 Mock strategy:
-- Bulk tests: mock config_yo_jenkins() to return DemoYoJenkins (tests CLI + handler + output)
+- Bulk tests: mock config_yo_jenkins() to return a MagicMock YoJenkins
 - Auth tests: mock at REST level to test credential loading pipeline
 """
 
@@ -15,8 +15,48 @@ import pytest
 import yaml
 
 from yojenkins.__main__ import main
-from yojenkins.api.demo import data as demo_data
 from yojenkins.yo_jenkins.exceptions import YoJenkinsException
+
+# ---------------------------------------------------------------------------
+# Test data (replaces demo mode static data)
+# ---------------------------------------------------------------------------
+
+TEST_BASE_URL = "http://test-jenkins:8080"
+
+TEST_SERVER_INFO = {
+    "mode": "NORMAL",
+    "numExecutors": 2,
+    "url": TEST_BASE_URL,
+    "useSecurity": True,
+}
+
+TEST_PEOPLE = {"users": [{"user": {"fullName": "Alice"}}, {"user": {"fullName": "Bob"}}]}
+TEST_PEOPLE_LIST = [{"fullName": "Alice"}, {"fullName": "Bob"}]
+
+TEST_JOBS = [
+    {"name": "backend-api", "fullName": "Backend/backend-api", "url": f"{TEST_BASE_URL}/job/Backend/job/backend-api/", "color": "blue", "folder": "Backend"},
+    {"name": "frontend-app", "fullName": "Frontend/frontend-app", "url": f"{TEST_BASE_URL}/job/Frontend/job/frontend-app/", "color": "blue", "folder": "Frontend"},
+    {"name": "deploy-service", "fullName": "DevOps/deploy-service", "url": f"{TEST_BASE_URL}/job/DevOps/job/deploy-service/", "color": "red", "folder": "DevOps"},
+]
+
+TEST_FOLDERS = [
+    {"name": "DevOps", "fullName": "DevOps", "url": f"{TEST_BASE_URL}/job/DevOps/"},
+    {"name": "Backend", "fullName": "Backend", "url": f"{TEST_BASE_URL}/job/Backend/"},
+    {"name": "Frontend", "fullName": "Frontend", "url": f"{TEST_BASE_URL}/job/Frontend/"},
+]
+
+TEST_BUILDS = [
+    {"number": 84, "result": "SUCCESS", "url": f"{TEST_BASE_URL}/job/DevOps/job/deploy-service/84/"},
+    {"number": 83, "result": "FAILURE", "url": f"{TEST_BASE_URL}/job/DevOps/job/deploy-service/83/"},
+]
+
+TEST_STAGES = [
+    {"name": "Checkout", "status": "SUCCESS"},
+    {"name": "Build", "status": "SUCCESS"},
+    {"name": "Test", "status": "SUCCESS"},
+]
+
+BUILD_URL = f"{TEST_BASE_URL}/job/DevOps/job/deploy-service/84/"
 
 
 # ---------------------------------------------------------------------------
@@ -32,27 +72,54 @@ def _patch_history_file_io():
 
 
 @pytest.fixture
-def demo_yj():
-    """DemoYoJenkins with MagicMock fallbacks for attributes not in demo mode."""
-    from yojenkins.api.demo import DemoYoJenkins
+def mock_yj():
+    """MagicMock YoJenkins with test data return values."""
+    yj = MagicMock()
 
-    yj = DemoYoJenkins()
+    # Server
+    yj.server.info.return_value = TEST_SERVER_INFO
+    yj.server.people.return_value = (TEST_PEOPLE, TEST_PEOPLE_LIST)
+    yj.server.queue_info.return_value = {"items": []}
+
+    # Jobs
+    yj.job.info.return_value = {"name": "backend-api", "fullName": "Backend/backend-api", "url": f"{TEST_BASE_URL}/job/Backend/job/backend-api/", "builds": TEST_BUILDS}
+    yj.job.search.return_value = (TEST_JOBS, [j["url"] for j in TEST_JOBS])
+    yj.job.build_list.return_value = (TEST_BUILDS, [b["url"] for b in TEST_BUILDS])
+
+    # Folders
+    yj.folder.info.return_value = {"name": "DevOps", "fullName": "DevOps", "url": f"{TEST_BASE_URL}/job/DevOps/", "jobs": TEST_JOBS[:1]}
+    yj.folder.search.return_value = (TEST_FOLDERS, [f["url"] for f in TEST_FOLDERS])
+    yj.folder.jobs_list.return_value = (TEST_JOBS[:1], [TEST_JOBS[0]["url"]])
+
+    # Builds
+    yj.build.info.return_value = TEST_BUILDS[0]
+    yj.build.stage_list.return_value = (TEST_STAGES, [s["name"] for s in TEST_STAGES])
+
+    # Auth
+    yj.auth.verify.return_value = True
+    yj.auth.user.return_value = {"id": "test-user", "fullName": "Test User"}
+
+    # REST (for console logs etc.)
+    yj.rest.request.return_value = ("Started: build #84\nFinished: SUCCESS", {}, True)
+
+    # Attributes not exercised by most tests but needed to avoid AttributeError
     yj.node = MagicMock()
     yj.account = MagicMock()
     yj.credential = MagicMock()
     yj.stage = MagicMock()
     yj.step = MagicMock()
+
     return yj
 
 
 @pytest.fixture
-def mock_config(demo_yj):
+def mock_config(mock_yj):
     """Patch config_yo_jenkins at the single source module."""
     with patch(
         'yojenkins.cli.cli_utility.config_yo_jenkins',
-        return_value=demo_yj,
+        return_value=mock_yj,
     ):
-        yield demo_yj
+        yield mock_yj
 
 
 # ---------------------------------------------------------------------------
@@ -75,7 +142,7 @@ def mock_config(demo_yj):
     (['tools'], ['history']),
 ])
 def test_help(cli_runner, args, expected):
-    result = cli_runner.invoke(main, args + ['--help'])
+    result = cli_runner.invoke(main, [*args, '--help'])
     assert result.exit_code == 0
     for cmd in expected:
         assert cmd in result.output.lower(), f"'{cmd}' not found in help output"
@@ -102,8 +169,7 @@ class TestServerE2E:
         result = cli_runner.invoke(main, ['server', 'people'])
         assert result.exit_code == 0
         data = json.loads(result.output)
-        assert isinstance(data, list)
-        assert len(data) > 0
+        assert isinstance(data, dict)
 
 
 # ---------------------------------------------------------------------------
@@ -158,7 +224,7 @@ class TestFolderE2E:
         assert result.exit_code == 0
         data = json.loads(result.output)
         assert isinstance(data, list)
-        assert len(data) == 3  # 3 demo folders
+        assert len(data) == 3  # 3 test folders
 
     def test_folder_jobs(self, cli_runner, mock_config):
         result = cli_runner.invoke(main, ['folder', 'jobs', 'DevOps'])
@@ -170,9 +236,6 @@ class TestFolderE2E:
 # ---------------------------------------------------------------------------
 # Category 5: Build commands
 # ---------------------------------------------------------------------------
-
-BUILD_URL = f"{demo_data.BASE_URL}/job/DevOps/job/deploy-service/84/"
-
 
 @pytest.mark.e2e
 class TestBuildE2E:
@@ -249,7 +312,7 @@ class TestErrorHandling:
 
 
 # ---------------------------------------------------------------------------
-# Category 8: Auth pipeline (REST-level mock)
+# Category 8: Stdin support
 # ---------------------------------------------------------------------------
 
 @pytest.mark.e2e
@@ -259,17 +322,19 @@ class TestStdinSupport:
         result = cli_runner.invoke(main, ['job', 'info', '-'], input='backend-api\n')
         assert result.exit_code == 0
         data = json.loads(result.output)
-        # DemoJob.info() returns fixed demo data regardless of input name
         assert 'name' in data
 
     def test_stdin_dash_without_pipe_is_literal(self, cli_runner, mock_config):
         """When no stdin pipe, '-' is treated as a literal job name."""
         # CliRunner with no input= simulates an interactive tty
         result = cli_runner.invoke(main, ['job', 'info', '-'])
-        # Will try to look up a job named '-' — the demo will fail gracefully
-        # Just verify it doesn't hang or crash
+        # Will try to look up a job named '-' — the mock returns data regardless
         assert result.exit_code in (0, 1)
 
+
+# ---------------------------------------------------------------------------
+# Category 9: Auth pipeline (REST-level mock)
+# ---------------------------------------------------------------------------
 
 @pytest.mark.e2e
 class TestAuthPipeline:

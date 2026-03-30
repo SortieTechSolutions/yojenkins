@@ -186,36 +186,6 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 .login-form input:focus { outline: none; border-color: var(--accent); }
 .login-form button { margin-top: 0.5rem; padding: 0.7rem; font-size: 1rem; }
-.demo-divider {
-  width: 100%;
-  max-width: 400px;
-  text-align: center;
-  color: var(--text-muted);
-  font-size: 0.85rem;
-  margin: 0.75rem 0;
-  position: relative;
-}
-.demo-divider::before,
-.demo-divider::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  width: 42%;
-  height: 1px;
-  background: var(--border);
-}
-.demo-divider::before { left: 0; }
-.demo-divider::after { right: 0; }
-.demo-btn {
-  width: 100%;
-  max-width: 400px;
-  padding: 0.7rem;
-  font-size: 1rem;
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text-muted);
-}
-.demo-btn:hover { border-color: var(--accent); color: var(--text); background: transparent; }
 
 /* Errors & utilities */
 .error { color: var(--danger); font-size: 0.9rem; }
