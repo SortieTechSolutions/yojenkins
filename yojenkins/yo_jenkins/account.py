@@ -1,7 +1,7 @@
 """Account class definition"""
 
 import logging
-import os
+from pathlib import Path
 
 from yojenkins.utility import utility
 from yojenkins.utility.utility import fail_out
@@ -21,7 +21,7 @@ class Account:
             None
         """
         self.rest = rest
-        self.groovy_script_directory = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'groovy_scripts')
+        self.groovy_script_directory = Path(__file__).resolve().parent / 'groovy_scripts'
 
     def list(self) -> tuple[list, list]:
         """List all accounts for the server
@@ -32,7 +32,7 @@ class Account:
         Returns:
             List of credentials in dictionary format and a list of credential names
         """
-        script_filepath = os.path.join(self.groovy_script_directory, 'user_list.groovy')
+        script_filepath = self.groovy_script_directory / 'user_list.groovy'
         account_list, success, error = utility.run_groovy_script(
             script_filepath=script_filepath, json_return=True, rest=self.rest
         )
@@ -56,7 +56,7 @@ class Account:
         Returns:
             Dictionary of account information
         """
-        script_filepath = os.path.join(self.groovy_script_directory, 'user_list.groovy')
+        script_filepath = self.groovy_script_directory / 'user_list.groovy'
         user_list, success, error = utility.run_groovy_script(
             script_filepath=script_filepath, json_return=True, rest=self.rest
         )
@@ -88,7 +88,7 @@ class Account:
             'email': '' if not email else email,
             'description': '' if not description else description,
         }
-        script_filepath = os.path.join(self.groovy_script_directory, 'user_create.groovy')
+        script_filepath = self.groovy_script_directory / 'user_create.groovy'
         _, success, error = utility.run_groovy_script(
             script_filepath=script_filepath, json_return=False, rest=self.rest, **kwargs
         )
@@ -106,7 +106,7 @@ class Account:
             True if the account was deleted, False otherwise
         """
         kwargs = {'user_id': user_id}
-        script_filepath = os.path.join(self.groovy_script_directory, 'user_delete.groovy')
+        script_filepath = self.groovy_script_directory / 'user_delete.groovy'
         _, success, error = utility.run_groovy_script(
             script_filepath=script_filepath, json_return=False, rest=self.rest, **kwargs
         )
@@ -149,7 +149,7 @@ class Account:
         else:
             fail_out(f'Invalid permission action specified: {action}')
 
-        script_filepath = os.path.join(self.groovy_script_directory, 'user_permission_add_remove.groovy')
+        script_filepath = self.groovy_script_directory / 'user_permission_add_remove.groovy'
         _, success, error = utility.run_groovy_script(
             script_filepath=script_filepath, json_return=False, rest=self.rest, **kwargs
         )
@@ -166,7 +166,7 @@ class Account:
         Returns:
             Dictionary of availabe permissions and descriptions
         """
-        script_filepath = os.path.join(self.groovy_script_directory, 'user_permission_list.groovy')
+        script_filepath = self.groovy_script_directory / 'user_permission_list.groovy'
         permission_list, success, error = utility.run_groovy_script(
             script_filepath=script_filepath, json_return=True, rest=self.rest
         )

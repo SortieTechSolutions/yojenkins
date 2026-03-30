@@ -2,7 +2,6 @@
 
 import json
 import logging
-import os
 import platform
 import sys
 from datetime import datetime
@@ -17,6 +16,7 @@ from json2xml import json2xml
 from json2xml.utils import readfromstring
 
 from yojenkins import __version__
+from yojenkins.utility._compat import tomli_w
 from yojenkins.yo_jenkins.auth import Auth
 from yojenkins.yo_jenkins.rest import Rest
 from yojenkins.yo_jenkins.yojenkins import YoJenkins
@@ -24,7 +24,7 @@ from yojenkins.utility.utility import (
     am_i_bundled,
     am_i_inside_docker,
     create_new_history_file,
-    is_full_url,
+    is_full_url,  # noqa: F401 - used by cli_sub_commands via cu.is_full_url
     iter_data_empty_item_stripper,
     print2,
 )
@@ -156,7 +156,6 @@ def standard_out(
         # TOML format
         data = {'item': data} if isinstance(data, list) else data
         logger.debug('Outputting TOML format ...')
-        from yojenkins.utility._compat import tomli_w
         print2(tomli_w.dumps(data))
     else:
         # JSON format
@@ -206,8 +205,8 @@ def log_to_history(decorated_function) -> Callable:
             profile_name = DEFAULT_PROFILE_NAME
 
         # Check if history file exists, if not create it
-        history_file_path = os.path.join(os.path.join(Path.home(), CONFIG_DIR_NAME), HISTORY_FILE_NAME)
-        if not os.path.isfile(history_file_path):
+        history_file_path = Path.home() / CONFIG_DIR_NAME / HISTORY_FILE_NAME
+        if not history_file_path.is_file():
             create_new_history_file(history_file_path)
 
         logger.debug(f'Logging command to command history file: "{history_file_path}" ...')

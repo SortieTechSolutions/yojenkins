@@ -360,14 +360,6 @@ class Credential:
         folder, store = self._get_folder_store(folder)
         domain = self._get_domain(domain)
 
-        # # TEMPLATE WORK
-        # test = utility.template_apply(string_template=CRED_USER_PASS, is_json=True,
-        #                             domain=domain,
-        #                             username='some-username',
-        #                             password='MYPASSWORD',
-        #                             description=description)
-        # print(test)
-
         target = f'{folder}/credentials/store/{store}/domain/{domain}/createCredentials'
         _, _, success = self.rest.request(
             target=target,

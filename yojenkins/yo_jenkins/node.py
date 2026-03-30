@@ -2,7 +2,7 @@
 
 import json
 import logging
-import os
+from pathlib import Path
 from typing import Optional
 
 import xmltodict
@@ -310,7 +310,7 @@ class Node:
         logger.debug(f'Using the following specified configuration file: {config_file}')
 
         logger.debug(f'Checking if file exists: {config_file} ...')
-        if not os.path.isfile(config_file):
+        if not Path(config_file).is_file():
             fail_out('Specified node configuration file does not exist')
 
         logger.debug(f'Reading configuration file: {config_file} ...')

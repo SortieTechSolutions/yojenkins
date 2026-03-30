@@ -14,7 +14,7 @@ from typing import Any
 from jenkins import Jenkins as JenkinsSDK
 
 from yojenkins.utility import utility
-from yojenkins.utility._compat import tomli_w, tomllib
+from yojenkins.utility._compat import tomli_w
 from yojenkins.utility.utility import TextStyle, fail_out, failures_out, print2
 from yojenkins.yo_jenkins.rest import Rest
 
@@ -70,9 +70,9 @@ class Auth:
             True if successfull, else False
         """
         # Storing configurations in file
-        output_path = os.path.join(Path.home(), CONFIG_DIR_NAME, CREDS_FILE_NAME)
+        output_path = Path.home() / CONFIG_DIR_NAME / CREDS_FILE_NAME
         logger.debug(f'Saving new file (TOML format): "{output_path}" ...')
-        with open(os.path.join(output_path), 'w') as file:  # Overwrite previous content
+        with open(output_path, 'w') as file:  # Overwrite previous content
             file.write(tomli_w.dumps(profiles))
 
         # Add top file prefix for TOML file format
@@ -245,8 +245,8 @@ class Auth:
         Returns:
             This is a description of what is returned.
         """
-        config_dir_abs_path = os.path.join(Path.home(), CONFIG_DIR_NAME)
-        creds_file_abs_path = os.path.join(config_dir_abs_path, CREDS_FILE_NAME)
+        config_dir_abs_path = Path.home() / CONFIG_DIR_NAME
+        creds_file_abs_path = config_dir_abs_path / CREDS_FILE_NAME
 
         # Checking if credential config file exists
         file_exists, file_path = self._detect_creds_file()
@@ -367,14 +367,14 @@ class Auth:
             Success, Directory path of the credentials profile file
         """
         home_dir = Path.home()
-        if not os.path.exists(home_dir):
+        if not home_dir.exists():
             logger.debug(f'Home directory does not exist: {home_dir}')
             return False, ''
-        config_dir_abs_path = os.path.join(home_dir, CONFIG_DIR_NAME)
-        if not os.path.exists(config_dir_abs_path):
+        config_dir_abs_path = home_dir / CONFIG_DIR_NAME
+        if not config_dir_abs_path.exists():
             logger.debug(f'Configuration directory does not exist: {config_dir_abs_path}')
             return False, ''
-        return True, config_dir_abs_path
+        return True, str(config_dir_abs_path)
 
     def _detect_creds_file(self) -> tuple[bool, str]:
         """Detect/find the credentials profile file in the home directory
@@ -387,16 +387,16 @@ class Auth:
         """
         if not self._detect_config_dir()[0]:
             return False, ''
-        config_dir_abs_path = os.path.join(Path.home(), CONFIG_DIR_NAME)
+        config_dir_abs_path = Path.home() / CONFIG_DIR_NAME
 
         # Seeing if configuration file is in specified directories
-        if os.path.exists(os.path.join(config_dir_abs_path, CREDS_FILE_NAME)):
+        creds_path = config_dir_abs_path / CREDS_FILE_NAME
+        if creds_path.exists():
             logger.debug(
                 f'Successfully found credential file "{CREDS_FILE_NAME}" found in user '
                 f'configuration directory: {config_dir_abs_path}'
             )
-            config_filepath = os.path.join(config_dir_abs_path, CREDS_FILE_NAME)
-            return True, config_filepath
+            return True, str(creds_path)
         else:
             logger.debug(
                 f'Failed to find credential file "{CREDS_FILE_NAME}" in user '
@@ -436,7 +436,7 @@ class Auth:
                         'a "{" symbol indicating user attempted to provide profile info '
                         'via --profile option. Please check option input structure.'
                     )
-            creds_file_abs_path = os.path.join(Path.home(), CONFIG_DIR_NAME, CREDS_FILE_NAME)
+            creds_file_abs_path = str(Path.home() / CONFIG_DIR_NAME / CREDS_FILE_NAME)
 
             # Check if credentials file existis on system
             if not self._detect_creds_file()[0]:
@@ -607,14 +607,8 @@ class Auth:
             )
             print2('')
 
-            # NOTE: Below dead code is to potentially check length of the api_token
-            # if len(self.jenkins_profile['api_token']) < 5:
-            #     logger.debug(f'The entered API Token has a length of {len(self.jenkins_profile["api_token"])}, which is too short')
-            #     return False
-
         # Load the token or password
         if token:
-            #  logger.debug('API Token / Password loaded via --token CLI option')
             self.jenkins_profile['api_token'] = token
             self.jenkins_api_token = token
             hidden_token = 'Loaded via --token'

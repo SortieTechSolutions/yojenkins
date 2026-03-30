@@ -4,6 +4,7 @@ import logging
 import os
 import threading
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Optional, Union
 
 from yojenkins.utility import utility
@@ -348,7 +349,7 @@ class Stage:
             filename = f'build-logs_{datetime.now().strftime("%m-%d-%Y_%I-%M-%S")}{self.build_logs_extension}'
             logger.debug(f'Saving console text logs to local file "{filename}" ...')
             try:
-                with open(os.path.join(download_dir, filename), 'w+') as file:
+                with open(Path(download_dir) / filename, 'w+') as file:
                     file.write(stage_log_text)
                 logger.debug('Successfully write build logs to file')
             except (OSError, PermissionError) as error:

@@ -1,6 +1,5 @@
 """Tests for yojenkins/tools/package.py and yojenkins/tools/shared_library.py"""
 
-import os
 import subprocess
 from unittest.mock import MagicMock, patch
 
@@ -91,8 +90,8 @@ class TestSharedLibraryInit:
 
     def test_groovy_script_directory_set(self):
         sl = SharedLibrary()
-        assert 'groovy_scripts' in sl.groovy_script_directory
-        assert os.path.isabs(sl.groovy_script_directory)
+        assert 'groovy_scripts' in str(sl.groovy_script_directory)
+        assert sl.groovy_script_directory.is_absolute()
 
 
 class TestSharedLibrarySetup:
