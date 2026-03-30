@@ -23,7 +23,10 @@ async def build_logs(
     yj=Depends(get_yo_jenkins),
 ):
     """Get build console logs."""
+    # /consoleText is the Jenkins REST endpoint for raw plaintext build logs.
     request_url = f'{url.strip("/")}/consoleText'
+    # is_endpoint=False (url is full, don't prepend base),
+    # json_content=False (response is plaintext, not JSON)
     content, _, success = await run_in_threadpool(
         yj.rest.request, request_url, 'get', False, False
     )

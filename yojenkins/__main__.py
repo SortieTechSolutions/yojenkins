@@ -188,6 +188,8 @@ def serve(host, port, reload, no_frontend, build):
         webapp_dir = _find_webapp_dir()
         if webapp_dir:
             dist_dir = webapp_dir / 'dist'
+            # index.html in dist/ marks a successful production build.
+            # Vite always emits it; if missing, frontend needs building.
             if build or not (dist_dir / 'index.html').exists():
                 _build_frontend(webapp_dir)
             if (dist_dir / 'index.html').exists():
@@ -237,6 +239,8 @@ def _build_frontend(webapp_dir):
     try:
         if not (webapp_dir / 'node_modules').exists():
             click.secho('Installing npm dependencies...', fg='cyan')
+            # Prefer `npm ci` with lockfile for reproducible installs;
+            # fall back to `npm install` for first-time setup.
             lock_file = webapp_dir / 'package-lock.json'
             install_cmd = [npm_cmd, 'ci'] if lock_file.exists() else [npm_cmd, 'install']
             subprocess.run(install_cmd, cwd=str(webapp_dir), check=True)

@@ -30,6 +30,8 @@ from yojenkins.yo_jenkins.exceptions import (
 async def _session_cleanup_loop():
     """Periodically remove expired sessions."""
     while True:
+        # 5 min between sweeps — frequent enough to bound memory from expired
+        # sessions, infrequent enough to be negligible overhead.
         await asyncio.sleep(300)
         cleanup_expired_sessions()
 
@@ -51,6 +53,8 @@ def create_app(static_dir: Optional[str] = None) -> FastAPI:
         lifespan=lifespan,
     )
 
+    # Dev-mode CORS: localhost:3000 (CRA) and localhost:5173 (Vite).
+    # In production the SPA is served from the same origin, so CORS is unused.
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["http://localhost:3000", "http://localhost:5173"],
@@ -59,7 +63,8 @@ def create_app(static_dir: Optional[str] = None) -> FastAPI:
         allow_headers=["Content-Type", "Authorization"],
     )
 
-    # Security headers
+    # X-Content-Type-Options: nosniff — prevent MIME-sniffing attacks.
+    # X-Frame-Options: DENY — prevent clickjacking via iframes.
     @app.middleware("http")
     async def security_headers(request: Request, call_next):
         response = await call_next(request)
