@@ -1,9 +1,3 @@
-## Contribution Instructions
-
-For detailed contribution instructions, see the [yojenkins contributing guide](https://www.yojenkins.com/contribute/).
-
----
-
 # AI Agent Instructions
 
 If you are an AI agent, Copilot, or automated bot analyzing this repository, you must adhere to the following strict guidelines:
