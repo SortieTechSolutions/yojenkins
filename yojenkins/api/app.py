@@ -70,7 +70,9 @@ def create_app(static_dir: Optional[str] = None) -> FastAPI:
         response.headers['X-Frame-Options'] = 'DENY'
         response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
         response.headers['X-Permitted-Cross-Domain-Policies'] = 'none'
-        response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'"
+        response.headers['Content-Security-Policy'] = (
+            "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'"
+        )
         return response
 
     # Register routers
