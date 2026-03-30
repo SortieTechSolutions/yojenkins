@@ -4,6 +4,8 @@ import json
 import logging
 import sys
 
+from webbrowser import open as browser_open
+
 import click
 import xmltodict
 
@@ -192,11 +194,11 @@ def browser(profile: str, token: str, job: str) -> None:
     Args:
         TODO
     """
-    yj_obj = cu.config_yo_jenkins(profile, token)
     if cu.is_full_url(job):
-        yj_obj.job.browser_open(job_url=job)
-    else:
-        yj_obj.job.browser_open(job_name=job)
+        browser_open(job)
+        return
+    yj_obj = cu.config_yo_jenkins(profile, token)
+    yj_obj.job.browser_open(job_name=job)
 
 
 @log_to_history

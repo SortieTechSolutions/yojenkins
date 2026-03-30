@@ -2,6 +2,7 @@
 
 import logging
 import sys
+from webbrowser import open as browser_open
 
 import click
 
@@ -292,6 +293,11 @@ def browser(profile: str, token: str, job: str, number: int, url: str, latest: b
             )
         )
         sys.exit(1)
+
+    # Skip auth when a complete URL is provided and no job resolution needed
+    if url and cu.is_full_url(url) and not job and not number and not latest:
+        browser_open(url)
+        return
 
     yj_obj = cu.config_yo_jenkins(profile, token)
 
