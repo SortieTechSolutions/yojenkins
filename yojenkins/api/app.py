@@ -1,8 +1,12 @@
 """FastAPI application factory."""
 
+import os
+from pathlib import Path
+from typing import Optional
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 
 from yojenkins import __version__
 from yojenkins.api.auth import router as auth_router
@@ -20,7 +24,7 @@ from yojenkins.yo_jenkins.exceptions import (
 )
 
 
-def create_app() -> FastAPI:
+def create_app(static_dir: Optional[str] = None) -> FastAPI:
     """Create and configure the FastAPI application."""
     app = FastAPI(
         title="yojenkins",
@@ -65,8 +69,21 @@ def create_app() -> FastAPI:
     async def generic_handler(request: Request, exc: YoJenkinsException):
         return JSONResponse(status_code=500, content={"detail": str(exc)})
 
+    # Serve built frontend static files (production mode)
+    if static_dir:
+        static_path = Path(static_dir)
+        if static_path.is_dir() and (static_path / "index.html").exists():
+
+            @app.get("/{full_path:path}")
+            async def serve_spa(full_path: str):
+                """Serve static files or index.html for SPA routing."""
+                file_path = static_path / full_path
+                if full_path and file_path.is_file():
+                    return FileResponse(file_path)
+                return FileResponse(static_path / "index.html")
+
     return app
 
 
 # Module-level app instance for uvicorn: `uvicorn yojenkins.api.app:app`
-app = create_app()
+app = create_app(static_dir=os.environ.get("YOJENKINS_STATIC_DIR"))

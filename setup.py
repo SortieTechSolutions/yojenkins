@@ -80,7 +80,13 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=get_requirements(),
     extras_require={
-        'sound': ['simpleaudio; sys_platform != "win32"']
+        'sound': ['simpleaudio; sys_platform != "win32"'],
+        'web': [
+            'fastapi>=0.104.0',
+            'uvicorn[standard]>=0.24.0',
+            'python-jose[cryptography]>=3.3.0',
+            'python-multipart>=0.0.6',
+        ],
     },
     include_package_data=True,
     long_description=read('README.md'),
