@@ -227,7 +227,7 @@ def config(debug, **kwargs):
     show_default=True,
     required=False,
     is_flag=True,
-    help='The specified file is in JSON format',
+    help='[Deprecated: format is auto-detected] The specified file is in JSON format',
 )
 def reconfig(debug, **kwargs):
     """Reconfigure the node"""

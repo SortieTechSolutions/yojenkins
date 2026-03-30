@@ -363,6 +363,33 @@ class TestReconfig:
         # The posted data should be XML (converted from JSON)
         assert b'<slave>' in call_kwargs['data'] or b'slave' in call_kwargs['data']
 
+    def test_reconfig_auto_detects_json(self, mock_rest, tmp_path):
+        """reconfig() auto-detects JSON format without config_is_json flag."""
+        config_file = tmp_path / 'config.json'
+        config_file.write_text('{"slave": {"name": "agent-1"}}')
+        mock_rest.request.return_value = ('', {}, True)
+        node = Node(rest=mock_rest)
+
+        result = node.reconfig('agent-1', config_file=str(config_file), config_is_json=False)
+
+        assert result is True
+        call_kwargs = mock_rest.request.call_args.kwargs
+        # The posted data should be XML (auto-detected and converted from JSON)
+        assert b'<slave>' in call_kwargs['data'] or b'slave' in call_kwargs['data']
+
+    def test_reconfig_xml_not_converted(self, mock_rest, tmp_path):
+        """reconfig() does not convert XML config files."""
+        config_file = tmp_path / 'config.xml'
+        config_file.write_text('<slave/>')
+        mock_rest.request.return_value = ('', {}, True)
+        node = Node(rest=mock_rest)
+
+        result = node.reconfig('agent-1', config_file=str(config_file), config_is_json=False)
+
+        assert result is True
+        call_kwargs = mock_rest.request.call_args.kwargs
+        assert call_kwargs['data'] == b'<slave/>'
+
     def test_reconfig_request_failure_exits(self, mock_rest, tmp_path, mocker):
         """reconfig() calls fail_out when POST request fails."""
         config_file = tmp_path / 'config.xml'

@@ -955,6 +955,38 @@ class TestJobCreate:
                 )
         assert result is True
 
+    def test_create_auto_detects_json_config(self, job_instance, tmp_path):
+        """create() auto-detects JSON format without --config-is-json flag."""
+        config_file = tmp_path / 'config.json'
+        config_file.write_bytes(b'{"project": {}}')
+        job_instance.rest.request.return_value = ({}, {}, True)
+        with patch('yojenkins.yo_jenkins.job.utility.item_exists_in_folder', return_value=False):
+            with patch('yojenkins.yo_jenkins.job.xmltodict.unparse', return_value='<project/>') as mock_unparse:
+                result = job_instance.create(
+                    name='new-job',
+                    folder_url='http://localhost:8080/job/folder/',
+                    config_file=str(config_file),
+                    config_is_json=False,
+                )
+        assert result is True
+        mock_unparse.assert_called_once()
+
+    def test_create_xml_config_not_converted(self, job_instance, tmp_path):
+        """create() does not convert XML config files."""
+        config_file = tmp_path / 'config.xml'
+        config_file.write_bytes(b'<project/>')
+        job_instance.rest.request.return_value = ({}, {}, True)
+        with patch('yojenkins.yo_jenkins.job.utility.item_exists_in_folder', return_value=False):
+            with patch('yojenkins.yo_jenkins.job.xmltodict.unparse') as mock_unparse:
+                result = job_instance.create(
+                    name='new-job',
+                    folder_url='http://localhost:8080/job/folder/',
+                    config_file=str(config_file),
+                    config_is_json=False,
+                )
+        assert result is True
+        mock_unparse.assert_not_called()
+
     def test_create_config_file_read_error_exits(self, job_instance):
         with patch('yojenkins.yo_jenkins.job.utility.item_exists_in_folder', return_value=False):
             with pytest.raises(YoJenkinsException):
