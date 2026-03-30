@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends, Query
 from starlette.concurrency import run_in_threadpool
 
-from yojenkins.api.dependencies import get_yo_jenkins
+from yojenkins.api.dependencies import get_yo_jenkins, validate_jenkins_url
 
 router = APIRouter()
 
@@ -14,6 +14,7 @@ async def build_info(
     yj=Depends(get_yo_jenkins),
 ):
     """Get build information."""
+    validate_jenkins_url(url, yj)
     return await run_in_threadpool(yj.build.info, build_url=url)
 
 
@@ -23,6 +24,7 @@ async def build_logs(
     yj=Depends(get_yo_jenkins),
 ):
     """Get build console logs."""
+    validate_jenkins_url(url, yj)
     # /consoleText is the Jenkins REST endpoint for raw plaintext build logs.
     request_url = f'{url.strip("/")}/consoleText'
     # is_endpoint=False (url is full, don't prepend base),
@@ -39,5 +41,6 @@ async def build_stages(
     yj=Depends(get_yo_jenkins),
 ):
     """Get build stages."""
+    validate_jenkins_url(url, yj)
     stages, stage_names = await run_in_threadpool(yj.build.stage_list, build_url=url)
     return {'stages': stages, 'stage_names': stage_names}

@@ -63,13 +63,14 @@ def create_app(static_dir: Optional[str] = None) -> FastAPI:
         allow_headers=['Content-Type', 'Authorization'],
     )
 
-    # X-Content-Type-Options: nosniff — prevent MIME-sniffing attacks.
-    # X-Frame-Options: DENY — prevent clickjacking via iframes.
     @app.middleware('http')
     async def security_headers(request: Request, call_next):
         response = await call_next(request)
         response.headers['X-Content-Type-Options'] = 'nosniff'
         response.headers['X-Frame-Options'] = 'DENY'
+        response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+        response.headers['X-Permitted-Cross-Domain-Policies'] = 'none'
+        response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'"
         return response
 
     # Register routers
@@ -110,7 +111,11 @@ def create_app(static_dir: Optional[str] = None) -> FastAPI:
             async def serve_spa(full_path: str):
                 """Serve static files or index.html for SPA routing."""
                 file_path = (static_path / full_path).resolve()
-                if full_path and file_path.is_file() and str(file_path).startswith(str(static_path)):
+                try:
+                    file_path.relative_to(static_path)
+                except ValueError:
+                    return FileResponse(static_path / 'index.html')
+                if full_path and file_path.is_file():
                     return FileResponse(file_path)
                 return FileResponse(static_path / 'index.html')
 
