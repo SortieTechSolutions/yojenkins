@@ -12,7 +12,6 @@ from shlex import quote
 from typing import Callable, Union
 
 import click
-import toml
 import yaml
 from json2xml import json2xml
 from json2xml.utils import readfromstring
@@ -157,7 +156,8 @@ def standard_out(
         # TOML format
         data = {'item': data} if isinstance(data, list) else data
         logger.debug('Outputting TOML format ...')
-        print2(toml.dumps(data))
+        from yojenkins.utility._compat import tomli_w
+        print2(tomli_w.dumps(data))
     else:
         # JSON format
         logger.debug('Outputting JSON format ...')

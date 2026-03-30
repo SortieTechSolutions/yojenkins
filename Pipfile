@@ -40,7 +40,8 @@ python-jenkins = "*"
 pywin32 = {version = "*", markers = "sys_platform == 'win32' or platform_system == 'Windows' or os_name =='nt'"}
 pyyaml = "*"
 requests_futures = "*"
-toml = "*"
+tomli = {version = "*", markers = "python_version < '3.11'"}
+tomli-w = "*"
 windows-curses = {version = "*", markers = "sys_platform == 'win32' or platform_system == 'Windows' or os_name =='nt'"}
 xmltodict = "*"
 yaspin = "*"

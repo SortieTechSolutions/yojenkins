@@ -16,7 +16,6 @@ from typing import Any, Literal, Union
 from urllib.parse import urljoin, urlparse
 
 import requests
-import toml
 import xmltodict
 import yaml
 from click import secho, style
@@ -24,6 +23,7 @@ from urllib3.util import parse_url
 from yaspin import yaspin
 from yaspin.spinners import Spinners
 
+from yojenkins.utility._compat import tomli_w, tomllib
 from yojenkins.yo_jenkins.jenkins_item_classes import JenkinsItemClasses
 
 logger = logging.getLogger()
@@ -92,7 +92,7 @@ def load_contents_from_local_file(
             if file_type == 'yaml':
                 file_contents = yaml.safe_load(open_file)
             elif file_type == 'toml':
-                file_contents = toml.load(open_file)
+                file_contents = tomllib.loads(open_file.read())
             elif file_type == 'json':
                 file_contents = json.loads(open_file.read())
             elif file_type == 'jsonl':
@@ -119,7 +119,7 @@ def load_contents_from_string(file_type: str, text: str) -> dict:
     if file_type == 'yaml':
         contents = yaml.safe_load(text)
     elif file_type == 'toml':
-        contents = toml.loads(text)
+        contents = tomllib.loads(text)
     elif file_type == 'json':
         contents = json.loads(text)
     else:
@@ -999,7 +999,7 @@ def write_xml_to_file(
         content_to_write = yaml.dump(content_to_write)
     elif opt_toml:
         logger.debug('Converting content to TOML ...')
-        content_to_write = toml.dumps(content_to_write)
+        content_to_write = tomli_w.dumps(content_to_write)
 
     logger.debug(f'Writing fetched configuration to "{filepath}" ...')
     try:
