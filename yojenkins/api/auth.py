@@ -1,6 +1,5 @@
 """JWT authentication endpoints."""
 
-import os
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -19,21 +18,6 @@ router = APIRouter()
 @router.post("/login", response_model=LoginResponse)
 async def login(request: LoginRequest):
     """Authenticate with a Jenkins server and receive a JWT."""
-    # Demo mode bypass (requires YOJENKINS_DEMO_MODE env var)
-    if request.username == "demo" and request.api_token == "demo":
-        if not os.environ.get("YOJENKINS_DEMO_MODE"):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Demo mode is not enabled. Set YOJENKINS_DEMO_MODE=1 to enable.",
-            )
-        from yojenkins.api.demo import DemoYoJenkins
-
-        yj = DemoYoJenkins()
-        user_id = str(uuid.uuid4())
-        store_session(user_id, yj)
-        token = create_access_token(user_id)
-        return LoginResponse(access_token=token)
-
     auth = Auth(Rest())
 
     profile_info = {

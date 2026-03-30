@@ -35,14 +35,6 @@ yojenkins serve --build  # force rebuild
 
 Built files in `webapp/dist/` are served by FastAPI as a single-page application.
 
-## Demo Mode
-
-```bash
-YOJENKINS_DEMO_MODE=1 yojenkins serve
-```
-
-Log in with username `demo` and token `demo`. Uses fake data — no Jenkins server needed.
-
 ## Project Structure
 
 - `src/pages/` — Page components (login, dashboard, job detail, etc.)
