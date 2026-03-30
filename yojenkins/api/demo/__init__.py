@@ -31,7 +31,7 @@ class DemoServer:
 
 
 class DemoJob:
-    def search(self, search_pattern=".*", folder_name="", folder_depth=4):
+    def search(self, search_pattern=".*", folder_name="", folder_depth=4, **kwargs):
         pattern = re.compile(search_pattern, re.IGNORECASE)
         matched = [j for j in data.JOBS if pattern.search(j["fullName"])]
         if folder_name:
@@ -75,11 +75,11 @@ class DemoJob:
 
 
 class DemoBuild:
-    def info(self, build_url=None):
+    def info(self, build_url=None, **kwargs):
         build = self._find(build_url)
         return build if build else {}
 
-    def stage_list(self, build_url=None):
+    def stage_list(self, build_url=None, **kwargs):
         build = self._find(build_url)
         if not build:
             return [], []
@@ -102,7 +102,7 @@ class DemoBuild:
 
 
 class DemoFolder:
-    def search(self, search_pattern=".*", folder_depth=4):
+    def search(self, search_pattern=".*", folder_depth=4, **kwargs):
         pattern = re.compile(search_pattern, re.IGNORECASE)
         matched = [f for f in data.FOLDERS if pattern.search(f["name"])]
         urls = [f["url"] for f in matched]
