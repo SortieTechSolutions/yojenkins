@@ -11,12 +11,16 @@ python_version = "3"
 
 [dev-packages]
 bump2version = "*"
+freezegun = "*"
 macholib = {version = "*", platform_system = "== 'Darwin'"}
 mkdocs = "*"
 myst_parser = "*"
 pre-commit = "*"
 pyinstaller = "*"
 pytest = "*"
+pytest-cov = "*"
+pytest-mock = "*"
+responses = "*"
 ruff = "*"
 setuptools = "*"
 twine = "*"
