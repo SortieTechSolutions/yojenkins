@@ -23,8 +23,6 @@ from urllib3.util import parse_url
 from yaspin import yaspin
 from yaspin.spinners import Spinners
 
-from yojenkins.yo_jenkins.jenkins_item_classes import JenkinsItemClasses
-
 logger = logging.getLogger()
 
 CONFIG_DIR_NAME = '.yojenkins'
@@ -842,6 +840,8 @@ def queue_find(all_queue_info: dict, job_name: str = '', job_url: str = '', firs
         return []
     job_name = job_name if job_name else url_to_name(job_url)
 
+    from yojenkins.yo_jenkins.jenkins_item_classes import JenkinsItemClasses  # noqa: PLC0415, I001 — deferred to avoid circular import
+
     queue_item_matches = []
 
     for i, queue_item in enumerate(all_queue_info['items']):
@@ -959,6 +959,8 @@ def item_exists_in_folder(item_name: str, folder_url: str, item_type: str, rest:
     Returns:
         True if the item exists, False if not
     """
+    from yojenkins.yo_jenkins.jenkins_item_classes import JenkinsItemClasses  # noqa: PLC0415, I001 — deferred to avoid circular import
+
     item_type_info = getattr(JenkinsItemClasses, item_type.upper())
     prefix = item_type_info.value['prefix']
 
