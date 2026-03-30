@@ -11,10 +11,10 @@ from json.decoder import JSONDecodeError
 from pathlib import Path
 from typing import Any
 
-import toml
 from jenkins import Jenkins as JenkinsSDK
 
 from yojenkins.utility import utility
+from yojenkins.utility._compat import tomli_w, tomllib
 from yojenkins.utility.utility import TextStyle, fail_out, failures_out, print2
 from yojenkins.yo_jenkins.rest import Rest
 
@@ -73,7 +73,7 @@ class Auth:
         output_path = os.path.join(Path.home(), CONFIG_DIR_NAME, CREDS_FILE_NAME)
         logger.debug(f'Saving new file (TOML format): "{output_path}" ...')
         with open(os.path.join(output_path), 'w') as file:  # Overwrite previous content
-            toml.dump(profiles, file)
+            file.write(tomli_w.dumps(profiles))
 
         # Add top file prefix for TOML file format
         lines_new = [f'# -*- mode: toml -*-{os.linesep}', f'# vim: set filetype=toml{os.linesep}']
