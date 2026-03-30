@@ -11,14 +11,26 @@ from jose import JWTError, jwt
 
 from yojenkins.yo_jenkins.yojenkins import YoJenkins
 
+# If YOJENKINS_SECRET_KEY is not set, a random key is generated at startup.
+# A random key means all JWTs are invalidated on process restart.
+# Set the env var for stable sessions across restarts.
 SECRET_KEY = os.environ.get("YOJENKINS_SECRET_KEY", "") or secrets.token_hex(32)
+# HS256 (HMAC-SHA256): symmetric signing — the same server issues and
+# validates tokens, so asymmetric RS256 would add complexity for no benefit.
 ALGORITHM = "HS256"
+# 1 hour: long enough for a working session, short enough to limit
+# exposure from a leaked token.
 ACCESS_TOKEN_EXPIRE_SECONDS = 3600
+# 30 min idle timeout: even if the JWT hasn't expired, the server-side
+# YoJenkins instance is garbage-collected after inactivity.
 SESSION_TTL_SECONDS = 1800
 
 security = HTTPBearer()
 
-# In-memory session store: user_id -> (YoJenkins instance, last_access_time)
+# In-memory session store: user_id -> (YoJenkins instance, last_access_time).
+# NOTE: Sessions are lost on restart and not shared across worker processes.
+# This is acceptable for a single-process dev tool; for multi-worker
+# deployments, replace with Redis or a database-backed store.
 _sessions: dict[str, tuple[YoJenkins, float]] = {}
 
 

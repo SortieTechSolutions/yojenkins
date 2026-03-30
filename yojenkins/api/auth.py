@@ -41,7 +41,7 @@ async def login(request: LoginRequest):
         "username": request.username,
         "api_token": request.api_token,
         "active": True,
-        "profile": "web_session",
+        "profile": "web_session",  # Distinguishes web sessions from CLI profiles on disk
     }
 
     try:

@@ -88,6 +88,8 @@ FOLDERS = [
 FOLDER_URLS = [f["url"] for f in FOLDERS]
 
 # --- Jobs ---
+# Jenkins "color" encodes build status: blue=success, red=failed,
+# yellow=unstable, notbuilt=never built. *_anime suffix=currently building.
 
 JOBS = [
     {
@@ -236,7 +238,8 @@ BUILDS: dict[str, list[dict]] = {
     ],
 }
 
-# Default stages for pipeline builds
+# Pipeline stage statuses per Jenkins Pipeline REST API:
+# SUCCESS, FAILED, UNSTABLE, IN_PROGRESS.
 DEFAULT_STAGES = [
     {"name": "Checkout", "status": "SUCCESS", "durationMillis": 5000, "id": "1"},
     {"name": "Build", "status": "SUCCESS", "durationMillis": 45000, "id": "2"},

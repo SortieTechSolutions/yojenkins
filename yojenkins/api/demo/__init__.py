@@ -51,7 +51,7 @@ class DemoJob:
         return result
 
     def build_trigger(self, job_name=None, job_url=None):
-        return 42
+        return 42  # Arbitrary fake queue item ID for demo mode
 
     def build_list(self, job_name=None, job_url=None):
         job = self._find(job_name, job_url)

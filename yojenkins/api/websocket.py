@@ -17,6 +17,9 @@ router = APIRouter()
 async def build_monitor(
     websocket: WebSocket,
     build_url: str = Query(...),
+    # WebSocket connections from browsers can't set Authorization headers,
+    # so the JWT is passed as a query param. Tradeoff: token may appear in
+    # server access logs. Mitigated by short TTL and HTTPS in production.
     token: str = Query(...),
 ):
     """WebSocket endpoint for live build monitoring.
@@ -41,6 +44,7 @@ async def build_monitor(
                     yj.build.stage_list, build_url=build_url
                 )
             except Exception:
+                # Stages may not exist for non-pipeline builds — treat as empty
                 stages, stage_names = [], []
 
             await websocket.send_json({
@@ -58,7 +62,7 @@ async def build_monitor(
                 })
                 break
 
-            await asyncio.sleep(5)
+            await asyncio.sleep(5)  # Poll interval — light on Jenkins API load
     except WebSocketDisconnect:
         logger.debug("WebSocket client disconnected")
     except Exception as exc:
