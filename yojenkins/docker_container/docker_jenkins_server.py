@@ -15,7 +15,7 @@ from time import perf_counter
 from typing import Any
 
 import docker
-from docker.errors import DockerException
+from docker.errors import DockerException, ImageNotFound
 
 from yojenkins.utility.utility import fail_out, get_resource_path, print2
 
@@ -233,7 +233,7 @@ class DockerJenkinsServer:
         logger.debug(f'Dockerfile context directory: {self.image_dockerfile_dir}')
         try:
             _, build_logs = self.docker_client.images.build(
-                path=self.image_dockerfile_dir,
+                path=str(self.image_dockerfile_dir),
                 tag=self.image_fullname,
                 rm=True,
                 buildargs=self.image_build_args,
@@ -286,6 +286,9 @@ class DockerJenkinsServer:
         logger.debug(f'Removing image: {self.image_fullname} ...')
         try:
             self.docker_client.images.remove(self.image_fullname)
+        except ImageNotFound:
+            logger.debug(f'Image not found (nothing to remove): {self.image_fullname}')
+            return True
         except DockerException as error:
             logger.debug(f'Failed to remove image: {self.image_fullname}. Exception: {error}')
             return False
@@ -374,11 +377,14 @@ class DockerJenkinsServer:
         Returns:
             TODO
         """
-        # Getting docker group id (Unix only)
+        # Getting docker group id (Unix only, may not exist on macOS with Docker Desktop)
+        docker_gid = None
         if platform.system() != 'Windows':
-            docker_gid = [getgrnam('docker').gr_gid]
-        else:
-            docker_gid = None
+            try:
+                docker_gid = [getgrnam('docker').gr_gid]
+            except KeyError:
+                logger.debug('Docker group not found (common on macOS with Docker Desktop)')
+                docker_gid = None
 
         logger.debug(f'Local docker service group id found: {docker_gid}')
 
