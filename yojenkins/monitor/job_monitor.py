@@ -335,7 +335,7 @@ class JobMonitor(Monitor):
                 mu.draw_message_box(scr, message_lines)
                 # Quit Message confirmed (pressed twice)
                 if self.quit > 1:
-                    self.all_threads_enabled = False
+                    self.all_threads_off()
                     return True
             else:
                 halfdelay_normal = True
@@ -344,9 +344,9 @@ class JobMonitor(Monitor):
             if halfdelay_normal:
                 curses.halfdelay(self.halfdelay_screen_refresh)
 
-            # Straight exist program
+            # Straight exit program
             if self.exit:
-                self.all_threads_enabled = False
+                self.all_threads_off()
                 sys.exit(0)
 
             ########################################################################################
@@ -539,7 +539,9 @@ class JobMonitor(Monitor):
         """
         logger.debug('Starting thread for job builds info ...')
         try:
-            threading.Thread(target=self.__thread_builds_data, args=(monitor_interval,), daemon=False).start()
+            t = threading.Thread(target=self.__thread_builds_data, args=(monitor_interval,), daemon=True)
+            t.start()
+            self._threads.append(t)
         except Exception as error:
             logger.error(f'Failed to start job builds info monitoring thread. Exception: {error}. Type: {type(error)}')
 

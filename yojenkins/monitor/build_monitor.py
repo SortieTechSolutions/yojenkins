@@ -11,7 +11,7 @@ from time import perf_counter, sleep, time
 
 from yojenkins.monitor.monitor import Monitor
 from yojenkins.utility.utility import get_resource_path
-from yojenkins.yo_jenkins.status import Color, StageStatus, Status
+from yojenkins.yo_jenkins.status import Color, Sound, StageStatus, Status
 
 from . import monitor_utility as mu
 
@@ -61,6 +61,9 @@ class BuildMonitor(Monitor):
         self.build_logs = False
 
         self.sound_directory = ''
+
+        # Track whether PAUSED_PENDING_INPUT sound has been played for current pause
+        self._stage_paused_sound_played = False
 
     ###########################################################################
     #                         BUILD MONITOR
@@ -299,6 +302,20 @@ class BuildMonitor(Monitor):
 
                     mu.draw_text(scr, result_text.replace('_', ' '), y_row, x_col[3], color=self.color[status_color])
                     y_row += 1
+
+                # Play sound when any stage is stuck in PAUSED_PENDING_INPUT
+                if sound and not self.playing_sound:
+                    has_paused_stage = any(
+                        stage.get('status') == StageStatus.PAUSED_INPUT.value
+                        for stage in self.build_stages_data
+                    )
+                    if has_paused_stage and not self._stage_paused_sound_played:
+                        sound_file = Sound.ITEMS.value['PAUSED_INPUT']
+                        if sound_file:
+                            self.play_sound_thread_on(str(self.sound_directory / sound_file))
+                            self._stage_paused_sound_played = True
+                    elif not has_paused_stage:
+                        self._stage_paused_sound_played = False
             else:
                 # Change the minimum window height limit (no stages section)
                 self.height_limit = 17
@@ -417,7 +434,7 @@ class BuildMonitor(Monitor):
             # Show the build logs
             if self.build_logs:
                 self.help = False
-                self.all_threads_enabled = False
+                self.all_threads_off()
                 curses.echo(True)
                 curses.nl(True)
                 curses.endwin()
@@ -434,7 +451,7 @@ class BuildMonitor(Monitor):
                 mu.draw_message_box(scr, message_lines)
                 # Quit Message confirmed (pressed twice)
                 if self.quit > 1:
-                    self.all_threads_enabled = False
+                    self.all_threads_off()
                     return True
             else:
                 halfdelay_normal = True
@@ -443,9 +460,9 @@ class BuildMonitor(Monitor):
             if halfdelay_normal:
                 curses.halfdelay(self.halfdelay_screen_refresh)
 
-            # Straight exist program
+            # Straight exit program
             if self.exit:
-                self.all_threads_enabled = False
+                self.all_threads_off()
                 sys.exit(0)
 
             ########################################################################################
@@ -500,8 +517,11 @@ class BuildMonitor(Monitor):
         while self.all_threads_enabled:
             if not self.paused:
                 self.server_interaction = True
-                with self._build_info_thread_lock:
-                    self.build_info_data = self.build.info(build_url=build_url)
+                try:
+                    with self._build_info_thread_lock:
+                        self.build_info_data = self.build.info(build_url=build_url)
+                except RuntimeError:
+                    break
 
             # Wait some time before checking again
             start_time = time()
@@ -525,14 +545,16 @@ class BuildMonitor(Monitor):
         """
         logger.debug(f'Starting thread for build info for "{build_url}" ...')
         try:
-            threading.Thread(
+            t = threading.Thread(
                 target=self.__thread_build_info,
                 args=(
                     build_url,
                     monitor_interval,
                 ),
-                daemon=False,
-            ).start()
+                daemon=True,
+            )
+            t.start()
+            self._threads.append(t)
         except Exception as error:
             logger.error(
                 f'Failed to start build info monitoring thread for {build_url}. Exception: {error}. Type: {type(error)}'
@@ -573,8 +595,11 @@ class BuildMonitor(Monitor):
         while self.all_threads_enabled:
             if not self.paused:
                 self.server_interaction = True
-                with self._build_stages_thread_lock:
-                    self.build_stages_data = self.build.stage_list(build_url=build_url)[0]
+                try:
+                    with self._build_stages_thread_lock:
+                        self.build_stages_data = self.build.stage_list(build_url=build_url)[0]
+                except RuntimeError:
+                    break
 
             # Wait some time before checking again
             start_time = time()
@@ -598,14 +623,16 @@ class BuildMonitor(Monitor):
         """
         logger.debug(f'Starting thread for build stages for "{build_url}" ...')
         try:
-            threading.Thread(
+            t = threading.Thread(
                 target=self.__thread_build_stages,
                 args=(
                     build_url,
                     monitor_interval,
                 ),
-                daemon=False,
-            ).start()
+                daemon=True,
+            )
+            t.start()
+            self._threads.append(t)
         except Exception as error:
             logger.error(
                 f'Failed to start build info monitoring thread for {build_url}. Exception: {error}. Type: {type(error)}'
