@@ -6,7 +6,6 @@ business logic method was invoked.
 """
 
 import json
-import sys
 from unittest.mock import MagicMock, mock_open, patch
 
 import pytest

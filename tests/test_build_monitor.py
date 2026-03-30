@@ -1,9 +1,9 @@
 """Tests for yojenkins/monitor/build_monitor.py"""
 
 import threading
+from unittest.mock import MagicMock, patch
 
 import pytest
-from unittest.mock import MagicMock, patch, PropertyMock
 
 from yojenkins.monitor.build_monitor import BuildMonitor
 

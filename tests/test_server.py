@@ -1,8 +1,10 @@
 """Tests for yojenkins.yo_jenkins.server.Server"""
 
-import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
+import pytest
+
+from yojenkins.yo_jenkins.exceptions import YoJenkinsException
 from yojenkins.yo_jenkins.server import Server
 
 
@@ -36,7 +38,7 @@ class TestServerInfo:
 
     def test_info_fail_out_on_failure(self, server):
         server.rest.request.return_value = ({}, {}, False)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             server.info()
 
 
@@ -57,12 +59,12 @@ class TestServerPeople:
 
     def test_people_fail_out_on_request_failure(self, server):
         server.rest.request.return_value = ({}, {}, False)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             server.people()
 
     def test_people_fail_out_on_missing_keys(self, server):
         server.rest.request.return_value = ({'users': [{'bad': 'data'}]}, {}, True)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             server.people()
 
 
@@ -77,7 +79,7 @@ class TestServerQueueInfo:
 
     def test_queue_info_fail_out_on_failure(self, server):
         server.rest.request.return_value = ({}, {}, False)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             server.queue_info()
 
 
@@ -119,12 +121,12 @@ class TestServerPluginList:
 
     def test_plugin_list_fail_out_on_request_failure(self, server):
         server.rest.request.return_value = ({}, {}, False)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             server.plugin_list()
 
     def test_plugin_list_fail_out_on_missing_keys(self, server):
         server.rest.request.return_value = ({'plugins': [{'bad': 'data'}]}, {}, True)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             server.plugin_list()
 
 
@@ -149,7 +151,7 @@ class TestServerRestart:
 
     def test_restart_fail_out(self, server):
         server.rest.request.return_value = ('', {}, False)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             server.restart()
 
 
@@ -174,7 +176,7 @@ class TestServerShutdown:
 
     def test_shutdown_fail_out(self, server):
         server.rest.request.return_value = ('', {}, False)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             server.shutdown()
 
 
@@ -199,7 +201,7 @@ class TestServerQuiet:
 
     def test_quiet_fail_out(self, server):
         server.rest.request.return_value = ('', {}, False)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             server.quiet()
 
 
@@ -214,5 +216,5 @@ class TestServerBrowserOpen:
 
     @patch('yojenkins.yo_jenkins.server.utility.browser_open', return_value=False)
     def test_browser_open_failure_exits(self, mock_browser, server):
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             server.browser_open()

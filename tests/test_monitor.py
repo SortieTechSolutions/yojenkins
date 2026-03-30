@@ -1,10 +1,9 @@
 """Tests for yojenkins/monitor/monitor.py (Monitor base class)"""
 
-import logging
-import sys
+
+from unittest.mock import MagicMock, patch
 
 import pytest
-from unittest.mock import MagicMock, patch, call
 
 from yojenkins.monitor.monitor import Monitor
 

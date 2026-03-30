@@ -2,12 +2,12 @@
 
 import json
 import logging
-import os
 from unittest.mock import MagicMock, mock_open, patch
 
 import pytest
 
 from yojenkins.cli import cli_utility as cu
+from yojenkins.yo_jenkins.exceptions import AuthenticationError, YoJenkinsException
 
 
 class TestSetDebugLogLevel:
@@ -177,28 +177,24 @@ class TestConfigYoJenkins:
     @patch('yojenkins.cli.cli_utility.YoJenkins')
     @patch('yojenkins.cli.cli_utility.Auth')
     @patch('yojenkins.cli.cli_utility.Rest')
-    @patch('click.secho')
-    def test_exits_on_failed_credentials(self, mock_secho, mock_rest_cls, mock_auth_cls, mock_yj_cls):
-        """Should sys.exit(1) if get_credentials fails."""
+    def test_raises_on_failed_credentials(self, mock_rest_cls, mock_auth_cls, mock_yj_cls):
+        """Should raise YoJenkinsException if get_credentials fails."""
         mock_auth = MagicMock()
-        mock_auth.get_credentials.return_value = False
+        mock_auth.get_credentials.side_effect = AuthenticationError('No profiles found')
         mock_auth_cls.return_value = mock_auth
 
-        with pytest.raises(SystemExit) as exc_info:
+        with pytest.raises(YoJenkinsException):
             cu.config_yo_jenkins('bad_profile', None)
-        assert exc_info.value.code == 1
 
     @patch('yojenkins.cli.cli_utility.YoJenkins')
     @patch('yojenkins.cli.cli_utility.Auth')
     @patch('yojenkins.cli.cli_utility.Rest')
-    @patch('click.secho')
-    def test_exits_on_failed_auth(self, mock_secho, mock_rest_cls, mock_auth_cls, mock_yj_cls):
-        """Should sys.exit(1) if create_auth fails."""
+    def test_raises_on_failed_auth(self, mock_rest_cls, mock_auth_cls, mock_yj_cls):
+        """Should raise YoJenkinsException if create_auth fails."""
         mock_auth = MagicMock()
         mock_auth.get_credentials.return_value = True
-        mock_auth.create_auth.return_value = False
+        mock_auth.create_auth.side_effect = AuthenticationError('Auth failed')
         mock_auth_cls.return_value = mock_auth
 
-        with pytest.raises(SystemExit) as exc_info:
+        with pytest.raises(YoJenkinsException):
             cu.config_yo_jenkins('default', None)
-        assert exc_info.value.code == 1

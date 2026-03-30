@@ -4,8 +4,8 @@ import json
 
 import pytest
 
+from yojenkins.yo_jenkins.exceptions import YoJenkinsException
 from yojenkins.yo_jenkins.node import Node
-
 
 # ---------------------------------------------------------------------------
 # info
@@ -41,7 +41,7 @@ class TestInfo:
         mock_rest.request.return_value = ({}, {}, False)
         node = Node(rest=mock_rest)
 
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             node.info('bad-node')
 
 
@@ -79,7 +79,7 @@ class TestList:
         mock_rest.request.return_value = ({}, {}, False)
         node = Node(rest=mock_rest)
 
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             node.list()
 
     def test_list_missing_computer_key_exits(self, mock_rest):
@@ -87,7 +87,7 @@ class TestList:
         mock_rest.request.return_value = ({'other_key': []}, {}, True)
         node = Node(rest=mock_rest)
 
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             node.list()
 
 
@@ -122,7 +122,7 @@ class TestConfig:
         mock_rest.request.return_value = ('', {}, False)
         node = Node(rest=mock_rest)
 
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             node.config(node_name='agent-1')
 
     def test_config_writes_file(self, mock_rest, mocker, tmp_path):
@@ -159,7 +159,7 @@ class TestDelete:
         mock_rest.request.return_value = ('', {}, False)
         node = Node(rest=mock_rest)
 
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             node.delete('agent-1')
 
 
@@ -202,7 +202,7 @@ class TestDisable:
         ]
         node = Node(rest=mock_rest)
 
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             node.disable('agent-1')
 
 
@@ -276,7 +276,7 @@ class TestCreatePermanent:
         create_kwargs['name'] = 'bad@name!'
         node = Node(rest=mock_rest)
 
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             node.create_permanent(**create_kwargs)
 
     def test_create_permanent_failure_exits(self, mock_rest, create_kwargs):
@@ -284,7 +284,7 @@ class TestCreatePermanent:
         mock_rest.request.return_value = ('', {}, False)
         node = Node(rest=mock_rest)
 
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             node.create_permanent(**create_kwargs)
 
     @pytest.mark.parametrize('ssh_verify,expected_class', [
@@ -346,7 +346,7 @@ class TestReconfig:
         """reconfig() calls fail_out when config file does not exist."""
         node = Node(rest=mock_rest)
 
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             node.reconfig('agent-1', config_file='/nonexistent/config.xml')
 
     def test_reconfig_json_conversion(self, mock_rest, tmp_path):
@@ -371,5 +371,5 @@ class TestReconfig:
         mock_rest.request.return_value = ('', {}, False)
         node = Node(rest=mock_rest)
 
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             node.reconfig('agent-1', config_file=str(config_file))

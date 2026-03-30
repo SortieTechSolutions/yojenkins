@@ -3,7 +3,7 @@
 import pytest
 
 from yojenkins.yo_jenkins.credential import Credential
-
+from yojenkins.yo_jenkins.exceptions import YoJenkinsException
 
 # ---------------------------------------------------------------------------
 # Static / helper methods
@@ -83,19 +83,19 @@ class TestList:
     def test_list_fails_on_request_failure(self, mock_rest):
         cred = Credential(mock_rest)
         mock_rest.request.return_value = ({}, {}, False)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             cred.list(domain='global', keys='all', folder='root')
 
     def test_list_fails_when_no_credentials_key(self, mock_rest):
         cred = Credential(mock_rest)
         mock_rest.request.return_value = ({'other': 'data'}, {}, True)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             cred.list(domain='global', keys='all', folder='root')
 
     def test_list_fails_when_credentials_empty(self, mock_rest):
         cred = Credential(mock_rest)
         mock_rest.request.return_value = ({'credentials': []}, {}, True)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             cred.list(domain='global', keys='all', folder='root')
 
 
@@ -130,7 +130,7 @@ class TestInfo:
         mock_rest.request.side_effect = [
             ({'credentials': [{'displayName': 'other', 'id': 'xyz'}]}, {}, True),
         ]
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             cred.info(credential='nonexistent', folder='root', domain='global')
 
 
@@ -171,7 +171,7 @@ class TestCreate:
 
     def test_create_fails_on_missing_file(self, mock_rest):
         cred = Credential(mock_rest)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             cred.create(config_file='/nonexistent/file.xml', folder='root', domain='global')
 
     def test_create_fails_on_request_failure(self, mock_rest, tmp_path):
@@ -179,7 +179,7 @@ class TestCreate:
         config_file = tmp_path / 'cred.xml'
         config_file.write_text('<credentials/>')
         mock_rest.request.return_value = ('', {}, False)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             cred.create(config_file=str(config_file), folder='root', domain='global')
 
 
@@ -207,7 +207,7 @@ class TestDelete:
             ({'credentials': [{'displayName': 'my-cred', 'id': 'cred-1'}]}, {}, True),
             ({'displayName': 'my-cred'}, {}, True),
         ]
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             cred.delete(credential='my-cred', folder='root', domain='global')
 
     def test_delete_request_failure_exits(self, mock_rest):
@@ -218,7 +218,7 @@ class TestDelete:
             ({'id': 'cred-1', 'displayName': 'my-cred'}, {}, True),
             ('', {}, False),  # delete fails
         ]
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             cred.delete(credential='my-cred', folder='root', domain='global')
 
 
@@ -286,7 +286,7 @@ class TestConfigEdgeCases:
             ('<credential>xml</credential>', {}, True),
         ]
         with patch('yojenkins.yo_jenkins.credential.utility.write_xml_to_file', return_value=False):
-            with pytest.raises(SystemExit):
+            with pytest.raises(YoJenkinsException):
                 cred.config(credential='my-cred', folder='root', domain='global', filepath='/tmp/cred.xml')
 
 
@@ -303,7 +303,7 @@ class TestInfoEdgeCases:
             ({'credentials': [{'displayName': 'my-cred', 'id': 'cred-1'}]}, {}, True),
             ({}, {}, False),  # info request fails
         ]
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             cred.info(credential='my-cred', folder='root', domain='global')
 
     def test_info_multiple_matches_uses_first(self, mock_rest):
@@ -366,7 +366,7 @@ class TestGetTemplate:
         from unittest.mock import patch
         cred = Credential(mock_rest)
         with patch('yojenkins.yo_jenkins.credential.utility.write_xml_to_file', return_value=False):
-            with pytest.raises(SystemExit):
+            with pytest.raises(YoJenkinsException):
                 cred.get_template('user-pass', filepath='/tmp/bad.xml')
 
 

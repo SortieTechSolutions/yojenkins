@@ -2,16 +2,13 @@
 
 import json
 import os
-import sys
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
 import toml
 
-from yojenkins.yo_jenkins.auth import Auth, CONFIG_DIR_NAME, CREDS_FILE_NAME, PROFILE_ENV_VAR
-from yojenkins.yo_jenkins.rest import Rest
-
+from yojenkins.yo_jenkins.auth import CONFIG_DIR_NAME, CREDS_FILE_NAME, PROFILE_ENV_VAR, Auth
+from yojenkins.yo_jenkins.exceptions import YoJenkinsException
 
 # ---------------------------------------------------------------------------
 # Constructor tests
@@ -104,13 +101,13 @@ class TestGetCredentials:
         """JSON string profile missing required keys triggers sys.exit(1)."""
         json_profile = json.dumps({'jenkins_server_url': 'http://server:8080'})
         auth = Auth(rest=mock_rest)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             auth.get_credentials(profile=json_profile)
 
     def test_priority1_invalid_json_starting_with_brace_exits(self, mock_rest, tmp_path):
         """A profile value starting with '{' but not valid JSON triggers fail_out."""
         auth = Auth(rest=mock_rest)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             auth.get_credentials(profile='{invalid json')
 
     def test_priority2_env_var_selects_profile(self, mock_rest, tmp_path):
@@ -152,7 +149,7 @@ class TestGetCredentials:
             with patch('yojenkins.yo_jenkins.auth.Path') as MockPath:
                 MockPath.home.return_value = tmp_path
                 with patch.dict(os.environ, {PROFILE_ENV_VAR: 'nonexistent'}, clear=False):
-                    with pytest.raises(SystemExit):
+                    with pytest.raises(YoJenkinsException):
                         auth.get_credentials(profile='')
 
     def test_priority3_default_profile_selected(self, mock_rest, tmp_path):
@@ -225,7 +222,7 @@ class TestGetCredentials:
             with patch('yojenkins.yo_jenkins.auth.Path') as MockPath:
                 MockPath.home.return_value = tmp_path
                 with patch.dict(os.environ, env_clean, clear=True):
-                    with pytest.raises(SystemExit):
+                    with pytest.raises(YoJenkinsException):
                         auth.get_credentials(profile='')
 
     def test_profile_arg_not_found_exits(self, mock_rest, tmp_path):
@@ -244,7 +241,7 @@ class TestGetCredentials:
         with patch.object(auth, '_detect_creds_file', return_value=(True, str(tmp_path / CONFIG_DIR_NAME / CREDS_FILE_NAME))):
             with patch('yojenkins.yo_jenkins.auth.Path') as MockPath:
                 MockPath.home.return_value = tmp_path
-                with pytest.raises(SystemExit):
+                with pytest.raises(YoJenkinsException):
                     auth.get_credentials(profile='nonexistent')
 
     def test_sets_jenkins_profile_attribute(self, mock_rest, tmp_path):
@@ -321,7 +318,7 @@ class TestCreateAuth:
         mock_rest.is_reachable = MagicMock(return_value=False)
 
         with patch('yojenkins.yo_jenkins.auth.JenkinsSDK'):
-            with pytest.raises(SystemExit):
+            with pytest.raises(YoJenkinsException):
                 auth.create_auth()
 
     def test_failed_verify_exits(self, mock_rest):
@@ -331,13 +328,13 @@ class TestCreateAuth:
 
         with patch('yojenkins.yo_jenkins.auth.JenkinsSDK'):
             with patch.object(auth, 'verify', return_value=False):
-                with pytest.raises(SystemExit):
+                with pytest.raises(YoJenkinsException):
                     auth.create_auth()
 
     def test_no_profile_loaded_exits(self, mock_rest):
         """When no profile is loaded and none passed, fail_out triggers exit."""
         auth = Auth(rest=mock_rest)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             auth.create_auth()
 
     def test_missing_url_protocol_exits(self, mock_rest):
@@ -349,7 +346,7 @@ class TestCreateAuth:
             'username': 'user',
             'api_token': 'token',
         }
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             auth.create_auth()
 
     def test_prompts_for_token_when_missing(self, mock_rest):
@@ -393,14 +390,14 @@ class TestVerify:
             'jenkins_server_url': 'http://localhost:8080',
         }
         mock_rest.request.return_value = ({}, {}, False)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             auth.verify()
 
     def test_verify_missing_server_url_exits(self, mock_rest):
         """verify() exits when jenkins_server_url key is missing from profile."""
         auth = Auth(rest=mock_rest)
         auth.jenkins_profile = {}
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             auth.verify()
 
 
@@ -434,7 +431,7 @@ class TestGenerateToken:
         auth = Auth(rest=mock_rest)
         mock_rest.request.return_value = ('', {}, False)
 
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             auth.generate_token(
                 token_name='mytoken',
                 server_base_url='http://localhost:8080',
@@ -450,7 +447,7 @@ class TestGenerateToken:
             ({}, {}, False),
         ]
 
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             auth.generate_token(
                 token_name='mytoken',
                 server_base_url='http://localhost:8080',
@@ -466,7 +463,7 @@ class TestGenerateToken:
             ({'data': {}}, {}, True),
         ]
 
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             auth.generate_token(
                 token_name='mytoken',
                 server_base_url='http://localhost:8080',
@@ -535,7 +532,7 @@ class TestProfileOperations:
         """show_local_credentials exits when no credentials file is found."""
         auth = Auth(rest=mock_rest)
         with patch.object(auth, '_detect_creds_file', return_value=(False, '')):
-            with pytest.raises(SystemExit):
+            with pytest.raises(YoJenkinsException):
                 auth.show_local_credentials()
 
     def test_user_returns_data(self, mock_rest):
@@ -549,7 +546,7 @@ class TestProfileOperations:
         """user() exits when REST request returns empty/falsy data."""
         auth = Auth(rest=mock_rest)
         mock_rest.request.return_value = ({}, {}, True)
-        with pytest.raises(SystemExit):
+        with pytest.raises(YoJenkinsException):
             auth.user()
 
 
@@ -615,7 +612,7 @@ class TestVerifyEdgeCases:
         }
         mock_rest.request.return_value = ({}, {}, False)
         with patch.dict(os.environ, {'YOJENKINS_TOKEN': 'some-token'}):
-            with pytest.raises(SystemExit):
+            with pytest.raises(YoJenkinsException):
                 auth.verify()
 
 
@@ -686,7 +683,7 @@ class TestCreateAuthEdgeCases:
             'api_token': 'token',
         }
         with patch('yojenkins.yo_jenkins.auth.JenkinsSDK', side_effect=Exception('SDK error')):
-            with pytest.raises(SystemExit):
+            with pytest.raises(YoJenkinsException):
                 auth.create_auth()
 
 
@@ -710,7 +707,7 @@ class TestGetCredentialsEdgeCases:
             with patch('yojenkins.yo_jenkins.auth.Path') as MockPath:
                 MockPath.home.return_value = tmp_path
                 with patch.dict(os.environ, env_clean, clear=True):
-                    with pytest.raises(SystemExit):
+                    with pytest.raises(YoJenkinsException):
                         auth.get_credentials(profile='')
 
 
@@ -750,14 +747,14 @@ class TestProfileAddNewToken:
         _write_creds_file(tmp_path, profiles)
         auth = Auth(rest=mock_rest)
         with patch.object(auth, '_detect_creds_file', return_value=(True, str(tmp_path / CONFIG_DIR_NAME / CREDS_FILE_NAME))):
-            with pytest.raises(SystemExit):
+            with pytest.raises(YoJenkinsException):
                 auth.profile_add_new_token('nonexistent')
 
     def test_add_token_no_creds_file_exits(self, mock_rest):
         """profile_add_new_token exits when no creds file found."""
         auth = Auth(rest=mock_rest)
         with patch.object(auth, '_detect_creds_file', return_value=(False, '')):
-            with pytest.raises(SystemExit):
+            with pytest.raises(YoJenkinsException):
                 auth.profile_add_new_token('default')
 
     def test_add_token_missing_server_url(self, mock_rest, tmp_path):
@@ -789,7 +786,7 @@ class TestProfileAddNewToken:
         auth = Auth(rest=mock_rest)
         with patch.object(auth, '_detect_creds_file', return_value=(True, str(tmp_path / CONFIG_DIR_NAME / CREDS_FILE_NAME))):
             with patch.object(auth, '_update_profiles', return_value=False):
-                with pytest.raises(SystemExit):
+                with pytest.raises(YoJenkinsException):
                     auth.profile_add_new_token('default', token='t')
 
 

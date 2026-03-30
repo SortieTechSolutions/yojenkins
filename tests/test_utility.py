@@ -1083,7 +1083,7 @@ class TestAppendLinesExceptionBranch:
     def test_exception_during_write_returns_false(self, tmp_path):
         f = tmp_path / 'test.txt'
         f.write_text('original')
-        with patch('builtins.open', side_effect=IOError('disk error')):
+        with patch('builtins.open', side_effect=OSError('disk error')):
             result = append_lines_to_file(str(f), ['new line\n'], location='end')
         assert result is False
 

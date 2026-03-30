@@ -1,9 +1,7 @@
 """Tests for yojenkins/monitor/monitor_utility.py"""
 
 import logging
-
-import pytest
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, patch
 
 
 class TestTruncateText:

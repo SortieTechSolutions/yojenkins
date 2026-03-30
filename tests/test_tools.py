@@ -3,11 +3,8 @@
 import subprocess
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from yojenkins.tools.package import Package
 from yojenkins.tools.shared_library import SharedLibrary
-
 
 # ============================================================================
 # Package tests

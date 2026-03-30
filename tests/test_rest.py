@@ -1,14 +1,11 @@
 """Tests for yojenkins/yo_jenkins/rest.py"""
 
-import pytest
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, patch
 
 import requests
 from requests.auth import HTTPBasicAuth
-from requests_futures.sessions import FuturesSession
 
 from yojenkins.yo_jenkins.rest import Rest
-
 
 # ---------------------------------------------------------------------------
 # Helpers

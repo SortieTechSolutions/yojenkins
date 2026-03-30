@@ -1,8 +1,9 @@
 """PyTest Configurations and Fixtures"""
 
+from unittest.mock import MagicMock
+
 import pytest
 from click.testing import CliRunner
-from unittest.mock import MagicMock
 
 from yojenkins.yo_jenkins.rest import Rest
 
