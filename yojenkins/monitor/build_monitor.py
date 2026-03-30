@@ -11,7 +11,7 @@ from time import perf_counter, sleep, time
 
 from yojenkins.monitor.monitor import Monitor
 from yojenkins.utility.utility import get_resource_path
-from yojenkins.yo_jenkins.status import Color, StageStatus, Status
+from yojenkins.yo_jenkins.status import Color, Sound, StageStatus, Status
 
 from . import monitor_utility as mu
 
@@ -61,6 +61,9 @@ class BuildMonitor(Monitor):
         self.message_box_temp_duration = 1  # sec
 
         self.sound_directory = ''
+
+        # Track whether PAUSED_PENDING_INPUT sound has been played for current pause
+        self._stage_paused_sound_played = False
 
     ###########################################################################
     #                         BUILD MONITOR
@@ -297,6 +300,20 @@ class BuildMonitor(Monitor):
 
                     mu.draw_text(scr, result_text.replace('_', ' '), y_row, x_col[3], color=self.color[status_color])
                     y_row += 1
+
+                # Play sound when any stage is stuck in PAUSED_PENDING_INPUT
+                if sound and not self.playing_sound:
+                    has_paused_stage = any(
+                        stage.get('status') == StageStatus.PAUSED_INPUT.value
+                        for stage in self.build_stages_data
+                    )
+                    if has_paused_stage and not self._stage_paused_sound_played:
+                        sound_file = Sound.ITEMS.value['PAUSED_INPUT']
+                        if sound_file:
+                            self.play_sound_thread_on(os.path.join(self.sound_directory, sound_file))
+                            self._stage_paused_sound_played = True
+                    elif not has_paused_stage:
+                        self._stage_paused_sound_played = False
             else:
                 # Change the minimum window height limit (no stages section)
                 self.height_limit = 17
