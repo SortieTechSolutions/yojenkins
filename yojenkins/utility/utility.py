@@ -1231,6 +1231,49 @@ def wait_for_build_and_follow_logs(yj_obj: object, queue_id: int) -> None:
     )
 
 
+def wait_for_build_and_monitor(yj_obj: object, queue_id: int, sound: bool = False) -> None:
+    """Wait for build to leave queue, then launch the build monitor UI
+
+    Details:
+        Will only use loading spinner when not in logger debug mode
+
+    Args:
+        yj_obj:   YoJenkins object
+        queue_id: Build queue ID
+        sound:    Play sound on build status change
+    """
+    msg = f'Build is in queue with queue ID {queue_id}. Waiting for build to run ...'
+    if logger.level > 10:
+        spinner = yaspin(spinner=Spinners.bouncingBar, attrs=['bold'], text=msg)
+        spinner.start()
+    else:
+        logger.info(msg)
+
+    while True:
+        queue_data = yj_obj.job.queue_info(build_queue_number=queue_id)
+        if 'executable' in queue_data:
+            break
+        if queue_data.get('stuck'):
+            fail_out(
+                f'Build is stuck in queue as queue number {queue_id}',
+                fg='bright_red',
+                bold=True,
+            )
+        time.sleep(2)
+
+    if logger.level > 10:
+        spinner.stop()
+
+    build_number = queue_data['executable']['number']
+    job_url = queue_data['jobUrl']
+    print2(f'Running with build number {build_number}. Starting build monitor ...')
+    yj_obj.build.monitor(
+        job_url=job_url,
+        build_number=build_number,
+        sound=sound,
+    )
+
+
 def diff_show(
     text_1: str,
     text_2: str,

@@ -1290,6 +1290,21 @@ class TestCliBuildHandlersExtended:
         )
         mock_follow.assert_called_once_with(mock_yj, 789)
 
+    @patch('yojenkins.cli.cli_build.wait_for_build_and_monitor')
+    @patch('yojenkins.cli.cli_build.cu.config_yo_jenkins')
+    @patch('yojenkins.cli.cli_build.cu.is_full_url', return_value=False)
+    @patch('yojenkins.cli.cli_build.is_complete_build_url', return_value=False)
+    def test_build_rebuild_with_monitor(self, mock_is_build_url, mock_is_url, mock_config, mock_monitor):
+        mock_yj = _mock_yj()
+        mock_config.return_value = mock_yj
+        mock_yj.build.rebuild.return_value = 888
+
+        cli_build.rebuild(
+            job='my-job', number=1, url=None, latest=False, follow_logs=False, monitor=True,
+            **PROFILE_TOKEN
+        )
+        mock_monitor.assert_called_once_with(mock_yj, 888)
+
     @patch('yojenkins.cli.cli_build.cu.standard_out')
     @patch('yojenkins.cli.cli_build.cu.config_yo_jenkins')
     @patch('yojenkins.cli.cli_build.cu.is_full_url', return_value=False)
@@ -1682,6 +1697,17 @@ class TestCliJobHandlersExtended:
 
         cli_job.build(job='my-job', parameter=(), follow_logs=True, **PROFILE_TOKEN)
         mock_follow.assert_called_once_with(mock_yj, 555)
+
+    @patch('yojenkins.cli.cli_job.wait_for_build_and_monitor')
+    @patch('yojenkins.cli.cli_job.cu.config_yo_jenkins')
+    @patch('yojenkins.cli.cli_job.cu.is_full_url', return_value=False)
+    def test_job_build_with_monitor(self, mock_is_url, mock_config, mock_monitor):
+        mock_yj = _mock_yj()
+        mock_config.return_value = mock_yj
+        mock_yj.job.build_trigger.return_value = 777
+
+        cli_job.build(job='my-job', parameter=(), follow_logs=False, monitor=True, **PROFILE_TOKEN)
+        mock_monitor.assert_called_once_with(mock_yj, 777)
 
 
 # ============================================================================

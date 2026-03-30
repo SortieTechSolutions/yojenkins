@@ -212,6 +212,9 @@ def parameters(ctx, debug, **kwargs):
 @click.option(
     '--follow-logs', type=bool, required=False, is_flag=True, help='Wait for build, follow logs when build starts'
 )
+@click.option(
+    '--monitor', type=bool, required=False, is_flag=True, help='Wait for build, then open build monitor UI'
+)
 @click.pass_context
 def rebuild(ctx, debug, **kwargs):
     """Get build parameters
