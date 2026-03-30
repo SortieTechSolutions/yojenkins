@@ -10,9 +10,9 @@ router = APIRouter()
 
 @router.get("/search")
 async def search_jobs(
-    pattern: str = Query(..., description="REGEX pattern to search for"),
+    pattern: str = Query(..., max_length=500, description="REGEX pattern to search for"),
     folder: str = Query("", description="Folder to search within"),
-    depth: int = Query(4, description="Search depth"),
+    depth: int = Query(4, ge=1, le=10, description="Search depth"),
     yj=Depends(get_yo_jenkins),
 ):
     """Search for jobs matching a REGEX pattern."""

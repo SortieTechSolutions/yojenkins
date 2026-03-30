@@ -1,6 +1,8 @@
 """FastAPI application factory."""
 
+import asyncio
 import os
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Optional
 
@@ -10,6 +12,7 @@ from fastapi.responses import FileResponse, JSONResponse
 
 from yojenkins import __version__
 from yojenkins.api.auth import router as auth_router
+from yojenkins.api.dependencies import cleanup_expired_sessions
 from yojenkins.api.routers.builds import router as builds_router
 from yojenkins.api.routers.folders import router as folders_router
 from yojenkins.api.routers.jobs import router as jobs_router
@@ -24,21 +27,45 @@ from yojenkins.yo_jenkins.exceptions import (
 )
 
 
+async def _session_cleanup_loop():
+    """Periodically remove expired sessions."""
+    while True:
+        await asyncio.sleep(300)
+        cleanup_expired_sessions()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application lifespan: start session cleanup background task."""
+    task = asyncio.create_task(_session_cleanup_loop())
+    yield
+    task.cancel()
+
+
 def create_app(static_dir: Optional[str] = None) -> FastAPI:
     """Create and configure the FastAPI application."""
     app = FastAPI(
         title="yojenkins",
         description="Web API for managing Jenkins servers",
         version=__version__,
+        lifespan=lifespan,
     )
 
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["http://localhost:3000", "http://localhost:5173"],
         allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_methods=["GET", "POST", "DELETE"],
+        allow_headers=["Content-Type", "Authorization"],
     )
+
+    # Security headers
+    @app.middleware("http")
+    async def security_headers(request: Request, call_next):
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        return response
 
     # Register routers
     app.include_router(auth_router, prefix="/api/auth", tags=["auth"])
@@ -71,14 +98,14 @@ def create_app(static_dir: Optional[str] = None) -> FastAPI:
 
     # Serve built frontend static files (production mode)
     if static_dir:
-        static_path = Path(static_dir)
+        static_path = Path(static_dir).resolve()
         if static_path.is_dir() and (static_path / "index.html").exists():
 
             @app.get("/{full_path:path}")
             async def serve_spa(full_path: str):
                 """Serve static files or index.html for SPA routing."""
-                file_path = static_path / full_path
-                if full_path and file_path.is_file():
+                file_path = (static_path / full_path).resolve()
+                if full_path and file_path.is_file() and str(file_path).startswith(str(static_path)):
                     return FileResponse(file_path)
                 return FileResponse(static_path / "index.html")
 
