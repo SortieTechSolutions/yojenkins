@@ -21,7 +21,7 @@ markers = [
 [tool.coverage.run]
 branch = true
 source = ["yojenkins"]
-omit = ["yojenkins/__main__.py"]
+omit = ["yojenkins/__main__.py", "tests/integration/*"]
 
 [tool.coverage.report]
 fail_under = 90
