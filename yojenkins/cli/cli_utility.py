@@ -16,7 +16,6 @@ import toml
 import yaml
 from json2xml import json2xml
 from json2xml.utils import readfromstring
-from urllib3.util import parse_url
 
 from yojenkins import __version__
 from yojenkins.yo_jenkins.auth import Auth
@@ -26,6 +25,7 @@ from yojenkins.utility.utility import (
     am_i_bundled,
     am_i_inside_docker,
     create_new_history_file,
+    is_full_url,
     iter_data_empty_item_stripper,
     print2,
 )
@@ -165,34 +165,6 @@ def standard_out(
             print2(json.dumps(data, indent=4, sort_keys=True))
         else:
             print2(json.dumps(data))
-
-
-def is_full_url(url: str) -> bool:
-    """Check if the provided url is a full and valide URL
-
-    ### DUPLICATE: See yojenkins.utility.utility
-
-    Args:
-        url: The URL to check
-
-    Returns:
-        True if full and valid, else False
-    """
-    # TODO: Remove this function from this file
-    #       Do url check within the class, not within the cli to not keep repeating it
-    #       In classes use yojenkins.utility.utility.is_full_url()
-
-    parsed_url = parse_url(url)
-    if all([parsed_url.scheme, parsed_url.netloc, parsed_url.path]):
-        is_valid_url = True
-    else:
-        is_valid_url = False
-    logger.debug(f'Is valid URL format: {is_valid_url} - {url}')
-    logger.debug(f'    - scheme:  {parsed_url.scheme} - {"OK" if parsed_url.scheme else "MISSING"}')
-    logger.debug(f'    - netloc:  {parsed_url.netloc} - {"OK" if parsed_url.netloc else "MISSING"}')
-    logger.debug(f'    - path:    {parsed_url.path} - {"OK" if parsed_url.path else "MISSING"}')
-
-    return is_valid_url
 
 
 def server_target_check(target: str) -> bool:
