@@ -322,7 +322,16 @@ class Node:
         except (OSError, PermissionError) as error:
             raise RequestError(f'Failed to open and read node configuration file. Exception: {error}')
 
-        if config_is_json:
+        # Auto-detect JSON format (or use explicit flag)
+        is_json = config_is_json
+        if not is_json:
+            try:
+                json.loads(node_config)
+                is_json = True
+                logger.debug('Auto-detected JSON config format')
+            except (ValueError, TypeError):
+                pass
+        if is_json:
             logger.debug('Converting the specified JSON file to XML format ...')
             try:
                 node_config = xmltodict.unparse(json.loads(node_config))
@@ -333,7 +342,7 @@ class Node:
             target=f'computer/{node_name}/config.xml',
             request_type='post',
             is_endpoint=True,
-            data=node_config.encode('utf-8'),
+            data=node_config.encode('utf-8') if isinstance(node_config, str) else node_config,
             json_content=False,
         )[2]
         if not success:

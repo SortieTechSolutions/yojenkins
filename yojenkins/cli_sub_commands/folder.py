@@ -140,7 +140,7 @@ def config(debug, **kwargs):
     default=False,
     required=False,
     is_flag=True,
-    help='The specified file is in JSON format',
+    help='[Deprecated: format is auto-detected] The specified file is in JSON format',
 )
 def create(debug, **kwargs):
     """Create an item [folder, view, job]"""

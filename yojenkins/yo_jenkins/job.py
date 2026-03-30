@@ -739,7 +739,16 @@ class Job:
             except (OSError, PermissionError) as error:
                 raise RequestError(f'Failed to open and read file. Exception: {error}')
 
-            if config_is_json:
+            # Auto-detect JSON format (or use explicit flag)
+            is_json = config_is_json
+            if not is_json:
+                try:
+                    json.loads(job_config)
+                    is_json = True
+                    logger.debug('Auto-detected JSON config format')
+                except (ValueError, TypeError):
+                    pass
+            if is_json:
                 logger.debug('Converting the specified JSON file to XML format ...')
                 try:
                     job_config = xmltodict.unparse(json.loads(job_config))
