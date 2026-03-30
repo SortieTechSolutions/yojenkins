@@ -810,9 +810,20 @@ class TestCliAuthHandlers:
         mock_auth = MagicMock()
         mock_auth_cls.return_value = mock_auth
 
-        cli_auth.verify(profile='default')
+        cli_auth.verify(profile='default', token='my-token')
         mock_auth.get_credentials.assert_called_once_with('default')
-        mock_auth.create_auth.assert_called_once()
+        mock_auth.create_auth.assert_called_once_with(token='my-token')
+
+    @patch('click.secho')
+    @patch('yojenkins.cli.cli_auth.Auth')
+    @patch('yojenkins.cli.cli_auth.Rest')
+    def test_auth_verify_token_passed_through(self, mock_rest_cls, mock_auth_cls, mock_secho):
+        """Regression test for issue #217: YOJENKINS_TOKEN env var must reach create_auth()"""
+        mock_auth = MagicMock()
+        mock_auth_cls.return_value = mock_auth
+
+        cli_auth.verify(profile='default', token='env-token-value')
+        mock_auth.create_auth.assert_called_once_with(token='env-token-value')
 
     @patch('yojenkins.cli.cli_auth.cu.standard_out')
     @patch('yojenkins.cli.cli_auth.cu.config_yo_jenkins')
