@@ -65,6 +65,20 @@ def cleanup_expired_sessions() -> None:
         del _sessions[uid]
 
 
+def validate_jenkins_url(url: str, yj: YoJenkins) -> None:
+    """Validate that a URL belongs to the authenticated Jenkins server.
+
+    Prevents SSRF by ensuring user-supplied URLs only target the Jenkins
+    instance the user authenticated against.
+    """
+    server_url = yj.rest.server_url.strip('/')
+    if not url.strip('/').startswith(server_url):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='URL does not belong to the authenticated Jenkins server.',
+        )
+
+
 async def get_yo_jenkins(
     credentials: HTTPAuthorizationCredentials = Depends(security),
 ) -> YoJenkins:

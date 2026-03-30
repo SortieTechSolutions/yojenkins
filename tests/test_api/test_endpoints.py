@@ -67,6 +67,7 @@ def mock_yj():
         ['Build'],
     )
     yj.rest.request.return_value = ('Started: build #42\nFinished: SUCCESS', {}, True)
+    yj.rest.server_url = 'http://test:8080/'
     return yj
 
 
@@ -189,7 +190,7 @@ class TestBuilds:
     def test_build_info(self, client, auth_token):
         resp = client.get(
             '/api/builds/info',
-            params={'url': 'http://jenkins.example.com/job/backend-api/42/'},
+            params={'url': 'http://test:8080/job/backend-api/42/'},
             headers={'Authorization': f'Bearer {auth_token}'},
         )
         assert resp.status_code == 200
@@ -197,7 +198,7 @@ class TestBuilds:
     def test_build_logs(self, client, auth_token):
         resp = client.get(
             '/api/builds/logs',
-            params={'url': 'http://jenkins.example.com/job/backend-api/42/'},
+            params={'url': 'http://test:8080/job/backend-api/42/'},
             headers={'Authorization': f'Bearer {auth_token}'},
         )
         assert resp.status_code == 200

@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends, Query
 from starlette.concurrency import run_in_threadpool
 
-from yojenkins.api.dependencies import get_yo_jenkins
+from yojenkins.api.dependencies import get_yo_jenkins, validate_jenkins_url
 
 router = APIRouter()
 
@@ -34,6 +34,7 @@ async def job_info(
     from yojenkins.utility.utility import is_full_url
 
     if is_full_url(job):
+        validate_jenkins_url(job, yj)
         return await run_in_threadpool(yj.job.info, job_url=job)
     return await run_in_threadpool(yj.job.info, job_name=job)
 
@@ -47,6 +48,7 @@ async def trigger_build(
     from yojenkins.utility.utility import is_full_url
 
     if is_full_url(job):
+        validate_jenkins_url(job, yj)
         queue_number = await run_in_threadpool(yj.job.build_trigger, job_url=job)
     else:
         queue_number = await run_in_threadpool(yj.job.build_trigger, job_name=job)
@@ -62,6 +64,7 @@ async def job_builds(
     from yojenkins.utility.utility import is_full_url
 
     if is_full_url(job):
+        validate_jenkins_url(job, yj)
         builds, urls = await run_in_threadpool(yj.job.build_list, job_url=job)
     else:
         builds, urls = await run_in_threadpool(yj.job.build_list, job_name=job)
