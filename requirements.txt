@@ -6,7 +6,7 @@ click>=8.1,<9
 coloredlogs>=15.0.1
 defusedxml>=0.7.1
 docker>=7.0,<8
-json2xml
+json2xml>=4.1.0
 pypiwin32; platform_system == "Windows"
 python-jenkins>=1.8.2,<2
 pywin32; platform_system == "Windows"
@@ -14,5 +14,5 @@ requests-futures>=1.0.2
 tomli>=1.1.0; python_version < "3.11"
 tomli-w>=1.0.0
 windows-curses; sys_platform == "win32"
-xmltodict
+xmltodict>=0.13.0
 yaspin>=3.1,<4
