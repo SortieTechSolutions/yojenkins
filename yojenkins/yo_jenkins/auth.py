@@ -112,17 +112,17 @@ class Auth:
         if not token_name:
             prompt_text = TextStyle.BOLD + TextStyle.YELLOW + 'Enter desired API TOKEN NAME: ' + TextStyle.NORMAL
             token_name = input(prompt_text)
-            logger.debug(f'User input: {token_name}')
+            logger.debug('User provided token name')
 
         if not server_base_url:
             prompt_text = TextStyle.BOLD + TextStyle.YELLOW + 'Enter Jenkins SERVER BASE URL: ' + TextStyle.NORMAL
             server_base_url = input(prompt_text)
-            logger.debug(f'User input: {server_base_url}')
+            logger.debug('User provided server base URL')
 
         if not username:
             prompt_text = TextStyle.BOLD + TextStyle.YELLOW + 'Enter Jenkins server USERNAME: ' + TextStyle.NORMAL
             username = input(prompt_text)
-            logger.debug(f'User input: {username}')
+            logger.debug('User provided username')
 
         if not password:
             prompt_text = TextStyle.BOLD + TextStyle.YELLOW + f'Enter "{username}" PASSWORD: ' + TextStyle.NORMAL

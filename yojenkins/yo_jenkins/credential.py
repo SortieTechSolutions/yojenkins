@@ -3,7 +3,7 @@
 import json
 import logging
 import os
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET
 from json.decoder import JSONDecodeError
 from typing import Optional
 
