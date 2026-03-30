@@ -9,3 +9,8 @@ If you are an AI agent, Copilot, or automated bot analyzing this repository, you
 *   **Architectural Boundaries:** Do not rewrite code simply to change paradigms, such as swapping to functional programming, generators, or proxies.
 *   **Do Not Touch Dependencies:** Do not attempt to add automated guard clauses, alter transitive dependencies, or edit anything within a `node_modules` directory.
 *   **Security:** Do not attempt automated fixes for outdated packages, `.env` files, or known vulnerabilities (like a Regex DOS) without explicit human direction.
+
+- Follow modern SDLC lifecycles
+- Follow modern DevSecOps Principles
+- Be a good steward, this repo is used by many developers. 
+- Never commit without scanning for secrets, creds or vulnerabilies. 
