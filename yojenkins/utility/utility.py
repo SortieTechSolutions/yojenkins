@@ -24,7 +24,6 @@ from yaspin import yaspin
 from yaspin.spinners import Spinners
 
 from yojenkins.utility._compat import tomli_w, tomllib
-from yojenkins.yo_jenkins.jenkins_item_classes import JenkinsItemClasses
 
 logger = logging.getLogger()
 
@@ -780,6 +779,8 @@ def queue_find(all_queue_info: dict, job_name: str = '', job_url: str = '', firs
     Returns:
         TODO
     """
+    from yojenkins.yo_jenkins.jenkins_item_classes import JenkinsItemClasses  # noqa: PLC0415, I001 — deferred to avoid circular import
+
     if not job_name and not job_url:
         logger.debug('=No job name or job URL provided')
         return []
@@ -902,6 +903,8 @@ def item_exists_in_folder(item_name: str, folder_url: str, item_type: str, rest:
     Returns:
         True if the item exists, False if not
     """
+    from yojenkins.yo_jenkins.jenkins_item_classes import JenkinsItemClasses  # noqa: PLC0415, I001 — deferred to avoid circular import
+
     item_type_info = getattr(JenkinsItemClasses, item_type.upper())
     prefix = item_type_info.value['prefix']
 
