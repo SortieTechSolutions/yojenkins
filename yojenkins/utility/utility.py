@@ -1173,7 +1173,7 @@ def create_new_history_file(file_path: str) -> None:
 
         if not config_dir_abs_path.exists():
             logger.debug('Configuration directory does not exist. Creating it ...')
-            config_dir_abs_path.mkdir(parents=True)
+            config_dir_abs_path.mkdir(parents=True, mode=0o700)
 
         if not Path(file_path).exists():
             logger.debug(f'Command history file NOT found: "{file_path}"')

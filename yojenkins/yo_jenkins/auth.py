@@ -81,6 +81,9 @@ class Auth:
         if not success:
             return False
 
+        # Restrict credential file to owner-only read/write
+        os.chmod(output_path, 0o600)
+
         return True
 
     def get_rest(self) -> object:
