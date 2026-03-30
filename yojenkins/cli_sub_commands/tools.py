@@ -37,6 +37,8 @@ def feature_request(debug):
 @cli_decorators.debug
 @click.option('--profile', type=str, required=False, is_flag=False, help='Filter by profile name')
 @click.option('--clear', type=bool, required=False, default=False, is_flag=True, help='Clear the history file')
+@click.option('--enable', type=bool, required=False, default=False, is_flag=True, help='Enable history tracking')
+@click.option('--disable', type=bool, required=False, default=False, is_flag=True, help='Disable history tracking')
 def history(debug, **kwargs):
     """Show detailed command usage history."""
     set_debug_log_level(debug)

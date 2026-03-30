@@ -106,7 +106,7 @@ def feature_request() -> None:
         logger.debug('Failed to open in web browser')
 
 
-def history(profile: str, clear: bool) -> None:
+def history(profile: str, clear: bool, enable: bool = False, disable: bool = False) -> None:
     """Display the command history and clearing the history file if requested.
 
     ### TODO: Ability to clear only for a specific profile.
@@ -114,7 +114,24 @@ def history(profile: str, clear: bool) -> None:
     Args:
         profile: The name of the profile to to filter history with
         clear:   Clearing the history file
+        enable:  Enable history tracking
+        disable: Disable history tracking
     """
+    config_path = Path.home() / cu.CONFIG_DIR_NAME / 'config'
+
+    if enable or disable:
+        config_path.parent.mkdir(parents=True, exist_ok=True)
+        lines = []
+        if config_path.is_file():
+            with open(config_path, 'r') as f:
+                lines = [l for l in f.readlines() if not l.strip().startswith('history_enabled=')]
+        lines.append(f'history_enabled={"true" if enable else "false"}\n')
+        with open(config_path, 'w') as f:
+            f.writelines(lines)
+        state = 'enabled' if enable else 'disabled'
+        click.secho(f'History tracking {state}', fg='bright_green', bold=True)
+        sys.exit(0)
+
     history_file_path = Path.home() / cu.CONFIG_DIR_NAME / cu.HISTORY_FILE_NAME
 
     # Clearing the history file if requested
