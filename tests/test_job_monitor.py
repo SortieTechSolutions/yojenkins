@@ -376,7 +376,83 @@ class TestJobMonitorDraw:
         mock_scr.getch.side_effect = [ord('b'), ord('b'), ord('q'), ord('q')]
 
         draw_monitor._JobMonitor__monitor_draw(mock_scr, 'http://jenkins/job/test/')
-        draw_monitor.job.build_trigger.assert_called_once_with(job_url='http://jenkins/job/test/')
+        draw_monitor.job.build_trigger.assert_called_once_with(
+            job_url='http://jenkins/job/test/', paramters={}
+        )
+
+    @patch('yojenkins.monitor.job_monitor.mu')
+    @patch('yojenkins.monitor.job_monitor.curses')
+    def test_build_with_parameters_passes_defaults(self, mock_curses, mock_mu, draw_monitor):
+        """B shortcut extracts default parameter values from job info."""
+        mock_mu.load_keys.return_value = {
+            'QUIT': (ord('q'),), 'BUILD': (ord('b'),), 'RESUME': (ord('r'),),
+            'PAUSE': (ord('p'),), 'HELP': (ord('h'),), 'OPEN': (ord('o'),),
+        }
+
+        mock_scr = MagicMock()
+        mock_scr.getmaxyx.return_value = (40, 120)
+        mock_scr.getch.side_effect = [ord('b'), ord('b'), ord('q'), ord('q')]
+
+        # Simulate a parameterized job with full job info
+        draw_monitor.job_info_data = {
+            'url': 'http://jenkins/job/test/',
+            'displayName': 'test-job',
+            'folderFullName': '/',
+            'serverURL': 'http://jenkins',
+            'actions': [
+                {
+                    'parameterDefinitions': [
+                        {
+                            'name': 'BRANCH',
+                            'defaultParameterValue': {'value': 'main'},
+                        },
+                        {
+                            'name': 'DEPLOY_ENV',
+                            'defaultParameterValue': {'value': 'staging'},
+                        },
+                    ]
+                }
+            ],
+        }
+
+        draw_monitor._JobMonitor__monitor_draw(mock_scr, 'http://jenkins/job/test/')
+        draw_monitor.job.build_trigger.assert_called_once_with(
+            job_url='http://jenkins/job/test/',
+            paramters={'BRANCH': 'main', 'DEPLOY_ENV': 'staging'},
+        )
+
+    @patch('yojenkins.monitor.job_monitor.mu')
+    @patch('yojenkins.monitor.job_monitor.curses')
+    def test_build_with_params_missing_default_uses_empty(self, mock_curses, mock_mu, draw_monitor):
+        """Parameters without defaults get empty string value."""
+        mock_mu.load_keys.return_value = {
+            'QUIT': (ord('q'),), 'BUILD': (ord('b'),), 'RESUME': (ord('r'),),
+            'PAUSE': (ord('p'),), 'HELP': (ord('h'),), 'OPEN': (ord('o'),),
+        }
+
+        mock_scr = MagicMock()
+        mock_scr.getmaxyx.return_value = (40, 120)
+        mock_scr.getch.side_effect = [ord('b'), ord('b'), ord('q'), ord('q')]
+
+        draw_monitor.job_info_data = {
+            'url': 'http://jenkins/job/test/',
+            'displayName': 'test-job',
+            'folderFullName': '/',
+            'serverURL': 'http://jenkins',
+            'actions': [
+                {
+                    'parameterDefinitions': [
+                        {'name': 'TAG', 'defaultParameterValue': {}},
+                    ]
+                }
+            ],
+        }
+
+        draw_monitor._JobMonitor__monitor_draw(mock_scr, 'http://jenkins/job/test/')
+        draw_monitor.job.build_trigger.assert_called_once_with(
+            job_url='http://jenkins/job/test/',
+            paramters={'TAG': ''},
+        )
 
     @patch('yojenkins.monitor.job_monitor.mu')
     @patch('yojenkins.monitor.job_monitor.curses')

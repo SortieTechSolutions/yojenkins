@@ -39,6 +39,26 @@ class TestGetFolderStore:
         assert folder == 'job/my-folder'
         assert store == 'folder'
 
+    def test_nested_folder_path(self):
+        folder, store = Credential._get_folder_store('level1/level2')
+        assert folder == 'job/level1/job/level2'
+        assert store == 'folder'
+
+    def test_deeply_nested_folder(self):
+        folder, store = Credential._get_folder_store('a/b/c')
+        assert folder == 'job/a/job/b/job/c'
+        assert store == 'folder'
+
+    def test_already_correct_nested_folder(self):
+        folder, store = Credential._get_folder_store('job/level1/job/level2')
+        assert folder == 'job/level1/job/level2'
+        assert store == 'folder'
+
+    def test_partially_prefixed_nested_folder(self):
+        folder, store = Credential._get_folder_store('job/level1/level2')
+        assert folder == 'job/level1/job/level2'
+        assert store == 'folder'
+
 
 class TestGetFolderStoreDomainFromUrl:
     def test_folder_credential_url(self):

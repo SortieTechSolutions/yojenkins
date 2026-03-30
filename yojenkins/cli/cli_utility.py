@@ -43,6 +43,18 @@ CLI_CMD_PATH = sys.argv[0]
 CLI_CMD_ARGS = ' '.join([quote(arg) for arg in sys.argv[1:]])
 
 
+def resolve_stdin(value: str) -> str:
+    """If value is '-', read from stdin and return stripped content.
+
+    Enables piping: echo "myJob" | yojenkins build info -
+    """
+    if value == '-':
+        if sys.stdin.isatty():
+            return value  # No piped input, treat '-' as literal
+        return click.get_text_stream('stdin').read().strip()
+    return value
+
+
 def set_debug_log_level(debug_flag: bool) -> None:
     """Setting the log DEBUG level
 

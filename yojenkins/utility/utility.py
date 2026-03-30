@@ -521,7 +521,8 @@ def is_complete_build_url(build_url: str) -> bool:
     is_complete = True
     try:
         int(url_path_split_list[-1])
-        if url_path_split_list[-3] != 'job':
+        # Verify 'job' appears somewhere before the build number (supports nested folders)
+        if 'job' not in url_path_split_list[:-1]:
             is_complete = False
     except (ValueError, IndexError):
         is_complete = False

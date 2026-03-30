@@ -266,19 +266,17 @@ class TestRequest:
         call_args = rest.session.get.call_args
         assert call_args[0][0] == 'http://other:9090/path'
 
-    @patch('yojenkins.yo_jenkins.rest.FuturesSession')
-    def test_new_session_creates_fresh_session(self, mock_fs_cls):
-        """new_session=True creates a new FuturesSession."""
+    def test_new_session_reuses_existing_session(self):
+        """new_session=True is deprecated and no longer replaces the session."""
         rest = self._make_rest()
-        # Make new_session branch create a new mock session
-        new_mock_session = MagicMock()
-        mock_fs_cls.return_value = new_mock_session
+        original_session = rest.session
         resp = _make_mock_response(json_data={})
-        new_mock_session.get.return_value = _make_future(resp)
+        rest.session.get.return_value = _make_future(resp)
 
         rest.request('url', request_type='get', is_endpoint=False, new_session=True)
-        mock_fs_cls.assert_called_with(max_workers=16)
-        new_mock_session.get.assert_called_once()
+        # Session should NOT have been replaced
+        assert rest.session is original_session
+        rest.session.get.assert_called_once()
 
     def test_auth_parameter_override(self):
         """Custom auth tuple overrides default HTTPBasicAuth."""

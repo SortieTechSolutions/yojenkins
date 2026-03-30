@@ -164,8 +164,10 @@ class Rest:
             if not auth:
                 auth = HTTPBasicAuth(self.username, self.api_token)
 
-        # Use a connection session if possible
-        if not self.session or new_session:
+        # Reuse the existing connection session for connection pooling
+        if new_session:
+            logger.debug('new_session parameter is deprecated; session is always reused')
+        if not self.session:
             logger.debug('Starting new requests session')
             self.session = FuturesSession(max_workers=16)
 
