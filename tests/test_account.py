@@ -21,7 +21,7 @@ class TestAccountInit:
 
     def test_init_sets_groovy_script_directory(self, mock_rest):
         acc = Account(rest=mock_rest)
-        assert acc.groovy_script_directory.endswith('groovy_scripts')
+        assert str(acc.groovy_script_directory).endswith('groovy_scripts')
 
 
 # --- Account.list ---

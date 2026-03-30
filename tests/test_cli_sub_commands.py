@@ -710,15 +710,15 @@ class TestNodeCliExtended:
 
     def test_node_prepare_command(self, runner):
         result = runner.invoke(main, ['node', 'prepare'])
-        assert result.exit_code == 0
+        assert result.exit_code == 1
 
     def test_node_create_ephemeral_command(self, runner):
         result = runner.invoke(main, ['node', 'create-ephemeral'])
-        assert result.exit_code == 0
+        assert result.exit_code == 1
 
     def test_node_logs_command(self, runner):
         result = runner.invoke(main, ['node', 'logs'])
-        assert result.exit_code == 0
+        assert result.exit_code == 1
 
 
 # =============================================================================

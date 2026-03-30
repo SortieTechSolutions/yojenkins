@@ -59,7 +59,7 @@ def _mock_yj():
 @pytest.fixture(autouse=True)
 def _patch_history_file_io():
     """Prevent log_to_history from touching the filesystem in all tests."""
-    with patch('os.path.isfile', return_value=True), \
+    with patch('pathlib.Path.is_file', return_value=True), \
          patch('builtins.open', MagicMock()):
         yield
 
@@ -980,9 +980,10 @@ class TestCliToolsHandlers:
 
     @patch('click.echo')
     @patch('builtins.open', MagicMock(read_data='script content'))
-    @patch('os.path.getsize', return_value=15)
+    @patch('yojenkins.cli.cli_tools.Path')
     @patch('yojenkins.cli.cli_tools.cu.config_yo_jenkins')
-    def test_run_script_with_file(self, mock_config, mock_getsize, mock_echo):
+    def test_run_script_with_file(self, mock_config, mock_path_cls, mock_echo):
+        mock_path_cls.return_value.stat.return_value.st_size = 15
         mock_yj = _mock_yj()
         mock_config.return_value = mock_yj
         mock_yj.rest.request.return_value = ('output', {}, True)
@@ -1092,8 +1093,8 @@ class TestCliToolsHandlers:
         mock_echo.assert_called()
 
     @patch('click.secho')
-    @patch('os.remove')
-    def test_history_clear(self, mock_remove, mock_secho):
+    @patch('pathlib.Path.unlink')
+    def test_history_clear(self, mock_unlink, mock_secho):
         with pytest.raises(SystemExit) as exc_info:
             cli_tools.history(profile=None, clear=True)
         assert exc_info.value.code == 0
@@ -1461,9 +1462,9 @@ class TestCliServerDeploy:
 class TestCliServerTeardown:
 
     @patch('yojenkins.cli.cli_server.print2')
-    @patch('yojenkins.cli.cli_server.os.remove')
+    @patch('pathlib.Path.unlink')
     @patch('yojenkins.cli.cli_server.DockerJenkinsServer')
-    def test_server_teardown_success(self, mock_djs_cls, mock_remove, mock_print2):
+    def test_server_teardown_success(self, mock_djs_cls, mock_unlink, mock_print2):
         deployed = {
             'image': 'jenkins/jenkins:lts',
             'container': 'yojenkins-jenkins',

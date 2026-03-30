@@ -121,7 +121,7 @@ class TestLogToHistory:
     """Tests for log_to_history decorator."""
 
     @patch('builtins.open', mock_open())
-    @patch('os.path.isfile', return_value=True)
+    @patch('pathlib.Path.is_file', return_value=True)
     def test_decorated_function_still_called(self, mock_isfile):
         """The decorated function should still execute."""
         inner = MagicMock(return_value='result')
@@ -141,7 +141,7 @@ class TestLogToHistory:
         inner.assert_called_once_with('default')
 
     @patch('builtins.open', mock_open())
-    @patch('os.path.isfile', return_value=False)
+    @patch('pathlib.Path.is_file', return_value=False)
     @patch('yojenkins.cli.cli_utility.create_new_history_file')
     def test_creates_history_file_if_missing(self, mock_create, mock_isfile):
         """If history file does not exist, create_new_history_file should be called."""

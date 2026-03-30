@@ -4,6 +4,7 @@ import logging
 import os
 from datetime import datetime, timedelta
 from itertools import islice
+from pathlib import Path
 from time import sleep, time
 from typing import Optional
 from urllib.parse import urlencode
@@ -429,7 +430,7 @@ class Build:
             try:
                 with requests.get(request_url, auth=auth, stream=True, timeout=10) as open_request:
                     open_request.raise_for_status()
-                    with open(os.path.join(download_dir, filename), 'wb') as open_file:
+                    with open(Path(download_dir) / filename, 'wb') as open_file:
                         for chunk in open_request.iter_content(chunk_size=8192):
                             if chunk:
                                 open_file.write(chunk)

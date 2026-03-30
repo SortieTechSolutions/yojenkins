@@ -1126,7 +1126,7 @@ class TestGetProjectDirBranches:
     def test_no_resource_dir_found_returns_empty(self):
         from yojenkins.utility.utility import get_project_dir
         with patch('yojenkins.utility.utility.am_i_bundled', return_value=False):
-            with patch('os.path.exists', return_value=False):
+            with patch('pathlib.Path.exists', return_value=False):
                 result = get_project_dir('nonexistent_dir_xyz')
         assert result == ''
 
@@ -1269,7 +1269,7 @@ class TestGetResourcePath:
     def test_resource_not_found_returns_empty(self):
         from yojenkins.utility.utility import get_resource_path
         with patch('yojenkins.utility.utility.get_project_dir', return_value='/fake/dir'):
-            with patch('os.path.exists', return_value=False):
+            with patch('pathlib.Path.exists', return_value=False):
                 result = get_resource_path('nonexistent/file.txt')
         assert result == ''
 

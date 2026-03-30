@@ -78,7 +78,7 @@ def load_contents_from_local_file(
         file_contents
     """
     # Check if file exists
-    if not os.path.isfile(local_file_path):
+    if not Path(local_file_path).is_file():
         fail_out(f'Failed to find file: {local_file_path}')
 
     # Check if file is completely empty
@@ -230,7 +230,7 @@ def append_lines_to_file(filepath: str, lines_to_append: list[str], location: st
     location = location.lower()
 
     # Check if file exists
-    if not os.path.isfile(filepath):
+    if not Path(filepath).is_file():
         logger.debug(f'Failed to find file: {filepath}')
         return False
 
@@ -827,14 +827,14 @@ def get_resource_path(relative_path: str) -> str:
     """
     # Get the path in python site packages
     resource_dir = get_project_dir()
-    resource_path = os.path.abspath(os.path.join(resource_dir, relative_path))
+    resource_path = (Path(resource_dir) / relative_path).resolve()
 
     # If the file has not been found and it is on windows, try APPDATA directory
-    if not os.path.exists(resource_path):
+    if not resource_path.exists():
         logger.debug(f'Failed to find resource "{relative_path}" in: {resource_dir}')
         return ''
     logger.debug(f'Successfully found existing resource: {resource_path}')
-    return resource_path
+    return str(resource_path)
 
 
 def get_project_dir(sample_path: str = 'resources') -> str:
@@ -859,9 +859,9 @@ def get_project_dir(sample_path: str = 'resources') -> str:
     else:
         project_dir = 'yojenkins'
         possible_dirs = {
-            'relative': os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')),
+            'relative': str(Path(__file__).resolve().parent.parent.parent),
             'sys_dirs': sysconfig.get_paths()['purelib'],
-            'cwd': os.getcwd(),
+            'cwd': str(Path.cwd()),
         }
         # NOTE: "site" module does not work with pyinstaller bundle (AttributeError)
         # 'usr_dirs': site.getusersitepackages(),
@@ -877,8 +877,8 @@ def get_project_dir(sample_path: str = 'resources') -> str:
     logger.debug('Searching project resource directory ...')
     resource_dir_path = ''
     for possible_dir in dirs:
-        if os.path.exists(os.path.join(possible_dir, project_dir, sample_path)):
-            resource_dir_path = os.path.join(possible_dir, project_dir)
+        if (Path(possible_dir) / project_dir / sample_path).exists():
+            resource_dir_path = str(Path(possible_dir) / project_dir)
             logger.debug(f'    - {possible_dir} - FOUND')
             break
         logger.debug(f'    - {possible_dir} - NOT FOUND')
@@ -924,7 +924,7 @@ def am_i_inside_docker() -> bool:
         True if running in docker container, else False
     """
     path = '/proc/self/cgroup'
-    return os.path.exists('/.dockerenv') or (os.path.isfile(path) and any('docker' in line for line in open(path)))
+    return Path('/.dockerenv').exists() or (Path(path).is_file() and any('docker' in line for line in open(path)))
 
 
 def am_i_bundled() -> bool:
@@ -1168,13 +1168,13 @@ def create_new_history_file(file_path: str) -> None:
     """
     try:
         # Creating configuration directory if it does not exist
-        config_dir_abs_path = os.path.join(Path.home(), CONFIG_DIR_NAME)
+        config_dir_abs_path = Path.home() / CONFIG_DIR_NAME
 
-        if not os.path.exists(config_dir_abs_path):
+        if not config_dir_abs_path.exists():
             logger.debug('Configuration directory does not exist. Creating it ...')
-            os.makedirs(config_dir_abs_path)
+            config_dir_abs_path.mkdir(parents=True)
 
-        if not os.path.exists(file_path):
+        if not Path(file_path).exists():
             logger.debug(f'Command history file NOT found: "{file_path}"')
             logger.debug('Creating a new command history file ...')
 
