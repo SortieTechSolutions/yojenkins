@@ -1,15 +1,11 @@
-"""This is just a set of dummy tests"""
+"""Smoke test to verify pytest runs."""
 
 import logging
 
+logger = logging.getLogger(__name__)
 
-def test_success() -> None:
-    """This is just a dummy test"""
-    logging.info('This is just a dummy test that SUCCEEDS')
+
+def test_smoke():
+    """Verify pytest infrastructure works."""
+    logger.info("Smoke test passed")
     assert True
-
-
-def test_failure() -> None:
-    """This is just a dummy test"""
-    logging.info('This is just a dummy test that FAILS')
-    raise AssertionError()

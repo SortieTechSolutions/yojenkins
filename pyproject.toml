@@ -12,6 +12,10 @@ log_file = "yojenkins_test_log.log"
 log_file_format = '[%(filename)-22s:%(lineno)4s] %(message)s'
 testpaths = ["tests"]
 python_files = ["test_*.py"]
+markers = [
+    "integration: requires Docker Jenkins server running locally",
+    "cli: fast CLI tests, no server needed",
+]
 
 [tool.bandit]
 skips = ["B101", "B105", "B107"]
