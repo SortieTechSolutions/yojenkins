@@ -6,7 +6,7 @@ import click
 
 from yojenkins.cli import cli_utility as cu
 from yojenkins.cli.cli_utility import log_to_history
-from yojenkins.yo_jenkins import Auth, Rest
+from yojenkins.yo_jenkins import Auth
 
 # Getting the logger reference
 logger = logging.getLogger()
