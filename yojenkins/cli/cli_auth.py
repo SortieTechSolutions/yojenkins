@@ -77,15 +77,15 @@ def show(**kwargs) -> None:
 
 
 @log_to_history
-def verify(profile: str) -> None:
+def verify(profile: str, token: str = '') -> None:
     """Check if credentials can authenticate
 
     Args:
         profile: The profile/account to use
+        token:   API token for Jenkins server
     """
-    auth = Auth(Rest())
-    auth.get_credentials(profile)
-    auth.create_auth()
+    yj = cu.config_yo_jenkins(profile, token)
+    yj.auth.verify()
     click.secho('success', fg='bright_green', bold=True)
 
 
