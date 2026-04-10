@@ -51,7 +51,7 @@ def status(ctx, debug, **kwargs):
 @click.argument('job', nargs=1, type=str, required=False)
 @click.option('-n', '--number', type=int, required=False, help='Build number')
 @click.option('-u', '--url', type=str, required=False, help='Flexible build URL (No job info needed)')
-@click.option('--latest', type=str, required=False, is_flag=True, help='Latest build (Replaces --number)')
+@click.option('--latest', type=bool, required=False, is_flag=True, help='Latest build (Replaces --number)')
 @click.pass_context
 def abort(ctx, debug, **kwargs):
     """Abort build"""
@@ -68,7 +68,7 @@ def abort(ctx, debug, **kwargs):
 @click.argument('job', nargs=1, type=str, required=False)
 @click.option('-n', '--number', type=int, required=False, help='Build number')
 @click.option('-u', '--url', type=str, required=False, help='Flexible build URL (No job info needed)')
-@click.option('--latest', type=str, required=False, is_flag=True, help='Latest build (Replaces --number)')
+@click.option('--latest', type=bool, required=False, is_flag=True, help='Latest build (Replaces --number)')
 @click.pass_context
 def delete(ctx, debug, **kwargs):
     """Delete build"""
@@ -88,7 +88,7 @@ def delete(ctx, debug, **kwargs):
 @click.argument('job', nargs=1, type=str, required=False)
 @click.option('-n', '--number', type=int, required=False, help='Build number')
 @click.option('-u', '--url', type=str, required=False, help='Flexible build URL (No job info needed)')
-@click.option('--latest', type=str, required=False, is_flag=True, help='Latest build (Replaces --number)')
+@click.option('--latest', type=bool, required=False, is_flag=True, help='Latest build (Replaces --number)')
 @click.pass_context
 def stages(ctx, debug, **kwargs):
     """Get build stages"""
@@ -105,7 +105,7 @@ def stages(ctx, debug, **kwargs):
 @click.argument('job', nargs=1, type=str, required=False)
 @click.option('-n', '--number', type=int, required=False, help='Build number')
 @click.option('-u', '--url', type=str, required=False, help='Flexible build URL (No job info needed)')
-@click.option('--latest', type=str, required=False, is_flag=True, help='Latest build (Replaces --number)')
+@click.option('--latest', type=bool, required=False, is_flag=True, help='Latest build (Replaces --number)')
 @click.option('--tail', type=float, required=False, help='Last of logs. If < 1 then %, else number of lines')
 @click.option(
     '-dd',
@@ -118,7 +118,7 @@ def stages(ctx, debug, **kwargs):
 @click.option(
     '--follow',
     default=False,
-    type=str,
+    type=bool,
     required=False,
     is_flag=True,
     help='Follow/Stream the logs as they are generated',
@@ -150,7 +150,7 @@ def logs(ctx, debug, **kwargs):
 @click.argument('job', nargs=1, type=str, required=False)
 @click.option('-n', '--number', type=int, required=False, help='Build number')
 @click.option('-u', '--url', type=str, required=False, help='Flexible build URL (No job info needed)')
-@click.option('--latest', type=str, required=False, is_flag=True, help='Latest build (Replaces --number)')
+@click.option('--latest', type=bool, required=False, is_flag=True, help='Latest build (Replaces --number)')
 @click.pass_context
 def browser(ctx, debug, **kwargs):
     """Open build in web browser"""
@@ -168,7 +168,7 @@ def browser(ctx, debug, **kwargs):
 @click.argument('job', nargs=1, type=str, required=False)
 @click.option('-n', '--number', type=int, required=False, help='Build number')
 @click.option('-u', '--url', type=str, required=False, help='Flexible build URL (No job info needed)')
-@click.option('--latest', type=str, required=False, is_flag=True, help='Latest build (Replaces --number)')
+@click.option('--latest', type=bool, required=False, is_flag=True, help='Latest build (Replaces --number)')
 @click.option('-s', '--sound', type=bool, required=False, is_flag=True, help='Enable sound effects')
 @click.pass_context
 def monitor(ctx, debug, **kwargs):
@@ -189,7 +189,7 @@ def monitor(ctx, debug, **kwargs):
 @click.argument('job', nargs=1, type=str, required=False)
 @click.option('-n', '--number', type=int, required=False, help='Build number')
 @click.option('-u', '--url', type=str, required=False, help='Flexible build URL (No job info needed)')
-@click.option('--latest', type=str, required=False, is_flag=True, help='Latest build (Replaces --number)')
+@click.option('--latest', type=bool, required=False, is_flag=True, help='Latest build (Replaces --number)')
 @click.pass_context
 def parameters(ctx, debug, **kwargs):
     """Get build parameters
@@ -209,7 +209,7 @@ def parameters(ctx, debug, **kwargs):
 @click.argument('job', nargs=1, type=str, required=False)
 @click.option('-n', '--number', type=int, required=False, help='Build number')
 @click.option('-u', '--url', type=str, required=False, help='Flexible build URL (No job info needed)')
-@click.option('--latest', type=str, required=False, is_flag=True, help='Latest build (Replaces --number)')
+@click.option('--latest', type=bool, required=False, is_flag=True, help='Latest build (Replaces --number)')
 @click.option(
     '--follow-logs', type=bool, required=False, is_flag=True, help='Wait for build, follow logs when build starts'
 )

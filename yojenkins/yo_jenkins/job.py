@@ -353,8 +353,7 @@ class Job:
         # Parse the queue location of the build
         if return_headers:
             build_queue_url = return_headers['Location']
-            if build_queue_url.endswith('/'):
-                queue_location = build_queue_url[:-1]
+            queue_location = build_queue_url.rstrip('/')
             parts = queue_location.split('/')
             build_queue_number = int(parts[-1])
             logger.debug(f'Build queue URL: {queue_location}')
@@ -457,8 +456,9 @@ class Job:
             fail_out('No build queue number passed')
 
         # Make the request URL
-        endpoint = f'queue/cancelItem?id={build_queue_number}'
-        return_content = self.rest.request(endpoint, 'post', is_endpoint=True)[0]
+        return_content = self.rest.request(
+            'queue/cancelItem', 'post', is_endpoint=True, params={'id': build_queue_number}
+        )[0]
 
         if not return_content:
             messages = [
@@ -611,7 +611,9 @@ class Job:
             fail_out('The new job name contains special characters')
 
         logger.debug(f'Renaming job: "{job_url}" ...')
-        success = self.rest.request(f'{job_url.strip("/")}/doRename?newName={new_name}', 'post', is_endpoint=False)[2]
+        success = self.rest.request(
+            f'{job_url.strip("/")}/doRename', 'post', is_endpoint=False, params={'newName': new_name}
+        )[2]
         if not success:
             fail_out('Failed to rename job')
         logger.debug('Successfully renamed job')
@@ -733,8 +735,8 @@ class Job:
             # Use job config from file
             logger.debug(f'Opening and reading file: {config_file} ...')
             try:
-                open_file = open(config_file, 'rb')
-                job_config = open_file.read()
+                with open(config_file, 'rb') as open_file:
+                    job_config = open_file.read()
             except (OSError, PermissionError) as error:
                 fail_out(f'Failed to open and read file. Exception: {error}')
 
@@ -749,20 +751,18 @@ class Job:
             job_config = JenkinsItemConfig.JOB.value['blank']
 
         logger.debug(f'Creating job "{name}" within folder "{folder_url}" "...')
-        endpoint = f'createItem?name={name}'
         headers = {'Content-Type': 'application/xml; charset=utf-8'}
         _, _, success = self.rest.request(
-            f'{folder_url.strip("/")}/{endpoint}', 'post', data=job_config, headers=headers, is_endpoint=False
+            f'{folder_url.strip("/")}/createItem',
+            'post',
+            data=job_config,
+            headers=headers,
+            is_endpoint=False,
+            params={'name': name},
         )
         if not success:
             fail_out(f'Failed to create job "{name}"')
         logger.debug(f'Successfully created job "{name}"')
-
-        try:
-            if 'open_file' in locals():
-                open_file.close()
-        except OSError:
-            pass
 
         return success
 

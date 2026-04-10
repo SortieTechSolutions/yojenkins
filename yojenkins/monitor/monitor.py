@@ -210,23 +210,24 @@ class Monitor:
             try:
                 wave_obj = simpleaudio.WaveObject.from_wave_file(sound_filepath)
                 play_obj = wave_obj.play()
+                self.playing_sound = True
+                while self.all_threads_enabled:
+                    if play_obj.is_playing():
+                        sleep(0.100)
+                    else:
+                        break
             except Exception as error:
                 logger.error(f'Failed to play sound. Exception: {error}')
-            self.playing_sound = True
-            while self.all_threads_enabled:
-                if play_obj.is_playing():
-                    sleep(0.100)
-                    if not self.all_threads_enabled:
-                        break
-                else:
-                    break
+            finally:
+                self.playing_sound = False
         else:
             try:
                 winsound.PlaySound(sound_filepath, winsound.SND_FILENAME | winsound.SND_NODEFAULT)
                 self.playing_sound = True
             except RuntimeError as error:
                 logger.error(f'Failed to play sound. Exception: {error}')
-        self.playing_sound = False
+            finally:
+                self.playing_sound = False
         logger.debug(f'Thread stopped - Play sound - (ID: {threading.get_ident()})')
 
     def play_sound_thread_on(self, sound_filepath: str) -> bool:
@@ -266,17 +267,20 @@ class Monitor:
             f'Thread starting - Server Status - (ID: {threading.get_ident()} - Refresh Interval: {monitor_interval}s) ...'
         )
 
-        # Set the monitoring thread flag up
-        self.all_threads_enabled = True
         self.server_status_thread_interval = monitor_interval
 
         # Loop until flags disable it
         while self.all_threads_enabled:
             if not self.paused:
-                # Get the build information
-                self.server_interaction = True
-                self.server_status_data['reachable'] = self.rest.is_reachable()
-                self.server_status_data['auth'] = self.auth.verify()
+                try:
+                    self.server_interaction = True
+                    self.server_status_data['reachable'] = self.rest.is_reachable()
+                    self.server_status_data['auth'] = self.auth.verify()
+                except RuntimeError:
+                    logger.debug('Server status thread: executor shut down, exiting')
+                    break
+                except Exception as error:
+                    logger.debug(f'Server status thread error: {error}')
 
             # Wait some time before checking again
             start_time = time()
@@ -298,7 +302,7 @@ class Monitor:
         """
         logger.debug('Starting thread for server status ...')
         try:
-            threading.Thread(target=self.__thread_server_status, args=(monitor_interval,), daemon=False).start()
+            threading.Thread(target=self.__thread_server_status, args=(monitor_interval,), daemon=True).start()
         except Exception as error:
             logger.error(f'Failed to start server status monitoring thread. Exception: {error}. Type: {type(error)}')
             return False

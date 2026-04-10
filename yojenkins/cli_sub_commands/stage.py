@@ -89,7 +89,7 @@ def steps(ctx, debug, **kwargs):
 @click.option('--latest', type=bool, required=False, is_flag=True, help='Latest build (Replaces --number)')
 @click.option(
     '-dd',
-    '--download_dir',
+    '--download-dir',
     type=click.Path(file_okay=False, dir_okay=True),
     required=False,
     is_flag=False,

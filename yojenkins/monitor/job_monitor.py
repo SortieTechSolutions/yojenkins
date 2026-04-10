@@ -5,7 +5,7 @@ import logging
 import sys
 import threading
 from datetime import datetime
-from time import perf_counter, sleep, time
+from time import sleep, time
 
 from yojenkins.monitor.monitor import Monitor
 from yojenkins.yo_jenkins.status import BuildStatus
@@ -87,8 +87,6 @@ class JobMonitor(Monitor):
 
         # Main Loop
         while True:
-            start_time = perf_counter()
-
             # Clearing the screen at each loop iteration before constructing the frame
             scr.clear()
 
@@ -344,8 +342,6 @@ class JobMonitor(Monitor):
 
             ########################################################################################
 
-            perf_counter() - start_time
-
             # Get User input
             keystroke = scr.getch()
 
@@ -386,16 +382,20 @@ class JobMonitor(Monitor):
             f'Thread starting - Job info - (ID: {threading.get_ident()} - Refresh Interval: {monitor_interval}s) ...'
         )
 
-        # Set the monitoring thread flag up
-        self.all_threads_enabled = True
         self.job_info_thread_interval = monitor_interval
 
         # Loop until flags disable it
         while self.all_threads_enabled:
             if not self.paused:
-                self.server_interaction = True
-                with self._job_info_thread_lock:
-                    self.job_info_data = self.job.info(job_url=job_url)
+                try:
+                    self.server_interaction = True
+                    with self._job_info_thread_lock:
+                        self.job_info_data = self.job.info(job_url=job_url)
+                except RuntimeError:
+                    logger.debug('Job info thread: executor shut down, exiting')
+                    break
+                except Exception as error:
+                    logger.debug(f'Job info thread error: {error}')
 
             # Wait some time before checking again
             start_time = time()
@@ -425,7 +425,7 @@ class JobMonitor(Monitor):
                     job_url,
                     monitor_interval,
                 ),
-                daemon=False,
+                daemon=True,
             ).start()
         except Exception as error:
             logger.error(
@@ -466,8 +466,6 @@ class JobMonitor(Monitor):
             f'Thread starting - Builds data - (ID: {threading.get_ident()} - Refresh Interval: {monitor_interval}s) ...'
         )
 
-        # Set the monitoring thread flag up
-        self.all_threads_enabled = True
         self.builds_data_thread_interval = monitor_interval
 
         # Pre-allocate
@@ -496,7 +494,7 @@ class JobMonitor(Monitor):
                                     build['url'],
                                     build_data_index,
                                 ),
-                                daemon=False,
+                                daemon=True,
                             )
                             thread.start()
                             threads.append(thread)
@@ -532,7 +530,7 @@ class JobMonitor(Monitor):
         """
         logger.debug('Starting thread for job builds info ...')
         try:
-            threading.Thread(target=self.__thread_builds_data, args=(monitor_interval,), daemon=False).start()
+            threading.Thread(target=self.__thread_builds_data, args=(monitor_interval,), daemon=True).start()
         except Exception as error:
             logger.error(f'Failed to start job builds info monitoring thread. Exception: {error}. Type: {type(error)}')
 

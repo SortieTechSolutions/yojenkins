@@ -161,7 +161,7 @@ class DockerJenkinsServer:
         if not self.docker_client:
             if not self.docker_client_init():
                 logger.debug('Docker client was not initialized. Please run .docker_client_init() first')
-                return deployed
+                return deployed, False
 
         if not self._container_kill():
             return deployed, False
@@ -186,9 +186,8 @@ class DockerJenkinsServer:
         deployed['address'] = server_address
         deployed['deploy_timestamp'] = datetime.now().timestamp()
         deployed['deploy_datetime'] = datetime.now().strftime('%A, %B %d, %Y %I:%M:%S')
-        deployed['docker_version'] = (
-            self.docker_client.info()['ServerVersion'] if 'ServerVersion' in self.docker_client.info() else 'N/A'
-        )
+        docker_info = self.docker_client.info()
+        deployed['docker_version'] = docker_info.get('ServerVersion', 'N/A')
 
         return deployed, True
 
@@ -320,7 +319,7 @@ class DockerJenkinsServer:
                     volume_handle.remove(force=True)
                 else:
                     logger.debug(f'Using found matching/existing named volume: {volume_name}')
-            except:
+            except Exception:
                 logger.debug(f'Creating new named volume: {volume_name}')
                 self.docker_client.volumes.create(name=volume_name, driver='local')
                 logger.debug('Successfully created!')

@@ -235,8 +235,8 @@ def server_deploy(
 
     print2('Successfully created containerized Jenkins server!', bold=True, color='green')
     print2(f'   - Docker image:      {deployed["image"]}', bold=True, color='green')
-    print2(f'   - Docker volumes:    {deployed["container"]}', bold=True, color='green')
-    print2(f'   - Docker container:  {", ".join(volumes_named)}', bold=True, color='green')
+    print2(f'   - Docker container:  {deployed["container"]}', bold=True, color='green')
+    print2(f'   - Docker volumes:    {", ".join(volumes_named)}', bold=True, color='green')
     print2(f'   - Deployment file:   {filepath}', bold=True, color='green')
     click.echo()
     print2(f'Address:  {deployed["address"]}', bold=True, color='green')

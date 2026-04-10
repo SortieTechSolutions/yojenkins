@@ -45,10 +45,11 @@ class Node:
         logger.debug(f'Getting info for node: {node_name} ...')
         node_name = '(master)' if node_name == 'master' else node_name  # Special case
         node_info, _, success = self.rest.request(
-            target=f'computer/{node_name}/api/json?depth={depth}',
+            target=f'computer/{node_name}/api/json',
             request_type='get',
             is_endpoint=True,
             json_content=True,
+            params={'depth': depth},
         )
         if not success:
             fail_out(f'Failed to find node info for "{node_name}"')
@@ -68,7 +69,11 @@ class Node:
         """
         logger.debug('Getting a list of all nodes ...')
         nodes_info, _, success = self.rest.request(
-            target=f'computer/api/json?depth={depth}', request_type='get', is_endpoint=True, json_content=True
+            target='computer/api/json',
+            request_type='get',
+            is_endpoint=True,
+            json_content=True,
+            params={'depth': depth},
         )
         if not success:
             fail_out('Failed to get any nodes')
@@ -220,10 +225,11 @@ class Node:
             return True
 
         success = self.rest.request(
-            target=f'computer/{node_name}/toggleOffline?offlineMessage={message}',
+            target=f'computer/{node_name}/toggleOffline',
             request_type='post',
             is_endpoint=True,
             json_content=False,
+            params={'offlineMessage': message or ''},
         )[2]
         if not success:
             fail_out(f'Failed to disable node "{node_name}"')
@@ -251,10 +257,11 @@ class Node:
             return True
 
         success = self.rest.request(
-            target=f'computer/{node_name}/toggleOffline?offlineMessage={message}',
+            target=f'computer/{node_name}/toggleOffline',
             request_type='post',
             is_endpoint=True,
             json_content=False,
+            params={'offlineMessage': message or ''},
         )[2]
         if not success:
             fail_out(f'Failed to enable node "{node_name}"')

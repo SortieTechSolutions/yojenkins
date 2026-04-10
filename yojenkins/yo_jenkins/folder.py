@@ -405,8 +405,8 @@ class Folder:
             # Use item configuration from file if provided
             logger.debug(f'Opening and reading "{type}" item configuration file: {config} ...')
             try:
-                open_file = open(config, 'rb')
-                item_config = open_file.read()
+                with open(config, 'rb') as open_file:
+                    item_config = open_file.read()
             except (OSError, PermissionError) as error:
                 fail_out(f'Failed to open and read "{type}" item configuration file. Exception: {error}')
 
@@ -420,17 +420,14 @@ class Folder:
         # FIXME: These are not valid XML configs, try json instead
         # FIXME: This does not account for the name of the item
         elif type == 'folder':
-            endpoint = f'createItem?name={name}'
+            endpoint = 'createItem'
             item_config = JenkinsItemConfig.FOLDER.value['blank']
-            # prefix = JenkinsItemClasses.FOLDER.value['prefix']
         elif type == 'view':
-            endpoint = f'createView?name={name}'
+            endpoint = 'createView'
             item_config = JenkinsItemConfig.VIEW.value['blank']
-            # prefix = JenkinsItemClasses.VIEW.value['prefix']
         elif type == 'job':
-            endpoint = f'createItem?name={name}'
+            endpoint = 'createItem'
             item_config = JenkinsItemConfig.JOB.value['blank']
-            # prefix = JenkinsItemClasses.JOB.value['prefix']
 
         # Checking if the item exists
         if utility.item_exists_in_folder(name, folder_url, type, self.rest):
@@ -445,17 +442,11 @@ class Folder:
             data=item_config.encode('utf-8'),
             headers=headers,
             is_endpoint=False,
+            params={'name': name},
         )[2]
         if not success:
             fail_out(f'Failed to create "{type}" item "{name}"')
         logger.debug(f'Successfully created "{type}" item "{name}"')
-
-        # Close the potentially open item configuration file
-        try:
-            if 'open_file' in locals():
-                open_file.close()
-        except OSError:
-            pass
 
         return success
 
@@ -491,9 +482,10 @@ class Folder:
 
         logger.debug(f'Copying original item "{original_name}" to new item "{new_name}" ...')
         success = self.rest.request(
-            f'{folder_url.strip("/")}/createItem?name={new_name}&mode=copy&from={original_name}',
+            f'{folder_url.strip("/")}/createItem',
             'post',
             is_endpoint=False,
+            params={'name': new_name, 'mode': 'copy', 'from': original_name},
         )[2]
         if not success:
             fail_out('Failed to copy folder')

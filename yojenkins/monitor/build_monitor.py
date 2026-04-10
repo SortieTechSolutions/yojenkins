@@ -7,7 +7,7 @@ import sys
 import threading
 
 #  from pprint import pprint
-from time import perf_counter, sleep, time
+from time import sleep, time
 
 from yojenkins.monitor.monitor import Monitor
 from yojenkins.utility.utility import get_resource_path
@@ -92,6 +92,7 @@ class BuildMonitor(Monitor):
         sound_notify_msg_show = False
         sound_notify_msg_box_timing = False
         status_sound_last = ''
+        stage_statuses_last = {}
 
         # User key input (ASCII value)
         keystroke = 0
@@ -101,8 +102,6 @@ class BuildMonitor(Monitor):
 
         # Main Loop
         while True:
-            start_time = perf_counter()
-
             # Clearing the screen at each loop iteration before constructing the frame
             scr.clear()
 
@@ -296,6 +295,17 @@ class BuildMonitor(Monitor):
                     status_color = self.status_to_color(build_stage['status'])
 
                     mu.draw_text(scr, result_text.replace('_', ' '), y_row, x_col[3], color=self.color[status_color])
+
+                    # Play sound when stage changes to PAUSED_PENDING_INPUT
+                    if sound and not self.playing_sound:
+                        stage_key = build_stage.get('id') or build_stage.get('name', str(i))
+                        prev_status = stage_statuses_last.get(stage_key)
+                        if prev_status != result_text and result_text == 'PAUSED_PENDING_INPUT':
+                            stage_sound = self.status_to_sound(result_text)
+                            if stage_sound:
+                                self.play_sound_thread_on(os.path.join(self.sound_directory, stage_sound))
+                        stage_statuses_last[stage_key] = result_text
+
                     y_row += 1
             else:
                 # Change the minimum window height limit (no stages section)
@@ -455,8 +465,6 @@ class BuildMonitor(Monitor):
 
             ########################################################################################
 
-            perf_counter() - start_time
-
             # Get User input
             keystroke = scr.getch()
 
@@ -497,16 +505,20 @@ class BuildMonitor(Monitor):
             f'Thread starting - Build info - (ID: {threading.get_ident()} - Refresh Interval: {monitor_interval}s) ...'
         )
 
-        # Set the monitoring thread flag up
-        self.all_threads_enabled = True
         self.build_info_thread_interval = monitor_interval
 
         # Loop until flags disable it
         while self.all_threads_enabled:
             if not self.paused:
-                self.server_interaction = True
-                with self._build_info_thread_lock:
-                    self.build_info_data = self.build.info(build_url=build_url)
+                try:
+                    self.server_interaction = True
+                    with self._build_info_thread_lock:
+                        self.build_info_data = self.build.info(build_url=build_url)
+                except RuntimeError:
+                    logger.debug('Build info thread: executor shut down, exiting')
+                    break
+                except Exception as error:
+                    logger.debug(f'Build info thread error: {error}')
 
             # Wait some time before checking again
             start_time = time()
@@ -536,7 +548,7 @@ class BuildMonitor(Monitor):
                     build_url,
                     monitor_interval,
                 ),
-                daemon=False,
+                daemon=True,
             ).start()
         except Exception as error:
             logger.error(
@@ -562,8 +574,6 @@ class BuildMonitor(Monitor):
             f'Thread starting - Build Stages - (ID: {threading.get_ident()} - Refresh Interval: {monitor_interval}s) ...'
         )
 
-        # Set the monitoring thread flag up
-        self.all_threads_enabled = True
         self.build_stages_thread_interval = monitor_interval
 
         # Check if this is a staged build
@@ -577,9 +587,15 @@ class BuildMonitor(Monitor):
         # Loop until flags disable it
         while self.all_threads_enabled:
             if not self.paused:
-                self.server_interaction = True
-                with self._build_stages_thread_lock:
-                    self.build_stages_data = self.build.stage_list(build_url=build_url)[0]
+                try:
+                    self.server_interaction = True
+                    with self._build_stages_thread_lock:
+                        self.build_stages_data = self.build.stage_list(build_url=build_url)[0]
+                except RuntimeError:
+                    logger.debug('Build stages thread: executor shut down, exiting')
+                    break
+                except Exception as error:
+                    logger.debug(f'Build stages thread error: {error}')
 
             # Wait some time before checking again
             start_time = time()
@@ -609,7 +625,7 @@ class BuildMonitor(Monitor):
                     build_url,
                     monitor_interval,
                 ),
-                daemon=False,
+                daemon=True,
             ).start()
         except Exception as error:
             logger.error(

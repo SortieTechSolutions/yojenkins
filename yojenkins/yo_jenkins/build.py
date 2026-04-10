@@ -184,51 +184,14 @@ class Build:
         Returns:
             TODO
         """
-        # Get the build info
+        # Get the build info (info() computes resultText with correct status)
         build_url = utility.build_url_complete(build_url)
         build_info = self.info(
             build_url=build_url, job_name=job_name, job_url=job_url, build_number=build_number, latest=latest
         )
 
-        # If nothing is returned, check if job is queued on server
-        logger.debug('The specified build was not found in job')
-        logger.debug('Looking for build in the server build queue ...')
-        if build_url:
-            job_url = utility.build_url_to_other_url(build_url)
-        elif job_name:
-            pass
-        elif job_url:
-            pass
-        else:
-            fail_out('Failed to find build status text. Specify build url, job name, or job url')
-        logger.debug(f'Job name: {job_name}')
-
-        # Requesting all queue and searching queue (NOTE: Could use Server object)
-        logger.debug('Requesting all build queue items ...')
-        queue_all = self.rest.request('queue/api/json', 'get')[0]
-        logger.debug(f'Number of queued items found: {len(queue_all["items"])}')
-        queue_matches = utility.queue_find(queue_all, job_name=job_name, job_url=job_url)
-        if not queue_matches:
-            fail_out('Failed to find running or queued builds')
-        queue_info = queue_matches[0]
-
-        if not queue_info:
-            logger.debug('Build for job NOT found in queue')
-            return BuildStatus.NOT_FOUND.value
-        else:
-            logger.debug(f'Build for job found in queue. Queue number {queue_info["id"]}')
-            return BuildStatus.QUEUED.value
-
-        # FIXME: resultText is returned in build info. Maybe move queue check to build_info??
-
-        # Check if in process (build is there but results not posted)
-        if 'result' not in build_info:
-            logger.debug('Build was found running/building, however no results are posted')
-            return BuildStatus.RUNNING.value
-        else:
-            # FIXME: Get "No status found" when "yojenkins build status --url" on build that is "RUNNING" (result: Null)
-            logger.debug('Build found, but has concluded or stopped with result')
-            return build_info['result']
+        logger.debug(f'Build status result text: {build_info.get("resultText")}')
+        return build_info['resultText']
 
     def abort(
         self,
@@ -476,11 +439,13 @@ class Build:
                 try:
                     progressive_text_position = headers['X-Text-Size']
                     while True:
-                        request_url = (
-                            f'{build_url.strip("/")}/logText/progressiveText?start={progressive_text_position}'
-                        )
+                        request_url = f'{build_url.strip("/")}/logText/progressiveText'
                         return_content, headers, _ = self.rest.request(
-                            request_url, 'get', is_endpoint=False, json_content=False
+                            request_url,
+                            'get',
+                            is_endpoint=False,
+                            json_content=False,
+                            params={'start': progressive_text_position},
                         )
                         logger.debug(f'Request Headers: {headers}')
                         if len(return_content) != 0:
@@ -508,6 +473,8 @@ class Build:
                         content_length_sample_1 = int(headers['Content-Length'])
                         sleep(1)
                         headers = self.rest.request(request_url, 'head', is_endpoint=False, json_content=False)[1]
+                        if 'content-length' not in headers:
+                            fail_out(f'Failed to find "content-length" key in server response headers: {headers}')
                         content_length_sample_2 = int(headers['Content-Length'])
 
                         content_length_diff = content_length_sample_2 - content_length_sample_1
@@ -686,8 +653,7 @@ class Build:
         # Parse the queue location of the build
         if return_headers:
             build_queue_url = return_headers['Location']
-            if build_queue_url.endswith('/'):
-                queue_location = build_queue_url[:-1]
+            queue_location = build_queue_url.rstrip('/')
             parts = queue_location.split('/')
             build_queue_number = int(parts[-1])
             logger.debug(f'Build queue URL: {queue_location}')

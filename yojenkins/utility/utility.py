@@ -1,5 +1,6 @@
 """General utility and tools."""
 
+import ast
 import difflib
 import json
 import logging
@@ -223,7 +224,12 @@ def load_contents_from_remote_file_url(file_type: str, remote_file_url: str, all
     header = return_content.headers
 
     # Check if file is below size limit
-    content_length = int(header['Content-length']) / 1000000
+    content_length_raw = header.get('Content-Length') or header.get('Content-length')
+    if content_length_raw is None:
+        logger.debug('No Content-Length header present; skipping size check')
+        content_length = 0.0
+    else:
+        content_length = int(content_length_raw) / 1000000
     logger.debug(f'Requested file content length: {content_length:.5f} MB)')
     if content_length > 1.0:
         logger.debug(
@@ -295,18 +301,16 @@ def append_lines_to_file(filepath: str, lines_to_append: list[str], location: st
     logger.debug(f'Appending lines of text to the {location} of file: {filepath} ...')
     try:
         if location == 'beginning':
-            open_file = open(filepath, 'r+')
-            lines_old = open_file.readlines()  # read old content
-            lines = lines_to_append + lines_old
-            open_file.seek(0)
-            for line in lines:
-                open_file.write(line)
-            open_file.close()
+            with open(filepath, 'r+') as open_file:
+                lines_old = open_file.readlines()
+                lines = lines_to_append + lines_old
+                open_file.seek(0)
+                for line in lines:
+                    open_file.write(line)
         elif location == 'end':
-            open_file = open(filepath, 'a')
-            for line in lines_to_append:
-                open_file.write(line)
-            open_file.close()
+            with open(filepath, 'a') as open_file:
+                for line in lines_to_append:
+                    open_file.write(line)
         else:
             logger.debug(f'Unsupported append file location: {location}')
             return False
@@ -742,7 +746,7 @@ def to_seconds(time_quantity: int, time_unit_text: str) -> int:
         return time_quantity * 60 * 60
 
     if time_unit_text in ['d', 'day', 'days']:
-        return time_quantity * 60 * 60 * 60
+        return time_quantity * 60 * 60 * 24
 
     if time_unit_text in ['blue moon']:
         blue_moon = 41  # months
@@ -982,7 +986,12 @@ def am_i_inside_docker() -> bool:
         True if running in docker container, else False
     """
     path = '/proc/self/cgroup'
-    return os.path.exists('/.dockerenv') or (os.path.isfile(path) and any('docker' in line for line in open(path)))
+    if os.path.exists('/.dockerenv'):
+        return True
+    if os.path.isfile(path):
+        with open(path) as f:
+            return any('docker' in line for line in f)
+    return False
 
 
 def am_i_bundled() -> bool:
@@ -1064,8 +1073,8 @@ def write_xml_to_file(
         with open(filepath, 'w+') as file:
             file.write(content_to_write)
         logger.debug('Successfully wrote configurations to file')
-    except Exception:
-        logger.debug('Failed to write configurations to file. Exception: {error}')
+    except Exception as error:
+        logger.debug(f'Failed to write configurations to file. Exception: {error}')
         return False
 
     return True
@@ -1112,6 +1121,26 @@ def template_apply(string_template: str, is_json: bool = False, **kwargs) -> Uni
             return ''
     logger.debug('Successfully applied variables to string template')
     return template_filled
+
+
+def escape_groovy_string(value: str) -> str:
+    """Escape a string value for safe interpolation into a Groovy double-quoted string literal.
+
+    Prevents injection by escaping characters that have special meaning
+    inside Groovy double-quoted strings: backslash, double-quote, and dollar sign.
+
+    Args:
+        value: The raw string to escape
+
+    Returns:
+        The escaped string, safe for use inside Groovy "..." literals
+    """
+    if not isinstance(value, str):
+        value = str(value)
+    value = value.replace('\\', '\\\\')
+    value = value.replace('"', '\\"')
+    value = value.replace('$', '\\$')
+    return value
 
 
 def run_groovy_script(
@@ -1167,7 +1196,7 @@ def run_groovy_script(
 
     # Check for yojenkins Groovy script error flag
     if 'yojenkins groovy script failed' in script_result:
-        groovy_return = eval(script_result.strip(os.linesep))
+        groovy_return = ast.literal_eval(script_result.strip(os.linesep))
         logger.debug('Failed to execute Groovy script')
         logger.debug(f'Groovy Exception: {groovy_return[1]}')
         logger.debug(groovy_return[2])
@@ -1268,11 +1297,7 @@ def wait_for_build_and_follow_logs(yj_obj: object, queue_id: int) -> None:
         if 'executable' in queue_data:
             break
         if queue_data.get('stuck'):
-            fail_out(
-                f'Build is stuck in queue as queue number {queue_id}',
-                fg='bright_red',
-                bold=True,
-            )
+            fail_out(f'Build is stuck in queue as queue number {queue_id}')
         time.sleep(2)
 
     if logger.level > 10:

@@ -7,6 +7,7 @@ import click
 
 from yojenkins.cli import cli_utility as cu
 from yojenkins.cli.cli_utility import log_to_history
+from yojenkins.utility import utility
 from yojenkins.utility.utility import is_complete_build_url, wait_for_build_and_follow_logs
 from yojenkins.yo_jenkins.status import Status
 
@@ -292,6 +293,11 @@ def browser(profile: str, token: str, job: str, number: int, url: str, latest: b
             )
         )
         sys.exit(1)
+
+    # If a full build URL is provided with no other lookups needed, skip auth
+    if url and not job and not number and not latest:
+        utility.browser_open(url=url)
+        return
 
     yj_obj = cu.config_yo_jenkins(profile, token)
 

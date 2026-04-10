@@ -2,9 +2,10 @@
 
 import logging
 import os
+import re
 
 from yojenkins.utility import utility
-from yojenkins.utility.utility import fail_out
+from yojenkins.utility.utility import escape_groovy_string, fail_out
 from yojenkins.yo_jenkins.rest import Rest
 
 # Getting the logger reference
@@ -82,11 +83,11 @@ class Account:
             True if the account was created, False otherwise
         """
         kwargs = {
-            'user_id': user_id,
-            'password': password,
+            'user_id': escape_groovy_string(user_id),
+            'password': escape_groovy_string(password),
             'is_admin': 'true' if is_admin else 'false',
-            'email': '' if not email else email,
-            'description': '' if not description else description,
+            'email': escape_groovy_string('' if not email else email),
+            'description': escape_groovy_string('' if not description else description),
         }
         script_filepath = os.path.join(self.groovy_script_directory, 'user_create.groovy')
         _, success, error = utility.run_groovy_script(
@@ -105,7 +106,7 @@ class Account:
         Returns:
             True if the account was deleted, False otherwise
         """
-        kwargs = {'user_id': user_id}
+        kwargs = {'user_id': escape_groovy_string(user_id)}
         script_filepath = os.path.join(self.groovy_script_directory, 'user_delete.groovy')
         _, success, error = utility.run_groovy_script(
             script_filepath=script_filepath, json_return=False, rest=self.rest, **kwargs
@@ -130,19 +131,29 @@ class Account:
         """
         # Parse comma seperated string
         permission_list = utility.parse_and_check_input_string_list(permission_id, join_back_char=', ')
+        if not permission_list:
+            fail_out('Invalid permission ID: contains special characters or is empty')
+
+        # Validate each permission ID matches safe pattern (e.g. "hudson.model.Item.READ")
+        permission_pattern = re.compile(r'^[A-Za-z_][A-Za-z0-9_.]*$')
+        for perm in permission_list.split(', '):
+            perm_stripped = perm.strip()
+            if perm_stripped and not permission_pattern.match(perm_stripped):
+                fail_out(f'Invalid permission ID format: {perm_stripped}')
+
         permission_groovy_list = '[' + permission_list + ']'
 
         if action == 'add':
             logger.debug(f'Adding the following permissions to user "{user_id}": {permission_list}')
             kwargs = {
-                'user_id': user_id,
+                'user_id': escape_groovy_string(user_id),
                 'permission_groovy_list': permission_groovy_list,
                 'permission_enabled': 'true',
             }
         elif action == 'remove':
             logger.debug(f'Removing the following permissions from user "{user_id}": {permission_list}')
             kwargs = {
-                'user_id': user_id,
+                'user_id': escape_groovy_string(user_id),
                 'permission_groovy_list': permission_groovy_list,
                 'permission_enabled': 'false',
             }
