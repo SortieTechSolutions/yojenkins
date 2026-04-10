@@ -28,7 +28,7 @@ def info(debug, **kwargs):
 def status(debug, **kwargs):
     """Node status"""
     set_debug_log_level(debug)
-    click.secho(**translate_kwargs(kwargs))
+    cli_node.info(**translate_kwargs(kwargs))
 
 
 @node.command(short_help='\tList all nodes')
@@ -230,7 +230,7 @@ def config(debug, **kwargs):
 def reconfig(debug, **kwargs):
     """Reconfigure the node"""
     set_debug_log_level(debug)
-    cli_node.reconfig(**kwargs)
+    cli_node.reconfig(**translate_kwargs(kwargs))
 
 
 @node.command(short_help='\tNode logs')

@@ -30,17 +30,23 @@ def logging_console(enabled: bool = True) -> None:
     for i, handler in enumerate(logger.handlers):
         logger.debug(f'    {i + 1}. {type(handler)} - Logging Level: {logging.getLevelName(handler.level)}')
 
+    stream_handler = next(
+        (h for h in logger.handlers if isinstance(h, logging.StreamHandler) and not isinstance(h, logging.FileHandler)),
+        None,
+    )
+    if stream_handler is None:
+        logger.debug('No stream handler found to toggle')
+        return
+
     if enabled:
         logger.debug('*******************************************')
         logger.debug('***  LOGGING TO CONSOLE OUTPUT ENABLED  ***')
         logger.debug('*******************************************')
-        stream_handler = logger.handlers[1]
         stream_handler.setLevel(logging.DEBUG)
     else:
         logger.debug('**********************************************************************')
         logger.debug('***  LOGGING TO CONSOLE OUTPUT DISABLED. ONLY LOGGING TO LOG FILE  ***')
         logger.debug('**********************************************************************')
-        stream_handler = logger.handlers[1]
         stream_handler.setLevel(logging.FATAL)
 
     logger.debug('Logging handler status:')
@@ -140,13 +146,13 @@ def load_keys() -> dict:
         'DOWN': (curses.KEY_DOWN, ord('j')),
         'ENTER': (curses.KEY_ENTER, ord('\n'), ord('\r')),
         'HELP': (ord('h'), ord('H')),
-        'LEFT': (curses.KEY_LEFT, ord('h')),
+        'LEFT': (curses.KEY_LEFT,),
         'LOGS': (ord('l'), ord('L')),
         'OPEN': (ord('o'), ord('O')),
         'PAUSE': (ord('p'), ord('P')),
         'QUIT': (27, ord('q'), ord('Q')),
         'RESUME': (ord('r'), ord('R')),
-        'RIGHT': (curses.KEY_RIGHT, ord('l')),
+        'RIGHT': (curses.KEY_RIGHT,),
         'SOUND': (ord('s'), ord('S')),
         'SPACE': (32, ord(' ')),
         'UP': (curses.KEY_UP, ord('k')),
@@ -409,10 +415,12 @@ def draw_text(
         None
     """
     # Set to default color and decor if not passed
-    if not color or not decor:
+    if color is None or decor is None:
         color_preset, decor_preset = load_curses_colors_decor()
-    color = color_preset['normal'] if not color else color
-    decor = decor_preset['normal'] if not decor else decor
+        if color is None:
+            color = color_preset['normal']
+        if decor is None:
+            decor = decor_preset['normal']
 
     # Check for NoneType
     if text is None:
@@ -446,7 +454,7 @@ def paint_background(scr, color: int = 0) -> None:
 
     # Paint it
     for start_y in range(1, term_height - 1):
-        line = term_width * ' '
+        line = (term_width - 2) * ' '
         scr.addstr(start_y, 1, line, color)
 
     # Update but don't write yet

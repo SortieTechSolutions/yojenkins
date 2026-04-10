@@ -74,6 +74,7 @@ class Auth:
         logger.debug(f'Saving new file (TOML format): "{output_path}" ...')
         with open(os.path.join(output_path), 'w') as file:  # Overwrite previous content
             toml.dump(profiles, file)
+        os.chmod(output_path, 0o600)
 
         # Add top file prefix for TOML file format
         lines_new = [f'# -*- mode: toml -*-{os.linesep}', f'# vim: set filetype=toml{os.linesep}']
@@ -588,6 +589,12 @@ class Auth:
             fail_out(
                 'Failed to find a valid server URL protocol schema (ie. http://, https://, etc) '
                 f'in the loaded profile server url: "{self.jenkins_profile["jenkins_server_url"]}"'
+            )
+        elif url_protocol_schema[0].lower() == 'http':
+            logger.warning(
+                'Server URL uses http:// (unencrypted). '
+                'API tokens and credentials will be transmitted in plaintext. '
+                'Consider using https:// instead.'
             )
 
         # Check if password is listed, if not, ask for it

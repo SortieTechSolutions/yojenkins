@@ -46,7 +46,7 @@ class Credential:
             folder = utility.url_to_name(folder)
             store = 'folder'
             logger.debug(f'Credential folder name or url passed. Using effective store: "{store}"')
-        if folder in ['root', '.']:
+        elif folder in ['root', '.']:
             folder = '.'
             store = 'system'
             logger.debug(f'Using effective credential folder name: "" = "{folder}"')
@@ -204,7 +204,7 @@ class Credential:
             credential_ids_match = []
             for credential_item in credentials_list:
                 for key_name in ['displayName', 'id', 'fullName']:
-                    if credential_item.get(key_name) == credential.lower():
+                    if credential_item.get(key_name, '').lower() == credential.lower():
                         credential_ids_match.append(credential_item['id'])
                         logger.debug(
                             f'Successfully found credential matching '

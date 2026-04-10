@@ -4,6 +4,7 @@ import logging
 import os
 
 from yojenkins.utility import utility
+from yojenkins.utility.utility import escape_groovy_string
 
 # Getting the logger reference
 logger = logging.getLogger()
@@ -69,13 +70,13 @@ class SharedLibrary:
         logger.debug(f'   - Credential ID:     {credential_id}')
 
         kwargs = {
-            'lib_name': lib_name,
-            'repo_owner': repo_owner,
-            'repo_name': repo_name,
-            'repo_url': repo_url,
-            'repo_branch': repo_branch,
+            'lib_name': escape_groovy_string(lib_name),
+            'repo_owner': escape_groovy_string(repo_owner),
+            'repo_name': escape_groovy_string(repo_name),
+            'repo_url': escape_groovy_string(repo_url),
+            'repo_branch': escape_groovy_string(repo_branch),
             'implicit': 'true' if implicit else 'false',
-            'credential_id': credential_id,
+            'credential_id': escape_groovy_string(credential_id),
         }
         script_filepath = os.path.join(self.groovy_script_directory, 'shared_lib_setup.groovy')
         _, success, error = utility.run_groovy_script(

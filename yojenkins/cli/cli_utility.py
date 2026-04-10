@@ -1,9 +1,11 @@
 """Utility/Tools Menu CLI Entrypoints"""
 
+import functools
 import json
 import logging
 import os
 import platform
+import re
 import sys
 from datetime import datetime
 from inspect import getfullargspec
@@ -40,7 +42,8 @@ DEFAULT_PROFILE_NAME = 'default'
 MAX_PROFILE_HISTORY_LENGTH = 1000
 
 CLI_CMD_PATH = sys.argv[0]
-CLI_CMD_ARGS = ' '.join([quote(arg) for arg in sys.argv[1:]])
+_raw_args = ' '.join([quote(arg) for arg in sys.argv[1:]])
+CLI_CMD_ARGS = re.sub(r'(--token\s+)\S+', r'\1<REDACTED>', _raw_args)
 
 
 def set_debug_log_level(debug_flag: bool) -> None:
@@ -140,10 +143,9 @@ def standard_out(
         if isinstance(data, dict) or isinstance(data, list):
             data = readfromstring(json.dumps(data))
             data_xml = json2xml.Json2xml(data, pretty=opt_pretty, wrapper=None, attr_type=False).to_xml()
-            if opt_pretty:
-                print2(data_xml)
-            else:
-                print2(data_xml.decode())
+            if isinstance(data_xml, bytes):
+                data_xml = data_xml.decode()
+            print2(data_xml)
         else:
             # When configs are fetched in XML format
             print2(data)
@@ -219,6 +221,7 @@ def log_to_history(decorated_function) -> Callable:
     except ValueError:
         arg_index = -1
 
+    @functools.wraps(decorated_function)
     def wrapper(*args, **kwargs) -> None:
         # Get the profile name for the command
         if 'profile' in kwargs:

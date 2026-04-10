@@ -7,7 +7,7 @@ import sys
 import threading
 
 #  from pprint import pprint
-from time import perf_counter, sleep, time
+from time import sleep, time
 
 from yojenkins.monitor.monitor import Monitor
 from yojenkins.utility.utility import get_resource_path
@@ -102,8 +102,6 @@ class BuildMonitor(Monitor):
 
         # Main Loop
         while True:
-            start_time = perf_counter()
-
             # Clearing the screen at each loop iteration before constructing the frame
             scr.clear()
 
@@ -467,8 +465,6 @@ class BuildMonitor(Monitor):
 
             ########################################################################################
 
-            perf_counter() - start_time
-
             # Get User input
             keystroke = scr.getch()
 
@@ -509,8 +505,6 @@ class BuildMonitor(Monitor):
             f'Thread starting - Build info - (ID: {threading.get_ident()} - Refresh Interval: {monitor_interval}s) ...'
         )
 
-        # Set the monitoring thread flag up
-        self.all_threads_enabled = True
         self.build_info_thread_interval = monitor_interval
 
         # Loop until flags disable it
@@ -554,7 +548,7 @@ class BuildMonitor(Monitor):
                     build_url,
                     monitor_interval,
                 ),
-                daemon=False,
+                daemon=True,
             ).start()
         except Exception as error:
             logger.error(
@@ -580,8 +574,6 @@ class BuildMonitor(Monitor):
             f'Thread starting - Build Stages - (ID: {threading.get_ident()} - Refresh Interval: {monitor_interval}s) ...'
         )
 
-        # Set the monitoring thread flag up
-        self.all_threads_enabled = True
         self.build_stages_thread_interval = monitor_interval
 
         # Check if this is a staged build
@@ -633,7 +625,7 @@ class BuildMonitor(Monitor):
                     build_url,
                     monitor_interval,
                 ),
-                daemon=False,
+                daemon=True,
             ).start()
         except Exception as error:
             logger.error(
