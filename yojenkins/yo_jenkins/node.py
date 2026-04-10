@@ -69,7 +69,11 @@ class Node:
         """
         logger.debug('Getting a list of all nodes ...')
         nodes_info, _, success = self.rest.request(
-            target='computer/api/json', request_type='get', is_endpoint=True, json_content=True, params={'depth': depth}
+            target='computer/api/json',
+            request_type='get',
+            is_endpoint=True,
+            json_content=True,
+            params={'depth': depth},
         )
         if not success:
             fail_out('Failed to get any nodes')

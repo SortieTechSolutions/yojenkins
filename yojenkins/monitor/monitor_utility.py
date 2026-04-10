@@ -31,7 +31,11 @@ def logging_console(enabled: bool = True) -> None:
         logger.debug(f'    {i + 1}. {type(handler)} - Logging Level: {logging.getLevelName(handler.level)}')
 
     stream_handler = next(
-        (h for h in logger.handlers if isinstance(h, logging.StreamHandler) and not isinstance(h, logging.FileHandler)),
+        (
+            h
+            for h in logger.handlers
+            if isinstance(h, logging.StreamHandler) and not isinstance(h, logging.FileHandler)
+        ),
         None,
     )
     if stream_handler is None:
